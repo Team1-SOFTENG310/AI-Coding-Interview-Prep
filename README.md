@@ -1,2 +1,7 @@
-# AI-Coding-Interview-Prep
-SE310 group project: AI-powered coding interview preparation and evaluation system.
+# AI Coding Interview Preparation
+
+**Team Name:** Team 1
+
+This project is developed as part of **SOFTENG 310** at the **University of Auckland**.
+
+The AI Coding Interview Preparation platform helps students and job seekers practise technical interviews by generating coding interview questions, evaluating users' responses with AI, and providing constructive feedback. The platform will also include LeetCode-style programming challenges to help users strengthen their coding and problem-solving skills in a realistic interview environment.
