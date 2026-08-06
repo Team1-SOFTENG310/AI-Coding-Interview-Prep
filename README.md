@@ -1,9 +1,60 @@
 # AI Coding Interview Preparation
 
 **Team Name:** Team 1
-**Team Contributors** Scott Wallace,
+**Team Members:** Scott Wallace, Gabriel Liu, Dylan Liddle, Neia Tererei, Kenny Geng, Dandan Wu, Shenol Peiris
 
-This project is developed as part of **SOFTENG 310** at the **University of Auckland**.
+This repository contains the setup scaffolding for the SOFTENG 310 A1 project.
 
-The AI Coding Interview Preparation platform helps students and job seekers practise technical interviews by generating coding interview questions, evaluating users' responses with AI, and providing constructive feedback. The platform will also include LeetCode-style programming challenges to help users strengthen their coding and problem-solving skills in a realistic interview environment.
+## What is included
+
+- Maven build configuration in `pom.xml`
+- JavaFX application scaffold in `src/main/java/com/aicodinginterviewprep/App.java`
+- Basic JUnit test in `src/test/java/com/aicodinginterviewprep/AppTest.java`
+- `.gitignore` to exclude build artifacts
+
+## Technology Stack
+
+- Frontend: JavaFX
+- Backend: Java
+- Build Tool: Maven
+- Testing: JUnit
+
+## Prerequisites
+
+- Java 17 JDK installed
+- Maven wrapper is included; a separate Maven install is optional
+
+## Run the application
+
+From the project root:
+
+On Windows:
+
+```powershell
+./mvnw.cmd javafx:run
+```
+
+On macOS/Linux:
+
+```bash
+./mvnw javafx:run
+```
+
+## Run tests
+
+On Windows:
+
+```powershell
+./mvnw.cmd test
+```
+
+On macOS/Linux:
+
+```bash
+./mvnw test
+```
+
+## Notes
+
+- This is setup-only scaffolding for the project; feature implementation can be added on top of this structure.
 
