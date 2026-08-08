@@ -31,7 +31,7 @@ jobs:
             ${{ runner.os }}-m2-
       
       - name: Build with Maven wrapper
-        run: ./mvnw -q -B verify
+        run: chmod +x ./mvnw && ./mvnw -q -B verify
       
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
