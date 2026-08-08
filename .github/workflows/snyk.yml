@@ -21,20 +21,19 @@ jobs:
           java-version: 17
 
       - name: Set up Node 20
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install Snyk
         run: npm install -g snyk
 
-      - name: Authenticate Snyk
+      - name: Run Snyk test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk auth $SNYK_TOKEN
-
-      - name: Run Snyk test
         run: snyk test --all-projects
 
       - name: Run Snyk monitor
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk monitor --all-projects
