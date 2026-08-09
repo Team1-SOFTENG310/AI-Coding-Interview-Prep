@@ -58,18 +58,23 @@ public class App extends Application {
 
         VBox left = new VBox(10);
         left.setStyle("-fx-padding: 8; -fx-border-width: 0 1 0 0; -fx-border-color: #ddd;");
+        left.prefWidthProperty().bind(pane.widthProperty().multiply(0.40));
         left.getChildren().addAll(
             new Label("Question Output"),
             new TextArea("Question will appear here.") {{ setPrefRowCount(8); setWrapText(true); setEditable(false); }}
         );
 
         VBox center = new VBox(10);
+        center.setStyle("-fx-padding: 8; -fx-border-width: 0 1 0 0; -fx-border-color: #ddd;");
+        center.prefWidthProperty().bind(pane.widthProperty().multiply(0.40));
         center.getChildren().addAll(
             new Label("Code Editor"),
             new TextArea("// Write your code here") {{ setPrefRowCount(20); setWrapText(true); }}
         );
 
         VBox right = new VBox(10);
+        right.setStyle("-fx-padding: 8; -fx-border-width: 0 1 0 0; -fx-border-color: #ddd;");
+        //right.prefWidthProperty().bind(pane.widthProperty().multiply(0.20));
         right.getChildren().addAll(
             new Label("Answer Submission"),
             new TextField("Enter your solution explanation..."),
