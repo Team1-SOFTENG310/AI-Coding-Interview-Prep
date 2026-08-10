@@ -33,3 +33,7 @@ AI Coding Interview Prep is an AI-supported interview preparation tool that help
 - TASKS.md: A1 tasks and A2 vision
 - Issue templates: bug report and feature request
 - Wiki: this page can be copied into the GitHub wiki
+
+## Workflow Notes
+
+While getting the SonarCloud and Snyk CI pipelines working (fixing auth tokens, the quality gate, and mvnw permissions), a handful of commits were pushed straight to main instead of going through an issue, feature branch, and reviewed pull request. This was a mistake made early on while we were still nailing down the required workflow. From this point on, all contributions go through: open/approve an issue -> feature branch off main -> PR referencing the issue -> review by another team member -> squash and merge. See #6.
