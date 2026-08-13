@@ -4,12 +4,12 @@ package com.aicodinginterviewprep.openai;
  * 
  * Record: Represents the evaluation result of a candidate's answer, including a rating and feedback.
  */
-public class Record {
+public class EvaluationResult {
   
   private int rating;
   private String evaluation;
 
-  public Record(String evaluation, int rating) {
+  public EvaluationResult(String evaluation, int rating) {
     this.evaluation = evaluation;
     this.rating = rating;
   }

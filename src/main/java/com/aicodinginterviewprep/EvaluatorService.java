@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.aicodinginterviewprep.openai.*;
-import com.aicodinginterviewprep.openai.Record;
+import com.aicodinginterviewprep.openai.OpenAiApiClient;
+import com.aicodinginterviewprep.openai.OpenAiConfig;
+import com.aicodinginterviewprep.openai.EvaluationResult;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -15,14 +16,18 @@ public class EvaluatorService {
     private final ObjectMapper objectMapper;
 
     public EvaluatorService() {
-        this.apiClient = new OpenAiApiClient();
-        this.objectMapper = new ObjectMapper();
+        this(new OpenAiApiClient(), new ObjectMapper());
+    }
+
+    public EvaluatorService(OpenAiApiClient apiClient, ObjectMapper objectMapper) {
+      this.apiClient = apiClient;
+      this.objectMapper = objectMapper;
     }
 
     /**
      * Sends user answer and interview question for evaluation.
      */
-    public CompletableFuture<Record> evaluateAnswerAsync(String question, String userAnswer) {
+    public CompletableFuture<EvaluationResult> evaluateAnswerAsync(String question, String userAnswer) {
         try {
             String jsonRequestBody = buildRequestBody(question, userAnswer);
 
@@ -68,7 +73,7 @@ public class EvaluatorService {
     /**
      * Parses the OpenAI API response to extract the evaluation content.
      */
-    private Record parseResponseContent(String rawJsonResponse) {
+    private EvaluationResult parseResponseContent(String rawJsonResponse) {
         try {
             JsonNode root = objectMapper.readTree(rawJsonResponse);
             String content = root.path("choices")
@@ -81,7 +86,7 @@ public class EvaluatorService {
             int rating = evalJson.path("rating").asInt();
             String evaluation = evalJson.path("evaluation").asText();
 
-            return new Record(evaluation, rating);
+            return new EvaluationResult(evaluation, rating);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse OpenAI JSON response", e);
         }
