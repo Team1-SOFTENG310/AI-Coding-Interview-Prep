@@ -36,14 +36,25 @@ public class EvaluatorService {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("model", OpenAiConfig.DEFAULT_MODEL);
         root.put("temperature", OpenAiConfig.DEFAULT_TEMPERATURE);
+        root.put("top_p", OpenAiConfig.DEFAULT_TOP_P);
+        root.put("max_completion_tokens", OpenAiConfig.DEFAULT_MAX_COMPLETION_TOKENS);
+        root.put("thinkingLevel", OpenAiConfig.DEFAULT_THINKING_LEVEL);
+
+        // can be extended to include more structured response formats if needed
+        ObjectNode responseFormat = root.putObject("response_format");
+        responseFormat.put("type", "json_object");
 
         ArrayNode messages = root.putArray("messages");
 
         ObjectNode systemMessage = messages.addObject();
         systemMessage.put("role", "system");
-        systemMessage.put("content", "You are an expert software engineering interviewer. " +
-                "Evaluate the candidate's response to the given question concisely. " +
-                "Provide constructive feedback, highlight strengths/weaknesses, and grade out of 10.");
+        systemMessage.put("content", 
+        "You are an expert software engineering interviewer. " +
+        "Evaluate the candidate's response and respond strictly in JSON format. " +
+        "The JSON object MUST contain the following fields:\n" +
+        "- \"rating\": (integer) A score from 1 to 10 evaluating the candidate's answer.\n" +
+        "- \"evaluation\": (string) Concise, constructive feedback detailing strengths and weaknesses."
+    );
 
         // User payload combining question and response
         ObjectNode userMessage = messages.addObject();
