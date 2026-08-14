@@ -38,7 +38,6 @@ public class PracticeView {
 
         VBox right = new VBox(10);
         right.setStyle("-fx-padding: 8; -fx-border-width: 0 1 0 0; -fx-border-color: #ddd;");
-        //right.prefWidthProperty().bind(pane.widthProperty().multiply(0.20));
         right.getChildren().addAll(
                 new Label("Answer Submission"),
                 new TextField("Enter your solution explanation..."),
