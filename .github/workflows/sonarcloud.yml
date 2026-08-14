@@ -30,6 +30,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
+      - name: Build with Maven wrapper
+        run: ./mvnw -q -B verify
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5
         env:
@@ -40,5 +43,3 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.host.url=https://sonarcloud.io
 
-      - name: Build with Maven wrapper
-        run: ./mvnw -q -B verify
