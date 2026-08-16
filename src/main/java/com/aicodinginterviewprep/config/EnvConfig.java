@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public final class EnvConfig {
     private static final Map<String, String> VALUES = load();
@@ -26,28 +27,14 @@ public final class EnvConfig {
     }
 
     private static Map<String, String> load() {
-        Map<String, String> values = new HashMap<>();
         Path envFile = Path.of(".env");
         if (!Files.exists(envFile)) {
-            return values;
+            return new HashMap<>();
         }
-        try {
-            for (String line : Files.readAllLines(envFile)) {
-                String trimmed = line.trim();
-                if (trimmed.isEmpty() || trimmed.startsWith("#")) {
-                    continue;
-                }
-                int separator = trimmed.indexOf('=');
-                if (separator <= 0) {
-                    continue;
-                }
-                String key = trimmed.substring(0, separator).trim();
-                String value = trimmed.substring(separator + 1).trim();
-                values.put(key, value);
-            }
+        try (Stream<String> lines = Files.lines(envFile)) {
+            return KeyValueFile.parse(lines);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read .env file", e);
         }
-        return values;
     }
 }

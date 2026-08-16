@@ -2,6 +2,7 @@ package com.aicodinginterviewprep.service;
 
 import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.config.EnvConfig;
+import com.aicodinginterviewprep.config.KeyValueFile;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,7 +17,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -26,32 +26,46 @@ public class OpenAiQuestionService {
     private static final String DEFAULT_MODEL = "gpt-5-nano";
     private static final String PROMPTS_RESOURCE = "/prompts/promptengineering.txt";
     private static final int MAX_COMPLETION_TOKENS = 100;
+    private static final String CONTENT_FIELD = "content";
 
-    private final HttpClient httpClient = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(10))
-        .build();
+    private final HttpClient httpClient;
+    private final String apiKey;
+    private final String model;
+    private final Map<String, String> prompts;
+    private final Map<QuestionType, List<String>> topicsByType;
+    private final Random random;
 
-    private final Map<String, String> prompts = loadPrompts();
-    private final Map<QuestionType, List<String>> topicsByType = Map.of(
-        QuestionType.BEHAVIOURAL, extractTopics(prompts, "BEHAVIOURAL_TOPIC_"),
-        QuestionType.THEORY, extractTopics(prompts, "THEORY_TOPIC_"));
-    private final Random random = new Random();
+    public OpenAiQuestionService() {
+        this(
+            HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build(),
+            EnvConfig.get("OPENAI_API_KEY"),
+            EnvConfig.get("OPENAI_MODEL", DEFAULT_MODEL));
+    }
+
+    OpenAiQuestionService(HttpClient httpClient, String apiKey, String model) {
+        this.httpClient = httpClient;
+        this.apiKey = apiKey;
+        this.model = model;
+        this.prompts = loadPrompts();
+        this.topicsByType = Map.of(
+            QuestionType.BEHAVIOURAL, extractTopics(prompts, "BEHAVIOURAL_TOPIC_"),
+            QuestionType.THEORY, extractTopics(prompts, "THEORY_TOPIC_"));
+        this.random = new Random();
+    }
 
     public String generateQuestion(QuestionType type) throws IOException, InterruptedException {
-        String apiKey = EnvConfig.get("OPENAI_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException(
                 "OPENAI_API_KEY is not set. Add it to your local .env file (see .env.example).");
         }
-        String model = EnvConfig.get("OPENAI_MODEL", DEFAULT_MODEL);
 
         JSONObject payload = new JSONObject();
         payload.put("model", model);
         payload.put("max_completion_tokens", MAX_COMPLETION_TOKENS);
         payload.put("reasoning_effort", "minimal");
         payload.put("messages", new JSONArray()
-            .put(new JSONObject().put("role", "system").put("content", prompts.get("SYSTEM")))
-            .put(new JSONObject().put("role", "user").put("content", buildUserPrompt(type))));
+            .put(new JSONObject().put("role", "system").put(CONTENT_FIELD, prompts.get("SYSTEM")))
+            .put(new JSONObject().put("role", "user").put(CONTENT_FIELD, buildUserPrompt(type))));
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(API_URL))
@@ -72,11 +86,11 @@ public class OpenAiQuestionService {
         return json.getJSONArray("choices")
             .getJSONObject(0)
             .getJSONObject("message")
-            .getString("content")
+            .getString(CONTENT_FIELD)
             .trim();
     }
 
-    private String buildUserPrompt(QuestionType type) {
+    String buildUserPrompt(QuestionType type) {
         List<String> topics = topicsByType.get(type);
         String topic = topics.get(random.nextInt(topics.size()));
         return prompts.get(type.name() + "_TEMPLATE").replace("{topic}", topic);
@@ -91,28 +105,15 @@ public class OpenAiQuestionService {
     }
 
     private static Map<String, String> loadPrompts() {
-        Map<String, String> values = new HashMap<>();
         try (InputStream in = OpenAiQuestionService.class.getResourceAsStream(PROMPTS_RESOURCE)) {
             if (in == null) {
                 throw new IllegalStateException("Missing prompts resource: " + PROMPTS_RESOURCE);
             }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String trimmed = line.trim();
-                    if (trimmed.isEmpty() || trimmed.startsWith("#")) {
-                        continue;
-                    }
-                    int separator = trimmed.indexOf('=');
-                    if (separator <= 0) {
-                        continue;
-                    }
-                    values.put(trimmed.substring(0, separator).trim(), trimmed.substring(separator + 1).trim());
-                }
+                return KeyValueFile.parse(reader.lines());
             }
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read prompts resource: " + PROMPTS_RESOURCE, e);
         }
-        return values;
     }
 }
