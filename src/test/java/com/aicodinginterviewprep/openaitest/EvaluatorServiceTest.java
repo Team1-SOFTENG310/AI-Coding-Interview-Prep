@@ -131,15 +131,16 @@ class EvaluatorServiceTest {
 
         // Assert - verify structure and values returned from OpenAI
         assertNotNull(result, "Response should not be null");
-        assertTrue(result.getRating() >= 1 && result.getRating() <= 10, "Rating should be between 1 and 10");
-        assertNotNull(result.getEvaluation(), "Evaluation text should not be null");
-        assertFalse(result.getEvaluation().isBlank(), "Evaluation text should not be blank");
-
+        
         // Print output to console so you can inspect OpenAI's evaluation
         System.out.println("==========================================");
         System.out.println("LIVE OPENAI RESPONSE RECEIVED SUCCESSFULLY");
         System.out.println("Rating: " + result.getRating() + "/10");
         System.out.println("Evaluation:\n" + result.getEvaluation());
         System.out.println("==========================================");
+        
+        assertTrue(result.getRating() >= 1 && result.getRating() <= 10, "Rating should be between 1 and 10");
+        assertNotNull(result.getEvaluation(), "Evaluation text should not be null");
+        assertFalse(result.getEvaluation().isBlank(), "Evaluation text should not be blank");
     }
 }
