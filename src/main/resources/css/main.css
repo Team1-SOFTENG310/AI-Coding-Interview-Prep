@@ -1,0 +1,106 @@
+/* interview-theme.css
+ * Warm, modern theme for a JavaFX interview practice application.
+ */
+
+.root {
+    -fx-background-color: #e6a034;
+    -fx-font-family: "System";
+    -fx-font-size: 14px;
+}
+
+/* ---------- Labels ---------- */
+
+.label {
+    -fx-text-fill: #332f2b;
+}
+
+.title-label {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #292522;
+}
+
+.section-label {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #413a34;
+}
+
+.question-label {
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #292522;
+}
+
+/* ---------- Text Areas ---------- */
+
+.text-area {
+    -fx-background-color: #fffdf9;
+    -fx-control-inner-background: #fffdf9;
+    -fx-text-fill: #332f2b;
+
+    -fx-border-color: #ded6cc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+
+    -fx-padding: 10px;
+
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.text-area:focused {
+    -fx-border-color: #c47a5a;
+    -fx-border-width: 1.5px;
+}
+
+.text-area .content {
+    -fx-background-color: #fffdf9;
+}
+
+/* ---------- Text Fields ---------- */
+
+.text-field {
+    -fx-background-color: #fffdf9;
+    -fx-text-fill: #332f2b;
+
+    -fx-border-color: #ded6cc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+    -fx-background-radius: 7px;
+
+    -fx-padding: 9px 12px;
+
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.text-field:focused {
+    -fx-border-color: #c47a5a;
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+    -fx-background-color: #eee7de;
+    -fx-text-fill: #443b35;
+
+    -fx-border-color: transparent;
+    -fx-background-radius: 7px;
+
+    -fx-padding: 9px 18px;
+
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #e4dbd1;
+}
+
+.button:pressed {
+    -fx-background-color: #d8cec3;
+}

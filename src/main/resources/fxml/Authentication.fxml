@@ -4,18 +4,18 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" stylesheets="@/css/main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
    <children>
       <Pane prefHeight="406.0" prefWidth="600.0">
          <children>
-            <Label layoutX="186.0" layoutY="96.0" text="Log In or Sign Up">
+            <Label layoutX="186.0" layoutY="95.0" styleClass="title-label" text="Log In or Sign Up">
                <font>
                   <Font name="Bodoni MT" size="30.0" />
                </font></Label>
-            <PasswordField fx:id="passwordfieldPassword" layoutX="225.0" layoutY="221.0" onAction="#onPassword" promptText="password" />
-            <TextField fx:id="textfieldUsername" layoutX="225.0" layoutY="188.0" onAction="#onUsername" promptText="username" />
-            <Button fx:id="buttonLogIn" layoutX="225.0" layoutY="254.0" mnemonicParsing="false" onAction="#onLogIn" prefWidth="60.0" text="Log In" />
-            <Button fx:id="buttonSignUp" layoutX="314.0" layoutY="254.0" mnemonicParsing="false" onAction="#onSignUp" prefWidth="60.0" text="Sign Up" />
+            <PasswordField fx:id="passwordfieldPassword" layoutX="210.0" layoutY="222.0" onAction="#onPassword" prefHeight="25.0" prefWidth="182.0" promptText="password" />
+            <TextField fx:id="textfieldUsername" layoutX="210.0" layoutY="191.0" onAction="#onUsername" prefHeight="25.0" prefWidth="182.0" promptText="username" />
+            <Button fx:id="buttonLogIn" layoutX="210.0" layoutY="254.0" mnemonicParsing="false" onAction="#onLogIn" prefHeight="33.0" prefWidth="85.0" text="Log In" />
+            <Button fx:id="buttonSignUp" layoutX="307.0" layoutY="254.0" mnemonicParsing="false" onAction="#onSignUp" prefHeight="33.0" prefWidth="85.0" text="Sign Up" />
             <Button fx:id="buttonReturn" layoutX="39.0" layoutY="21.0" mnemonicParsing="false" onAction="#onReturn" text="Return" />
          </children></Pane>
    </children>
