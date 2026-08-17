@@ -1,8 +1,11 @@
 package com.aicodinginterviewprep;
 
+import com.aicodinginterviewprep.service.OpenAiQuestionService;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -15,6 +18,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class App extends Application {
+    private final OpenAiQuestionService questionService = new OpenAiQuestionService();
+
+    private TextArea questionOutput;
+    private ComboBox<QuestionType> questionTypeCombo;
+    private Button generateButton;
+
     @Override
     public void start(Stage stage) {
         // Basic JavaFX scaffold for the project setup
@@ -56,12 +65,17 @@ public class App extends Application {
         BorderPane pane = new BorderPane();
         pane.setStyle("-fx-padding: 16;");
 
+        questionOutput = new TextArea("Question will appear here.");
+        questionOutput.setPrefRowCount(8);
+        questionOutput.setWrapText(true);
+        questionOutput.setEditable(false);
+
         VBox left = new VBox(10);
         left.setStyle("-fx-padding: 8; -fx-border-width: 0 1 0 0; -fx-border-color: #ddd;");
         left.prefWidthProperty().bind(pane.widthProperty().multiply(0.40));
         left.getChildren().addAll(
             new Label("Question Output"),
-            new TextArea("Question will appear here.") {{ setPrefRowCount(8); setWrapText(true); setEditable(false); }}
+            questionOutput
         );
 
         VBox center = new VBox(10);
@@ -81,9 +95,17 @@ public class App extends Application {
             new Button("Submit Answer")
         );
 
+        questionTypeCombo = new ComboBox<>();
+        questionTypeCombo.getItems().addAll(QuestionType.values());
+        questionTypeCombo.setValue(QuestionType.BEHAVIOURAL);
+
+        generateButton = new Button("Generate New Question");
+        generateButton.setOnAction(event -> generateQuestion());
+
         HBox bottom = new HBox(12);
         bottom.getChildren().addAll(
-            new Button("Generate New Question"),
+            questionTypeCombo,
+            generateButton,
             new Button("Run AI Evaluation")
         );
 
@@ -128,6 +150,35 @@ public class App extends Application {
 
         tab.setContent(content);
         return tab;
+    }
+
+    private void generateQuestion() {
+        QuestionType type = questionTypeCombo.getValue();
+        generateButton.setDisable(true);
+        questionOutput.setText("Generating question...");
+
+        Task<String> task = new Task<>() {
+            @Override
+            protected String call() throws Exception {
+                return questionService.generateQuestion(type);
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            questionOutput.setText(task.getValue());
+            generateButton.setDisable(false);
+        });
+
+        task.setOnFailed(event -> {
+            Throwable error = task.getException();
+            String message = error != null ? error.getMessage() : "Unknown error.";
+            questionOutput.setText("Failed to generate question: " + message);
+            generateButton.setDisable(false);
+        });
+
+        Thread worker = new Thread(task, "openai-question-generation");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     public static void main(String[] args) {
