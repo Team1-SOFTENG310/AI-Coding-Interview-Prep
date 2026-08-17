@@ -4,7 +4,7 @@ Thank you for contributing to AI Coding Interview Prep.
 
 ## How to contribute
 
-1. Fork the repository.
+1. Clone this repository directly — do not fork it. All team members have push access, and PRs opened from a personal fork do not receive the `SONAR_TOKEN` secret, so SonarCloud fails on them (see #14).
 2. Create a branch for your change: `git checkout -b feature-name`.
 3. Make small, focused commits.
 4. Push your branch to GitHub.
