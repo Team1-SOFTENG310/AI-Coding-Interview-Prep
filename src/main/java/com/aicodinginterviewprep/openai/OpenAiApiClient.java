@@ -33,8 +33,7 @@ public class OpenAiApiClient {
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
                     if (response.statusCode() != 200) {
-                        throw new RuntimeException("OpenAI API call failed with status " 
-                                + response.statusCode() + ": " + response.body());
+                        throw new OpenAiApiException(response.statusCode(), response.body());
                     }
                     return response.body();
                 });

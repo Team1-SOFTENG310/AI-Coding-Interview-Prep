@@ -1,8 +1,9 @@
 package com.aicodinginterviewprep.openaitest;
 
 import com.aicodinginterviewprep.EvaluatorService;
-import com.aicodinginterviewprep.openai.OpenAiApiClient;
 import com.aicodinginterviewprep.openai.EvaluationResult;
+import com.aicodinginterviewprep.openai.OpenAiApiClient;
+import com.aicodinginterviewprep.openai.OpenAiApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,7 @@ class EvaluatorServiceTest {
 
     @Test
     @DisplayName("evaluateAnswerAsync should parse valid OpenAI response into Record")
-    void testEvaluateAnswerAsync_Success() throws Exception {
+    void testEvaluateAnswerAsyncSuccess() throws Exception {
         // Arrange
         String mockOpenAiResponse = """
             {
@@ -71,7 +72,7 @@ class EvaluatorServiceTest {
 
     @Test
     @DisplayName("evaluateAnswerAsync should handle invalid OpenAI JSON response")
-    void testEvaluateAnswerAsync_MalformedJsonResponse() {
+    void testEvaluateAnswerAsyncMalformedJsonResponse() {
         // Arrange: API returns valid outer JSON but invalid inner content payload
         String malformedResponse = """
             {
@@ -92,16 +93,16 @@ class EvaluatorServiceTest {
         CompletableFuture<EvaluationResult> future = evaluatorService.evaluateAnswerAsync("Question", "Answer");
 
         ExecutionException exception = assertThrows(ExecutionException.class, future::get);
-        assertTrue(exception.getCause() instanceof RuntimeException);
+        assertTrue(exception.getCause() instanceof OpenAiApiException);
         assertTrue(exception.getCause().getMessage().contains("Failed to parse OpenAI JSON response"));
     }
 
     @Test
     @DisplayName("evaluateAnswerAsync should propagate network or API client failures")
-    void testEvaluateAnswerAsync_ApiClientFailure() {
+    void testEvaluateAnswerAsyncApiClientFailure() {
         // Arrange: Network call throws an exception in the future
         CompletableFuture<String> failedFuture = CompletableFuture.failedFuture(
-                new RuntimeException("HTTP 500 Internal Server Error")
+                new OpenAiApiException("HTTP 500 Internal Server Error")
         );
 
         when(mockApiClient.postChatCompletionAsync(anyString())).thenReturn(failedFuture);
@@ -110,6 +111,7 @@ class EvaluatorServiceTest {
         CompletableFuture<EvaluationResult> future = evaluatorService.evaluateAnswerAsync("Question", "Answer");
 
         ExecutionException exception = assertThrows(ExecutionException.class, future::get);
+        assertTrue(exception.getCause() instanceof OpenAiApiException);
         assertTrue(exception.getCause().getMessage().contains("HTTP 500 Internal Server Error"));
     }
 
@@ -131,13 +133,6 @@ class EvaluatorServiceTest {
 
         // Assert - verify structure and values returned from OpenAI
         assertNotNull(result, "Response should not be null");
-        
-        // Print output to console so you can inspect OpenAI's evaluation
-        System.out.println("==========================================");
-        System.out.println("LIVE OPENAI RESPONSE RECEIVED SUCCESSFULLY");
-        System.out.println("Rating: " + result.getRating() + "/10");
-        System.out.println("Evaluation:\n" + result.getEvaluation());
-        System.out.println("==========================================");
         
         assertTrue(result.getRating() >= 1 && result.getRating() <= 10, "Rating should be between 1 and 10");
         assertNotNull(result.getEvaluation(), "Evaluation text should not be null");

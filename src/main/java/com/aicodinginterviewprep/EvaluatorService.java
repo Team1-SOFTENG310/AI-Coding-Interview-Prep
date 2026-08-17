@@ -1,12 +1,14 @@
 package com.aicodinginterviewprep;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.aicodinginterviewprep.openai.OpenAiApiClient;
-import com.aicodinginterviewprep.openai.OpenAiConfig;
 import com.aicodinginterviewprep.openai.EvaluationResult;
+import com.aicodinginterviewprep.openai.OpenAiApiClient;
+import com.aicodinginterviewprep.openai.OpenAiApiException;
+import com.aicodinginterviewprep.openai.OpenAiConfig;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -38,7 +40,7 @@ public class EvaluatorService {
         }
     }
 
-    private String buildRequestBody(String question, String userAnswer) throws Exception {
+    private String buildRequestBody(String question, String userAnswer) throws JsonProcessingException {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("model", OpenAiConfig.DEFAULT_MODEL);
         root.put("temperature", OpenAiConfig.DEFAULT_TEMPERATURE);
@@ -87,7 +89,7 @@ public class EvaluatorService {
 
             return new EvaluationResult(evaluation, rating);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse OpenAI JSON response", e);
+            throw new OpenAiApiException("Failed to parse OpenAI JSON response", e);
         }
     }
 }
