@@ -7,6 +7,8 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
+import com.aicodinginterviewprep.config.EnvConfig;
+
 public class OpenAiApiClient {
 
     private final HttpClient httpClient;
@@ -25,7 +27,7 @@ public class OpenAiApiClient {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(OpenAiConfig.API_URL))
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + OpenAiConfig.getApiKey())
+                .header("Authorization", "Bearer " + EnvConfig.get("OPENAI_API_KEY"))
                 .timeout(Duration.ofSeconds(30))
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();
