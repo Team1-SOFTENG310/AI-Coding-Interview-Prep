@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Reject fork pull requests
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "::error::This PR comes from a fork (${{ github.event.pull_request.head.repo.full_name }}). GitHub does not pass repository secrets to fork PRs, so SonarCloud cannot authenticate here."
+          echo "::error::All team members have push access to this repo — push your branch here directly instead of from a personal fork. See CONTRIBUTING.md."
+          exit 1
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
