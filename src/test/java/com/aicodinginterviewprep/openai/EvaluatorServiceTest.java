@@ -1,9 +1,6 @@
 package com.aicodinginterviewprep.openai;
 
 import com.aicodinginterviewprep.EvaluatorService;
-import com.aicodinginterviewprep.openai.EvaluationResult;
-import com.aicodinginterviewprep.openai.OpenAiApiClient;
-import com.aicodinginterviewprep.openai.OpenAiApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
