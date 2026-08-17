@@ -1,5 +1,6 @@
 package com.aicodinginterviewprep;
 
+import com.aicodinginterviewprep.openai.EvaluationResult;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -12,6 +13,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -114,7 +116,6 @@ public class App extends Application {
 
         VBox right = new VBox(10);
         right.setStyle("-fx-padding: 8; -fx-border-width: 0 1 0 0; -fx-border-color: #ddd;");
-        //right.prefWidthProperty().bind(pane.widthProperty().multiply(0.20));
         right.getChildren().addAll(
             new Label("Answer Submission"),
             answerInput,
@@ -216,22 +217,40 @@ public class App extends Application {
     }
 
     private void runEvaluation() {
-        String question = questionOutput != null && questionOutput.getText() != null
-                ? questionOutput.getText().trim() : "";
-        if (question.isEmpty() || "Question will appear here.".equals(question)) {
-            if (feedbackOutput != null) {
-                feedbackOutput.setText("Please generate a question first before running an evaluation.");
-            }
-            if (tabPane != null && feedbackTab != null) {
-                tabPane.getSelectionModel().select(feedbackTab);
-            }
+        String question = extractValidQuestion();
+        if (question == null) {
+            showFeedback("Please generate a question first before running an evaluation.");
             return;
         }
 
-        String explanation = answerInput != null && answerInput.getText() != null
-                ? answerInput.getText().trim() : "";
-        String code = codeEditor != null && codeEditor.getText() != null
-                ? codeEditor.getText().trim() : "";
+        String userAnswer = buildUserAnswer();
+        if (userAnswer.isEmpty()) {
+            showFeedback("Please provide an answer explanation or code solution before submitting for evaluation.");
+            return;
+        }
+
+        setEvaluationInProgress(true);
+        showFeedback("Evaluating your response with AI, please wait...");
+
+        evaluatorService.evaluateAnswerAsync(question, userAnswer)
+            .thenAccept(result -> Platform.runLater(() -> handleEvaluationSuccess(result)))
+            .exceptionally(ex -> {
+                Platform.runLater(() -> handleEvaluationError(ex));
+                return null;
+            });
+    }
+
+    private String extractValidQuestion() {
+        String question = getTextOrEmpty(questionOutput);
+        if (question.isEmpty() || "Question will appear here.".equals(question)) {
+            return null;
+        }
+        return question;
+    }
+
+    private String buildUserAnswer() {
+        String explanation = getTextOrEmpty(answerInput);
+        String code = getTextOrEmpty(codeEditor);
 
         StringBuilder answerBuilder = new StringBuilder();
         if (!explanation.isEmpty() && !"Enter your solution explanation...".equals(explanation)) {
@@ -243,59 +262,42 @@ public class App extends Application {
             }
             answerBuilder.append(code);
         }
+        return answerBuilder.toString().trim();
+    }
 
-        String userAnswer = answerBuilder.toString().trim();
-        if (userAnswer.isEmpty()) {
-            if (feedbackOutput != null) {
-                feedbackOutput.setText("Please provide an answer explanation or code solution before submitting for evaluation.");
-            }
-            if (tabPane != null && feedbackTab != null) {
-                tabPane.getSelectionModel().select(feedbackTab);
-            }
-            return;
-        }
+    private String getTextOrEmpty(TextInputControl control) {
+        return control != null && control.getText() != null ? control.getText().trim() : "";
+    }
 
-        if (runEvaluationButton != null) {
-            runEvaluationButton.setDisable(true);
-        }
-        if (submitAnswerButton != null) {
-            submitAnswerButton.setDisable(true);
-        }
+    private void showFeedback(String message) {
         if (feedbackOutput != null) {
-            feedbackOutput.setText("Evaluating your response with AI, please wait...");
+            feedbackOutput.setText(message);
         }
         if (tabPane != null && feedbackTab != null) {
             tabPane.getSelectionModel().select(feedbackTab);
         }
+    }
 
-        evaluatorService.evaluateAnswerAsync(question, userAnswer)
-            .thenAccept(result -> Platform.runLater(() -> {
-                if (feedbackOutput != null) {
-                    feedbackOutput.setText(String.format("Rating: %d/10%n%nEvaluation:%n%s",
-                            result.getRating(), result.getEvaluation()));
-                }
-                if (runEvaluationButton != null) {
-                    runEvaluationButton.setDisable(false);
-                }
-                if (submitAnswerButton != null) {
-                    submitAnswerButton.setDisable(false);
-                }
-            }))
-            .exceptionally(ex -> {
-                Platform.runLater(() -> {
-                    Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-                    if (feedbackOutput != null) {
-                        feedbackOutput.setText("Evaluation failed: " + (cause.getMessage() != null ? cause.getMessage() : "Unknown error."));
-                    }
-                    if (runEvaluationButton != null) {
-                        runEvaluationButton.setDisable(false);
-                    }
-                    if (submitAnswerButton != null) {
-                        submitAnswerButton.setDisable(false);
-                    }
-                });
-                return null;
-            });
+    private void setEvaluationInProgress(boolean inProgress) {
+        if (runEvaluationButton != null) {
+            runEvaluationButton.setDisable(inProgress);
+        }
+        if (submitAnswerButton != null) {
+            submitAnswerButton.setDisable(inProgress);
+        }
+    }
+
+    private void handleEvaluationSuccess(EvaluationResult result) {
+        showFeedback(String.format("Rating: %d/10%n%nEvaluation:%n%s",
+                result.getRating(), result.getEvaluation()));
+        setEvaluationInProgress(false);
+    }
+
+    private void handleEvaluationError(Throwable ex) {
+        Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+        String errorMessage = cause.getMessage() != null ? cause.getMessage() : "Unknown error.";
+        showFeedback("Evaluation failed: " + errorMessage);
+        setEvaluationInProgress(false);
     }
 
     public static void main(String[] args) {
