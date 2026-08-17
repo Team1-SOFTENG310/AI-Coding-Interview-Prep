@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" stylesheets="@/css/main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
+   <children>
+      <Pane prefHeight="400.0" prefWidth="600.0">
+         <children>
+            <Label styleClass="title-label" layoutX="124.0" layoutY="14.0" text="Practice Interview Question">
+               <font>
+                  <Font name="Bodoni MT" size="30.0" />
+               </font>
+            </Label>
+            <TextArea fx:id="textareaCode" layoutX="65.0" layoutY="129.0" prefHeight="145.0" prefWidth="470.0" promptText="Enter your code here" wrapText="true" />
+            <Label fx:id="labelQuestion" layoutX="65.0" layoutY="59.0" prefHeight="65.0" prefWidth="470.0" text="Waiting for question to generate..." textFill="#bfbcbc" wrapText="true" />
+            <TextArea fx:id="textareaExplanation" layoutX="65.0" layoutY="281.0" prefHeight="73.0" prefWidth="470.0" promptText="Enter an explanation of your code here" />
+            <Button fx:id="buttonSubmitAnswer" layoutX="244.0" layoutY="360.0" mnemonicParsing="false" onAction="#onSubmitAnswer" text="Submit Answer" />
+            <Button fx:id="buttonReturn" layoutX="31.0" layoutY="17.0" mnemonicParsing="false" onAction="#onReturn" text="Return" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>

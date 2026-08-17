@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Reject fork pull requests
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "::error::This PR comes from a fork (${{ github.event.pull_request.head.repo.full_name }}). GitHub does not pass repository secrets to fork PRs, so SonarCloud cannot authenticate here."
+          echo "::error::All team members have push access to this repo — push your branch here directly instead of from a personal fork. See CONTRIBUTING.md."
+          exit 1
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -30,14 +37,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
+      - name: Build with Maven wrapper
+        run: ./mvnw -q -B verify
+
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
-      - name: Build with Maven wrapper
-        run: ./mvnw -q -B verify
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            -Dsonar.sources=src/main/java,src/main/resources
+            -Dsonar.tests=src/test/java
+            -Dsonar.java.binaries=target/classes
+            -Dsonar.java.test.binaries=target/test-classes
+            -Dsonar.coverage.exclusions=src/main/java/com/aicodinginterviewprep/App.java

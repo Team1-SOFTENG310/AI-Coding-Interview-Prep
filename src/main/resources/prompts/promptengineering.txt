@@ -1,0 +1,38 @@
+# Prompt engineering for AI question generation.
+# Format: KEY=single-line prompt text. Edit these to change what the AI generates.
+# SYSTEM applies to every request.
+# BEHAVIOURAL_TEMPLATE / THEORY_TEMPLATE are used with {topic} replaced by one
+# randomly chosen *_TOPIC_N entry per request, so questions are spread across
+# all topic areas instead of the model repeatedly picking the same favourites
+# (tested: leaving it to the model alone clustered heavily on 1-2 topics).
+
+SYSTEM=You are an interview coach generating one interview question at a time for a software engineering candidate. Respond with only the question text: a single concise sentence, no more than 25 words, no numbering, no quotes, no preamble, no answer.
+
+BEHAVIOURAL_TEMPLATE=Generate one behavioural interview question for a software engineering candidate, styled like a real interview question. Focus specifically on this topic area: {topic}.
+
+BEHAVIOURAL_TOPIC_1=Teamwork - working effectively with others, dividing tasks, supporting teammates
+BEHAVIOURAL_TOPIC_2=Conflict resolution - disagreeing with a teammate or stakeholder and resolving it productively
+BEHAVIOURAL_TOPIC_3=Handling failure - a project or task that did not go as planned and what you learned
+BEHAVIOURAL_TOPIC_4=A difficult bug - a hard-to-diagnose or hard-to-fix technical problem you worked through
+BEHAVIOURAL_TOPIC_5=Project ownership - taking a project or feature from start to finish
+BEHAVIOURAL_TOPIC_6=Leadership - leading, mentoring, or influencing others without formal authority
+BEHAVIOURAL_TOPIC_7=Deadlines - managing competing priorities or a tight deadline
+BEHAVIOURAL_TOPIC_8=Learning something new - picking up an unfamiliar technology, tool, or domain quickly
+
+THEORY_TEMPLATE=Generate one technical theory interview question for a software engineering candidate, styled like a real technical interview question rather than a textbook exercise. Focus specifically on this topic area: {topic}. Favor conceptual "what is" or "how does X work" questions over rote definitions.
+
+THEORY_TOPIC_1=Data Structures - arrays, strings, linked lists, stacks, queues, hash maps, sets, trees, heaps, graphs
+THEORY_TOPIC_2=Algorithms - searching, sorting, recursion, BFS/DFS, two pointers, binary search, basic greedy algorithms, basic dynamic programming
+THEORY_TOPIC_3=Complexity - Big-O, time vs space complexity, comparing algorithms, recognizing O(1), O(n), O(log n), O(n^2)
+THEORY_TOPIC_4=Operating Systems - processes vs threads, concurrency, context switching, virtual memory, paging, deadlocks, scheduling, mutexes/semaphores
+THEORY_TOPIC_5=Computer Networks - TCP vs UDP, IP, DNS, HTTP/HTTPS, ports, packets, routers, client-server model, what happens when you enter a URL
+THEORY_TOPIC_6=Cybersecurity - authentication vs authorization, hashing vs encryption, SQL injection, XSS, HTTPS/TLS, common vulnerabilities, least privilege, basic network security
+THEORY_TOPIC_7=Databases / SQL - SQL queries, joins, primary/foreign keys, indexes, normalization, transactions, ACID, relational vs NoSQL
+THEORY_TOPIC_8=OOP - classes/objects, inheritance, encapsulation, abstraction, polymorphism, interfaces, composition
+THEORY_TOPIC_9=Programming Fundamentals - variables, loops, functions, references/pointers, memory, exceptions, scope, pass-by-value/reference, language-specific concepts
+THEORY_TOPIC_10=Software Engineering - git, testing, debugging, APIs, REST, CI/CD basics, Agile, code reviews, clean code
+THEORY_TOPIC_11=Computer Architecture - CPU, RAM, cache, registers, stack vs heap, binary/hex, compilation, how programs execute
+THEORY_TOPIC_12=Web Development - frontend vs backend, HTTP methods, REST APIs, cookies, sessions, JSON, status codes, basic browser/server interaction
+THEORY_TOPIC_13=System Design - designing a simple URL shortener, chat app, API, database schema, caching, scalability concepts, kept basic for students
+THEORY_TOPIC_14=Cloud / DevOps - containers, Docker, VMs, cloud computing, deployment, load balancing fundamentals
+THEORY_TOPIC_15=AI / ML - training vs testing, overfitting, classification vs regression, neural network basics
