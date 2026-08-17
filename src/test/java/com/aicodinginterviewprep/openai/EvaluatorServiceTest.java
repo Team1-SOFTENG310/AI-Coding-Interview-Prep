@@ -1,4 +1,4 @@
-package com.aicodinginterviewprep.openaitest;
+package com.aicodinginterviewprep.openai;
 
 import com.aicodinginterviewprep.EvaluatorService;
 import com.aicodinginterviewprep.openai.EvaluationResult;

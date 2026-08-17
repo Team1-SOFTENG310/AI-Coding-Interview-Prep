@@ -20,6 +20,10 @@ public class OpenAiApiClient {
                 .build();
     }
 
+    public OpenAiApiClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
     /**
      * Sends raw JSON asynchronously to the OpenAI Chat Completions API.
      */
