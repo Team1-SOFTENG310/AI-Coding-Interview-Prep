@@ -1,24 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.PracticeController">
-   <children>
-      <Pane prefHeight="400.0" prefWidth="600.0">
-         <children>
-            <Label styleClass="title-label" layoutX="124.0" layoutY="14.0" text="Practice Interview Question">
-               <font>
-                  <Font name="Bodoni MT" size="30.0" />
-               </font>
-            </Label>
-            <TextArea fx:id="textareaCode" layoutX="65.0" layoutY="129.0" prefHeight="145.0" prefWidth="470.0" promptText="Enter your code here" wrapText="true" />
-            <Label fx:id="labelQuestion" layoutX="65.0" layoutY="59.0" prefHeight="65.0" prefWidth="470.0" text="Waiting for question to generate..." textFill="#bfbcbc" wrapText="true" />
-            <TextArea fx:id="textareaExplanation" layoutX="65.0" layoutY="281.0" prefHeight="73.0" prefWidth="470.0" promptText="Enter an explanation of your code here" />
-            <Button fx:id="buttonSubmitAnswer" layoutX="244.0" layoutY="360.0" mnemonicParsing="false" onAction="#onSubmitAnswer" text="Submit Answer" />
-            <Button fx:id="buttonReturn" layoutX="31.0" layoutY="17.0" mnemonicParsing="false" onAction="#onReturn" text="Return" />
-         </children>
-      </Pane>
-   </children>
-</AnchorPane>
+<BorderPane fx:id="practiceRoot" prefHeight="760" prefWidth="1200" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.PracticeController">
+
+   <padding>
+      <Insets bottom="16" left="16" right="16" top="16" />
+   </padding>
+
+   <!-- ===== Question output (40% width, set in initialize) ===== -->
+   <left>
+      <VBox>
+         <padding>
+            <Insets bottom="8" left="8" right="8" top="8" />
+         </padding>
+         <Label styleClass="section-label" text="Question" />
+         <TextArea fx:id="questionOutput" editable="false" prefRowCount="8" promptText="Generate a question to begin." styleClass="question-label" wrapText="true" VBox.vgrow="ALWAYS" />
+      </VBox>
+   </left>
+
+   <!-- ===== Code editor (40% width, set in initialize) ===== -->
+   <center>
+      <VBox>
+         <padding>
+            <Insets bottom="8" left="8" right="8" top="8" />
+         </padding>
+         <Label styleClass="section-label" text="Code editor" />
+         <TextArea fx:id="codeEditor" prefRowCount="20" text="// Write your code here" wrapText="true" VBox.vgrow="ALWAYS" />
+      </VBox>
+   </center>
+
+   <!-- ===== Answer submission (remaining ~20%) ===== -->
+   <right>
+      <VBox>
+         <padding>
+            <Insets bottom="8" left="8" right="8" top="8" />
+         </padding>
+         <Label styleClass="section-label" text="Your explanation" />
+         <TextField fx:id="answerInput" promptText="Explain your solution" />
+         <Button fx:id="buttonSubmitAnswer" maxWidth="Infinity" onAction="#onSubmitAnswer" text="Submit answer" />
+      </VBox>
+   </right>
+
+   <!-- ===== Action bar ===== -->
+   <bottom>
+      <HBox prefHeight="38.0" prefWidth="1023.0">
+         <padding>
+            <Insets left="8" right="8" top="12" />
+         </padding>
+         <ComboBox fx:id="comboQuestionType" prefWidth="200" />
+         <Button fx:id="buttonGenerateQuestion" onAction="#onGenerateQuestion" text="Generate new question" />
+         <Button fx:id="buttonRunEvaluation" onAction="#runEvaluation" text="Run AI evaluation" />
+         <Button fx:id="buttonReturn" mnemonicParsing="false" onAction="#onReturn" prefHeight="26.0" prefWidth="102.0" text="Return" />
+      </HBox>
+   </bottom>
+
+</BorderPane>

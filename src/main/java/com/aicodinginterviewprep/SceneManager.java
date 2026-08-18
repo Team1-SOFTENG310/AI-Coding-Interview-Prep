@@ -14,6 +14,7 @@ public class SceneManager {
     private final Map<String, String> sceneMap;
     private Scene currentScene;
     private Map<String, Scene> loadedScenes =  new HashMap<>();
+    private Map<String, Object> controllers = new HashMap<>();
 
     public SceneManager(Stage stage) {
         this.stage = stage;
@@ -46,12 +47,13 @@ public class SceneManager {
             Parent root = loader.load();
 
             Object controller = loader.getController();
+            controllers.put(sceneName, controller);
             if (controller instanceof SceneAware) {
                 ((SceneAware) controller).setSceneManager(this);
             }
 
             Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+            // scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
 
             loadedScenes.put(sceneName, scene);
             currentScene = scene;
@@ -63,6 +65,10 @@ public class SceneManager {
 
     public Scene getCurrentScene() {
         return currentScene;
+    }
+
+    public Object getController(String sceneName) {
+        return controllers.get(sceneName);
     }
 
     public void registerScene(String name, String fxmlPath) {

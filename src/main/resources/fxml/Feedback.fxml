@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.FeedbackController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.FeedbackController">
    <children>
       <Pane prefHeight="400.0" prefWidth="600.0">
          <children>
@@ -14,7 +14,8 @@
                </font>
             </Label>
             <TextArea fx:id="textareaEvaluation" editable="false" layoutX="65.0" layoutY="131.0" prefHeight="190.0" prefWidth="470.0" />
-            <Button fx:id="buttonTryAgain" layoutX="216.0" layoutY="343.0" mnemonicParsing="false" onAction="#onTryAgain" text="Try Another Question" />
+            <Button fx:id="buttonTryAgain" layoutX="159.0" layoutY="334.0" mnemonicParsing="false" onAction="#onTryAgain" text="Try Another Question" />
+            <Button fx:id="buttonSubmitAnswer" layoutX="307.0" layoutY="334.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="130.0" text="Submit Answer" />
          </children>
       </Pane>
    </children>
