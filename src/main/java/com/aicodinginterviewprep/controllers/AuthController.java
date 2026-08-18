@@ -1,11 +1,14 @@
 package com.aicodinginterviewprep.controllers;
 
+import com.aicodinginterviewprep.SceneAware;
+import com.aicodinginterviewprep.SceneManager;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
-public class AuthController {
+public class AuthController implements SceneAware {
+    private SceneManager sceneManager;
 
     public PasswordField passwordfieldPassword;
     public TextField textfieldUsername;
@@ -13,24 +16,28 @@ public class AuthController {
     public Button buttonSignUp;
     public Button buttonReturn;
 
+    @Override
+    public void setSceneManager(SceneManager sceneManager) {
+        this.sceneManager = sceneManager;
+    }
 
     public void onPassword(ActionEvent actionEvent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Password field logic
     }
 
     public void onUsername(ActionEvent actionEvent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Username field logic
     }
 
     public void onLogIn(ActionEvent actionEvent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO: Implement login logic
     }
 
     public void onSignUp(ActionEvent actionEvent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO: Implement sign-up logic
     }
 
     public void onReturn(ActionEvent actionEvent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        sceneManager.switchToScene("home");
     }
 }
