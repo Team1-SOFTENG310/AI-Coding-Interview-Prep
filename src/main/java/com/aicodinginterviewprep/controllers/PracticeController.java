@@ -2,7 +2,6 @@ package com.aicodinginterviewprep.controllers;
 
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
@@ -17,11 +16,11 @@ public class PracticeController implements SceneAware {
         this.sceneManager = sceneManager;
     }
 
-    public void onSubmitAnswer(ActionEvent actionEvent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void onSubmitAnswer() {
+        sceneManager.switchToScene("feedback");
     }
 
-    public void onReturn(ActionEvent actionEvent) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void onReturn() {
+        sceneManager.switchToScene("home");
     }
 }

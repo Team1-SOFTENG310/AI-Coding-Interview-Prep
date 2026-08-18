@@ -2,7 +2,6 @@ package com.aicodinginterviewprep.controllers;
 
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
@@ -18,12 +17,12 @@ public class HomeController implements SceneAware {
     }
 
     @FXML
-    public void onGetStarted(ActionEvent actionEvent) {
+    public void onGetStarted() {
         sceneManager.switchToScene("practice");
     }
 
     @FXML
-    public void onSignIn(ActionEvent actionEvent) {
+    public void onSignIn() {
         sceneManager.switchToScene("authentication");
     }
 }
