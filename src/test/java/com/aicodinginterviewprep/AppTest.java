@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AppTest {
+class AppTest {
 
     @Test
-    public void testAppLaunch() {
+    void testAppLaunch() {
         assertTrue(true, "Basic smoke test placeholder");
     }
 }
