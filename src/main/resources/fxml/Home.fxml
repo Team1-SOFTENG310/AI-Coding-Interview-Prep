@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane stylesheets="@/css/main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
+<AnchorPane stylesheets="@/css/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
    <children>
-      <Pane prefHeight="400.0" prefWidth="600.0">
+      <Pane prefHeight="400.0" prefWidth="600.0" styleClass="primary-pane" stylesheets="@../css/main.css">
          <children>
-            <Label layoutX="127.0" layoutY="95.0" styleClass="title-label" text="Coding Interview Practice">
-               <font>
-                  <Font name="Bodoni MT" size="30.0" />
-               </font>
-            </Label>
-            <Label layoutX="172.0" layoutY="143.0" text="Welcome to AI Coding Interview Prep!" />
-            <Label layoutX="80.0" layoutY="162.0" text="Go to Practice to answer coding questions and receive AI feedback." />
-            <Label layoutX="119.0" layoutY="181.0" text="Login or register to save progress in later assignments." />
-            <Button fx:id="buttonGetStarted" layoutX="155.0" layoutY="278.0" mnemonicParsing="false" onAction="#onGetStarted" prefHeight="33.0" prefWidth="111.0" text="Get Started!" />
-            <Button fx:id="buttonSignIn" layoutX="334.0" layoutY="278.0" mnemonicParsing="false" onAction="#onSignIn" prefHeight="32.0" prefWidth="111.0" text="Sign In" />
+            <Button fx:id="buttonGetStarted" layoutX="155.0" layoutY="278.0" mnemonicParsing="false" onAction="#onGetStarted" prefHeight="46.0" prefWidth="128.0" text="Get Started!" />
+            <Button fx:id="buttonSignIn" layoutX="311.0" layoutY="278.0" mnemonicParsing="false" onAction="#onSignIn" prefHeight="46.0" prefWidth="134.0" text="Sign In" />
+            <VBox layoutX="98.0" layoutY="70.0" prefHeight="178.0" prefWidth="404.0" styleClass="vbox">
+               <children>
+                  <Label styleClass="title-label" text="Coding Interview Practice">
+                     <font>
+                        <Font name="Bodoni MT" size="30.0" />
+                     </font>
+                  </Label>
+                  <Label text="Welcome to AI Coding Interview Prep!" />
+                  <Label text="Go to Practice to answer coding questions and receive AI feedback." />
+                  <Label text="Login or register to save progress in later assignments." />
+               </children>
+            </VBox>
          </children></Pane>
    </children>
 </AnchorPane>

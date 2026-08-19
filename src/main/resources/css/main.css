@@ -3,9 +3,45 @@
  */
 
 .root {
-    -fx-background-color: #e6a034;
+    -fx-background-color: #489caa;
     -fx-font-family: "System";
     -fx-font-size: 14px;
+}
+
+/* ---------- Panes ----------- */
+
+.primary-pane {
+    -fx-background-color: #489caa;
+    -fx-border-color: #d1eaf1 #059498 #058691 #8ad3d3; /* Top, Right, Bottom, Left */
+    -fx-border-width: 4px;
+    -fx-border-insets: 0;
+}
+
+
+/* ----------- Vbox ----------- */
+
+.vbox {
+    -fx-alignment: center;
+    -fx-border-width: 4px;
+    -fx-border-color: #172d3e;
+    -fx-border-radius: 5px;
+    -fx-background-color: #a6dde3;
+    -fx-background-radius: 5px;
+    -fx-background-insets: 2px;
+    -fx-spacing: 6;
+    -fx-padding: 5;
+
+}
+
+.inner-box {
+    -fx-spacing: 6;
+}
+
+/* ----------- Hbox ----------- */
+
+.hbox {
+    -fx-alignment: center;
+    -fx-spacing: 40;
 }
 
 /* ---------- Labels ---------- */
@@ -20,17 +56,6 @@
     -fx-text-fill: #292522;
 }
 
-.section-label {
-    -fx-font-size: 17px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #413a34;
-}
-
-.question-label {
-    -fx-font-size: 19px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #292522;
-}
 
 /* ---------- Text Areas ---------- */
 
@@ -67,6 +92,7 @@
     -fx-background-radius: 7px;
 
     -fx-padding: 9px 12px;
+    -fx-max-width: 180px;
 
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
@@ -75,14 +101,16 @@
 /* ---------- Buttons ---------- */
 
 .button {
-    -fx-background-color: #eee7de;
     -fx-text-fill: #443b35;
-
-    -fx-border-color: transparent;
-    -fx-background-radius: 7px;
+    -fx-background-color: #a6dde3;
+    -fx-background-radius: 10px;
+    -fx-border-width: 4px;
+    -fx-border-color: #172d3e;
+    -fx-border-radius: 7px;
+    -fx-background-insets: 2px;
 
     -fx-padding: 9px 18px;
-
+    -fx-max-width: 220px;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 
@@ -93,3 +121,8 @@
     -fx-background-color: #e4dbd1;
 }
 
+/* ---------- Progress Bars ---------- */
+
+.progress-bar {
+    -fx-accent: #489caa;
+}
