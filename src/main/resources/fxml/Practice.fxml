@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="practiceRoot" prefHeight="760" prefWidth="1200" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.PracticeController">
+<BorderPane fx:id="practiceRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.PracticeController">
 
    <padding>
       <Insets bottom="16" left="16" right="16" top="16" />
@@ -23,7 +23,7 @@
             <Insets bottom="8" left="8" right="8" top="8" />
          </padding>
          <Label styleClass="section-label" text="Question" />
-         <TextArea fx:id="questionOutput" editable="false" prefRowCount="8" promptText="Generate a question to begin." styleClass="question-label" wrapText="true" VBox.vgrow="ALWAYS" />
+         <TextArea fx:id="questionOutput" editable="false" prefHeight="634.0" prefRowCount="8" prefWidth="322.0" promptText="Generate a question to begin." styleClass="question-label" wrapText="true" VBox.vgrow="ALWAYS" />
       </VBox>
    </left>
 
@@ -34,7 +34,7 @@
             <Insets bottom="8" left="8" right="8" top="8" />
          </padding>
          <Label styleClass="section-label" text="Code editor" />
-         <TextArea fx:id="codeEditor" prefRowCount="20" text="// Write your code here" wrapText="true" VBox.vgrow="ALWAYS" />
+         <TextArea fx:id="codeEditor" prefHeight="633.0" prefRowCount="20" prefWidth="493.0" text="// Write your code here" wrapText="true" VBox.vgrow="ALWAYS" />
       </VBox>
    </center>
 
@@ -45,7 +45,7 @@
             <Insets bottom="8" left="8" right="8" top="8" />
          </padding>
          <Label styleClass="section-label" text="Your explanation" />
-         <TextField fx:id="answerInput" promptText="Explain your solution" />
+         <TextField fx:id="answerInput" prefHeight="182.0" prefWidth="194.0" promptText="Explain your solution" />
          <Button fx:id="buttonSubmitAnswer" maxWidth="Infinity" onAction="#onSubmitAnswer" text="Submit answer" />
       </VBox>
    </right>

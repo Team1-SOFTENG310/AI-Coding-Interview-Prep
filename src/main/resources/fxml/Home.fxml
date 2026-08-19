@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.HomeController">
+<StackPane prefHeight="720" prefWidth="1024" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.HomeController">
    <children>
-      <Pane prefHeight="400.0" prefWidth="600.0">
-         <children>
-            <Label layoutX="127.0" layoutY="95.0" styleClass="title-label" text="Coding Interview Practice">
-               <font>
-                  <Font name="Bodoni MT" size="30.0" />
-               </font>
-            </Label>
-            <Label layoutX="172.0" layoutY="143.0" text="Welcome to AI Coding Interview Prep!" />
-            <Label layoutX="80.0" layoutY="162.0" text="Go to Practice to answer coding questions and receive AI feedback." />
-            <Label layoutX="119.0" layoutY="181.0" text="Login or register to save progress in later assignments." />
-            <Button fx:id="buttonGetStarted" layoutX="155.0" layoutY="278.0" mnemonicParsing="false" onAction="#onGetStarted" prefHeight="33.0" prefWidth="111.0" text="Get Started!" />
-            <Button fx:id="buttonSignIn" layoutX="334.0" layoutY="278.0" mnemonicParsing="false" onAction="#onSignIn" prefHeight="32.0" prefWidth="111.0" text="Sign In" />
-         </children></Pane>
+      <VBox alignment="CENTER" spacing="20">
+         <padding>
+            <Insets bottom="50" left="50" right="50" top="50" />
+         </padding>
+         <Label alignment="CENTER" styleClass="title-label" text="Coding Interview Practice">
+            <font>
+               <Font name="Bodoni MT" size="30.0" />
+            </font>
+         </Label>
+         <Label alignment="CENTER" text="Welcome to AI Coding Interview Prep!" />
+         <Label alignment="CENTER" text="Go to Practice to answer coding questions and receive AI feedback." wrapText="true" />
+         <Label alignment="CENTER" text="Login or register to save progress in later assignments." wrapText="true" />
+         <HBox alignment="CENTER" spacing="20">
+            <Button fx:id="buttonGetStarted" mnemonicParsing="false" onAction="#onGetStarted" prefHeight="41.0" prefWidth="133.0" text="Get Started!" />
+            <Button fx:id="buttonSignIn" mnemonicParsing="false" onAction="#onSignIn" prefHeight="32.0" prefWidth="111.0" text="Sign In" />
+         </HBox>
+      </VBox>
    </children>
-</AnchorPane>
+</StackPane>

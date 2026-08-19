@@ -53,7 +53,6 @@ public class SceneManager {
             }
 
             Scene scene = new Scene(root);
-            // scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
 
             loadedScenes.put(sceneName, scene);
             currentScene = scene;
