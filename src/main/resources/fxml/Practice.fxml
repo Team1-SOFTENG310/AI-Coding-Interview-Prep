@@ -1,23 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" stylesheets="@/css/main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
    <children>
       <Pane prefHeight="400.0" prefWidth="600.0">
          <children>
-            <Label styleClass="title-label" layoutX="124.0" layoutY="14.0" text="Practice Interview Question">
-               <font>
-                  <Font name="Bodoni MT" size="30.0" />
-               </font>
-            </Label>
-            <TextArea fx:id="textareaCode" layoutX="65.0" layoutY="129.0" prefHeight="145.0" prefWidth="470.0" promptText="Enter your code here" wrapText="true" />
-            <Label fx:id="labelQuestion" layoutX="65.0" layoutY="59.0" prefHeight="65.0" prefWidth="470.0" text="Waiting for question to generate..." textFill="#bfbcbc" wrapText="true" />
-            <TextArea fx:id="textareaExplanation" layoutX="65.0" layoutY="281.0" prefHeight="73.0" prefWidth="470.0" promptText="Enter an explanation of your code here" />
-            <Button fx:id="buttonSubmitAnswer" layoutX="244.0" layoutY="360.0" mnemonicParsing="false" onAction="#onSubmitAnswer" text="Submit Answer" />
-            <Button fx:id="buttonReturn" layoutX="31.0" layoutY="17.0" mnemonicParsing="false" onAction="#onReturn" text="Return" />
+            <Button fx:id="buttonReturn" layoutX="13.0" layoutY="11.0" mnemonicParsing="false" onAction="#onReturn" text="Return" />
+            <VBox layoutX="58.0" layoutY="57.0" prefHeight="329.0" prefWidth="484.0" styleClass="vbox">
+               <children>
+                  <Label prefHeight="29.0" prefWidth="362.0" styleClass="title-label" text="Practice Interview Question">
+                     <font>
+                        <Font name="Bodoni MT" size="30.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="labelQuestion" prefHeight="78.0" prefWidth="466.0" text="Waiting for question to generate..." textFill="#bfbcbc" wrapText="true" />
+                  <VBox prefHeight="216.0" prefWidth="466.0" styleClass="inner-box">
+                     <children>
+                        <TextArea fx:id="textareaCode" prefHeight="145.0" prefWidth="470.0" promptText="Enter your code here" wrapText="true" />
+                        <TextArea fx:id="textareaExplanation" prefHeight="82.0" prefWidth="466.0" promptText="Enter an explanation of your code here" />
+                     </children>
+                  </VBox>
+                  <HBox prefHeight="100.0" prefWidth="200.0" styleClass="hbox">
+                     <children>
+                        <Button fx:id="buttonSubmitAnswer" mnemonicParsing="false" onAction="#onSubmitAnswer" prefHeight="46.0" prefWidth="150.0" text="Submit Answer" />
+                        <Button fx:id="buttonNewQuestion" maxWidth="210.0" mnemonicParsing="false" onAction="#onNewQuestion" prefHeight="46.0" prefWidth="227.0" text="Generate New Question" wrapText="true" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <ProgressBar fx:id="progressBarQuestion" layoutX="290.0" layoutY="117.0" prefWidth="200.0" progress="0.0" visible="false" />
          </children>
       </Pane>
    </children>
