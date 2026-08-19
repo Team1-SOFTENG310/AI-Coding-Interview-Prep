@@ -26,7 +26,7 @@
                   <VBox prefHeight="216.0" prefWidth="466.0" styleClass="inner-box">
                      <children>
                         <TextArea fx:id="textareaCode" prefHeight="145.0" prefWidth="470.0" promptText="Enter your code here" wrapText="true" />
-                        <TextArea fx:id="textareaExplanation" prefHeight="82.0" prefWidth="466.0" promptText="Enter an explanation of your code here" />
+                        <TextArea fx:id="textareaExplanation" prefHeight="82.0" prefWidth="466.0" promptText="Enter an explanation here" />
                      </children>
                   </VBox>
                   <HBox prefHeight="100.0" prefWidth="200.0" styleClass="hbox">
