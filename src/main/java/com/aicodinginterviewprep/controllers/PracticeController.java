@@ -65,14 +65,6 @@ public class PracticeController implements SceneAware {
     }
 
     public void onSubmitAnswer() {
-        runEvaluation();
-    }
-
-    public void onReturn() {
-        sceneManager.switchToScene("home");
-    }
-
-    public void runEvaluation() {
         sceneManager.switchToScene("feedback");
         Object controller = sceneManager.getController("feedback");
         if (!(controller instanceof FeedbackController feedbackController)) {
@@ -80,5 +72,9 @@ public class PracticeController implements SceneAware {
         }
         feedbackController.setAnswerControls(questionOutput, codeEditor, answerInput);
         feedbackController.runEvaluation();
+    }
+
+    public void onReturn() {
+        sceneManager.switchToScene("home");
     }
 }

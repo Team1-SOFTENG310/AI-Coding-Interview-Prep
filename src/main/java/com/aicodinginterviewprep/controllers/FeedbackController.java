@@ -15,7 +15,6 @@ public class FeedbackController implements SceneAware {
 
     public TextArea textareaEvaluation;
     public Button buttonTryAgain;
-    public Button buttonSubmitAnswer;
 
     // References to Practice tab controls for answer extraction
     private TextArea questionOutput;
@@ -97,9 +96,6 @@ public class FeedbackController implements SceneAware {
     }
 
     private void setEvaluationInProgress(boolean inProgress) {
-        if (buttonSubmitAnswer != null) {
-            buttonSubmitAnswer.setDisable(inProgress);
-        }
         if (buttonTryAgain != null) {
             buttonTryAgain.setDisable(inProgress);
         }
