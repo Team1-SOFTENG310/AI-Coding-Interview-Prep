@@ -17,9 +17,6 @@
     -fx-border-insets: 0;
 }
 
-.secondary-pane {
-    -fx-background-color: #03349f;
-}
 
 /* ----------- Vbox ----------- */
 
@@ -59,17 +56,6 @@
     -fx-text-fill: #292522;
 }
 
-.section-label {
-    -fx-font-size: 17px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #413a34;
-}
-
-.question-label {
-    -fx-font-size: 19px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #292522;
-}
 
 /* ---------- Text Areas ---------- */
 
