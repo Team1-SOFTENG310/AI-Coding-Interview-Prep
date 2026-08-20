@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane stylesheets="@/css/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CONTROLLER_NAME">
+<StackPane prefHeight="720" prefWidth="1024" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.HomeController">
    <children>
-      <Pane prefHeight="400.0" prefWidth="600.0" styleClass="primary-pane" stylesheets="@../css/main.css">
-         <children>
-            <Button fx:id="buttonGetStarted" layoutX="155.0" layoutY="278.0" mnemonicParsing="false" onAction="#onGetStarted" prefHeight="46.0" prefWidth="128.0" text="Get Started!" />
-            <Button fx:id="buttonSignIn" layoutX="311.0" layoutY="278.0" mnemonicParsing="false" onAction="#onSignIn" prefHeight="46.0" prefWidth="134.0" text="Sign In" />
-            <VBox layoutX="98.0" layoutY="70.0" prefHeight="178.0" prefWidth="404.0" styleClass="vbox">
-               <children>
-                  <Label styleClass="title-label" text="Coding Interview Practice">
-                     <font>
-                        <Font name="Bodoni MT" size="30.0" />
-                     </font>
-                  </Label>
-                  <Label text="Welcome to AI Coding Interview Prep!" />
-                  <Label text="Go to Practice to answer coding questions and receive AI feedback." />
-                  <Label text="Login or register to save progress in later assignments." />
-               </children>
-            </VBox>
-         </children></Pane>
+      <VBox alignment="CENTER" spacing="20">
+         <padding>
+            <Insets bottom="50" left="50" right="50" top="50" />
+         </padding>
+         <Label alignment="CENTER" styleClass="title-label" text="Coding Interview Practice">
+            <font>
+               <Font name="Bodoni MT" size="30.0" />
+            </font>
+         </Label>
+         <Label alignment="CENTER" text="Welcome to AI Coding Interview Prep!" />
+         <Label alignment="CENTER" text="Go to Practice to answer coding questions and receive AI feedback." wrapText="true" />
+         <Label alignment="CENTER" text="Login or register to save progress in later assignments." wrapText="true" />
+         <HBox alignment="CENTER" spacing="20">
+            <Button fx:id="buttonGetStarted" mnemonicParsing="false" onAction="#onGetStarted" prefHeight="41.0" prefWidth="133.0" text="Get Started!" />
+            <Button fx:id="buttonSignIn" mnemonicParsing="false" onAction="#onSignIn" prefHeight="32.0" prefWidth="111.0" text="Sign In" />
+         </HBox>
+      </VBox>
    </children>
-</AnchorPane>
+</StackPane>

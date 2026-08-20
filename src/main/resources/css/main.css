@@ -3,9 +3,18 @@
  */
 
 .root {
-    -fx-background-color: #489caa;
-    -fx-font-family: "System";
-    -fx-font-size: 14px;
+    /* tokens — declare once, inherited by every descendant */
+    -color-bg:      #f5ead8;
+    -color-surface: #ebddc5;
+    -color-text:    #201e1d;
+    -color-accent:  #c67139;
+    -color-divider: rgba(32, 30, 29, 0.16);   /* the color-mix line, precomputed */
+
+    /* applied */
+    -fx-background-color: -color-bg;
+    -fx-text-fill: -color-text;
+    -fx-font-family: "Figtree", "Segoe UI", sans-serif;
+    -fx-font-size: 15px;
 }
 
 /* ---------- Panes ----------- */
