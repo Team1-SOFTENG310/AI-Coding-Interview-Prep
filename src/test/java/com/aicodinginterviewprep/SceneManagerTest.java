@@ -1,5 +1,6 @@
 package com.aicodinginterviewprep;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -206,6 +208,69 @@ class SceneManagerTest {
             assertSame(
                     originalFirstScene,
                     returnedFirstScene
+            );
+
+            stage.close();
+        });
+    }
+
+    @Test
+    void switchToScene_sceneAwareController_receivesSceneManager() {
+        runOnFxThread(() -> {
+
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+
+            manager.registerScene(
+                    "aware",
+                    "/fxml/TestSceneAware.fxml"
+            );
+
+            manager.switchToScene("aware");
+
+            Object controllerObject =
+                    manager.getController("aware");
+
+            assertNotNull(controllerObject);
+
+            TestSceneController controller =
+                    (TestSceneController) controllerObject;
+
+            assertSame(
+                    manager,
+                    controller.getSceneManager()
+            );
+
+            stage.close();
+        });
+    }
+
+    @Test
+    void switchToScene_brokenFXML_throwsRuntimeException() {
+        runOnFxThread(() -> {
+
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+
+            manager.registerScene(
+                    "broken",
+                    "/fxml/BrokenScene.fxml"
+            );
+
+            RuntimeException exception = assertThrows(
+                    RuntimeException.class,
+                    () -> manager.switchToScene("broken")
+            );
+
+            assertEquals(
+                    "Failed to load scene: broken",
+                    exception.getMessage()
+            );
+
+            assertNotNull(exception.getCause());
+
+            assertTrue(
+                    exception.getCause() instanceof IOException
             );
 
             stage.close();
