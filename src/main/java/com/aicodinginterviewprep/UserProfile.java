@@ -1,10 +1,12 @@
 package com.aicodinginterviewprep;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class UserProfile {
     private String username;
     private String password;
     private int questionsAnswered;
-    private int questionsCorrect;
+    private int totalScore;
 
     public UserProfile() {
     }
@@ -38,19 +40,25 @@ public class UserProfile {
         this.questionsAnswered = questionsAnswered;
     }
 
-    public int getQuestionsCorrect() {
-        return questionsCorrect;
+    public int getTotalScore() {
+        return totalScore;
     }
 
-    public void setQuestionsCorrect(int questionsCorrect) {
-        this.questionsCorrect = questionsCorrect;
+    public void setTotalScore(int totalScore) {
+        this.totalScore = totalScore;
     }
 
-    public void questionAnswered(boolean answeredCorrect) { // Update the profiles score
+    public void addEvaluationScore(int rating) { // Update the profiles score
         questionsAnswered++;
-        if (answeredCorrect) {
-            questionsCorrect++;
+        totalScore += rating;
+    }
+
+    @JsonIgnore
+    public double getAverageScore() {
+        if (questionsAnswered == 0) {
+            return 0.0;
         }
+        return (double) totalScore /questionsAnswered;
     }
 
     public boolean nameAndPasswordMatch(String username, String password) {

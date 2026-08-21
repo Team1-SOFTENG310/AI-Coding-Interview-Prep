@@ -237,7 +237,7 @@ class PracticeControllerTest {
         }
 
         FakeSceneManager(Object feedbackController) {
-            super(new Stage());
+            super(new Stage(), null);
             this.feedbackController = feedbackController;
         }
 

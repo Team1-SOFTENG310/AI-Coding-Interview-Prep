@@ -97,12 +97,18 @@ public class Authenticator {
         return currentUserProfile.getUsername();
     }
 
-    public void updateUserScore(boolean correct) {
-        currentUserProfile.questionAnswered(correct); // Updates the user score, use true if answer was correct, false if not
+    public void updateUserScore(int rating) {
+        if (!isSignedIn()) {
+            throw new IllegalStateException("You must be logged in");
+        }
+        currentUserProfile.addEvaluationScore(rating);
     }
 
-    public String getUserScore() {
-        return String.valueOf(currentUserProfile.getQuestionsCorrect());
+    public double getUserScore() {
+        if (!isSignedIn()) {
+            return 0.0;
+        }
+        return currentUserProfile.getAverageScore();
     }
 
     public boolean isSignedIn() {

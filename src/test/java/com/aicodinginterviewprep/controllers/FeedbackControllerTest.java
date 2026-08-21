@@ -17,6 +17,7 @@ import com.aicodinginterviewprep.openai.EvaluationResult;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -529,6 +530,7 @@ class FeedbackControllerTest {
         controller.textareaEvaluation = new TextArea();
         controller.buttonTryAgain = new Button();
         controller.buttonSubmitAnswer = new Button();
+        setPrivateField(controller, "labelScore", new Label());
         return controller;
     }
 
@@ -537,6 +539,16 @@ class FeedbackControllerTest {
             java.lang.reflect.Field field = FeedbackController.class.getDeclaredField("evaluatorService");
             field.setAccessible(true);
             field.set(controller, service);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setPrivateField(FeedbackController controller, String fieldName, Object value) {
+        try {
+            java.lang.reflect.Field field = FeedbackController.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(controller, value);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -556,7 +568,7 @@ class FeedbackControllerTest {
         String lastScene;
 
         FakeSceneManager() {
-            super(new Stage());
+            super(new Stage(), null);
         }
 
         @Override

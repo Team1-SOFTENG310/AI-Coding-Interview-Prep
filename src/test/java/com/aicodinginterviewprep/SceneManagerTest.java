@@ -35,7 +35,7 @@ class SceneManagerTest {
 
     @BeforeEach
     void setUp() {
-        sceneManager = new SceneManager(null);
+        sceneManager = new SceneManager(null, null);
     }
 
     private static void runOnFxThread(Runnable action) {
@@ -110,7 +110,7 @@ class SceneManagerTest {
         runOnFxThread(() -> {
 
             Stage stage = new Stage();
-            SceneManager manager = new SceneManager(stage);
+            SceneManager manager = new SceneManager(stage, null);
 
             manager.registerScene(
                     "test",
@@ -130,7 +130,7 @@ class SceneManagerTest {
         runOnFxThread(() -> {
 
             Stage stage = new Stage();
-            SceneManager manager = new SceneManager(stage);
+            SceneManager manager = new SceneManager(stage, null);
 
             manager.registerScene(
                     "test",
@@ -156,7 +156,7 @@ class SceneManagerTest {
         runOnFxThread(() -> {
 
             Stage stage = new Stage();
-            SceneManager manager = new SceneManager(stage);
+            SceneManager manager = new SceneManager(stage, null);
 
             manager.registerScene(
                     "first",
@@ -185,7 +185,7 @@ class SceneManagerTest {
         runOnFxThread(() -> {
 
             Stage stage = new Stage();
-            SceneManager manager = new SceneManager(stage);
+            SceneManager manager = new SceneManager(stage, null);
 
             manager.registerScene(
                     "first",
@@ -219,7 +219,7 @@ class SceneManagerTest {
         runOnFxThread(() -> {
 
             Stage stage = new Stage();
-            SceneManager manager = new SceneManager(stage);
+            SceneManager manager = new SceneManager(stage, null);
 
             manager.registerScene(
                     "aware",
@@ -250,7 +250,7 @@ class SceneManagerTest {
         runOnFxThread(() -> {
 
             Stage stage = new Stage();
-            SceneManager manager = new SceneManager(stage);
+            SceneManager manager = new SceneManager(stage, null);
 
             manager.registerScene(
                     "broken",

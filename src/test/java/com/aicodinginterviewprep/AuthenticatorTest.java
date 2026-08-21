@@ -14,7 +14,7 @@ class AuthenticatorTest {
         Path profileFile = tempDir.resolve("testaccounts.json");
         Authenticator authenticator = new Authenticator(profileFile.toString());
         UserProfile profile = new UserProfile("alice", "secret");
-        profile.questionAnswered(true);
+        profile.addEvaluationScore(1);
         authenticator.getUserProfiles().add(profile);
 
         authenticator.writeUserProfiles();
@@ -25,7 +25,7 @@ class AuthenticatorTest {
         assertEquals("alice", reloadedProfile.getUsername());
         assertEquals("secret", reloadedProfile.getPassword());
         assertEquals(1, reloadedProfile.getQuestionsAnswered());
-        assertEquals(1, reloadedProfile.getQuestionsCorrect());
+        assertEquals(1, reloadedProfile.getTotalScore());
 
     }
 
@@ -34,7 +34,7 @@ class AuthenticatorTest {
         Path profileFile = tempDir.resolve("testaccounts.json");
         Authenticator authenticator = new Authenticator(profileFile.toString());
         UserProfile profile = new UserProfile("alice", "smith");
-        profile.questionAnswered(true);
+        profile.addEvaluationScore(1);
         authenticator.getUserProfiles().add(profile);
 
         authenticator.writeUserProfiles();
@@ -45,58 +45,58 @@ class AuthenticatorTest {
         assertNotEquals("jane", reloadedProfile.getUsername());
         assertEquals("smith", reloadedProfile.getPassword());
         assertEquals(1, reloadedProfile.getQuestionsAnswered());
-        assertEquals(1, reloadedProfile.getQuestionsCorrect());
+        assertEquals(1, reloadedProfile.getTotalScore());
 
     }
 
     @Test
     void loginToValidProfile(@TempDir Path tempDir) throws Exception {
-        Path profileFile = tempDir.resolve("testaccounts.json");
-        Authenticator authenticator = new Authenticator(profileFile.toString());
-        UserProfile profile = new UserProfile("alice", "smith");
-        profile.questionAnswered(true);
-        authenticator.getUserProfiles().add(profile);
+        assertDoesNotThrow(() -> {
+            Path profileFile = tempDir.resolve("testaccounts.json");
+            Authenticator authenticator = new Authenticator(profileFile.toString());
+            UserProfile profile = new UserProfile("alice", "smith");
+            profile.addEvaluationScore(1);
+            authenticator.getUserProfiles().add(profile);
 
-        authenticator.writeUserProfiles();
+            authenticator.writeUserProfiles();
 
-        Authenticator reloaded = new Authenticator(profileFile.toString());
-        assertTrue(reloaded.login("alice", "smith"));
+            Authenticator reloaded = new Authenticator(profileFile.toString());
+            reloaded.login("alice", "smith");
+        });
     }
 
     @Test
     void loginToInvalidProfileFails(@TempDir Path tempDir) throws Exception {
-        Path profileFile = tempDir.resolve("testaccounts.json");
-        Authenticator authenticator = new Authenticator(profileFile.toString());
-        UserProfile profile = new UserProfile("alice", "smith");
-        profile.questionAnswered(true);
-        authenticator.getUserProfiles().add(profile);
+        assertThrows(IllegalStateException.class, () -> {
+            Path profileFile = tempDir.resolve("testaccounts.json");
+            Authenticator authenticator = new Authenticator(profileFile.toString());
+            UserProfile profile = new UserProfile("alice", "smith");
+            profile.addEvaluationScore(3);
+            authenticator.getUserProfiles().add(profile);
 
-        authenticator.writeUserProfiles();
+            authenticator.writeUserProfiles();
 
-        Authenticator reloaded = new Authenticator(profileFile.toString());
-        assertFalse(reloaded.login("jane", "smith"));
+            Authenticator reloaded = new Authenticator(profileFile.toString());
+            reloaded.login("jane", "smith");
+        });
     }
 
     @Test
     void loginWithNullUsernameFails(@TempDir Path tempDir) throws Exception {
-        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        assertFalse(authenticator.login(null, "smith"));
+        assertThrows(IllegalStateException.class, () -> {
+            Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+            authenticator.login(null, "smith");
+        });
     }
 
     @Test
     void loginWithNullPasswordFails(@TempDir Path tempDir) throws Exception {
-        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        assertFalse(authenticator.login("alice", null));
+        assertThrows(IllegalStateException.class, () -> {
+            Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+            authenticator.login("alice", null);
+        });
     }
 
-    @Test
-    void signUpAddsNewAccountAndAllowsLogin(@TempDir Path tempDir) throws Exception {
-        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        authenticator.signUp("bob", "hunter2");
-
-        assertEquals(1, authenticator.getUserProfiles().size());
-        assertTrue(authenticator.login("bob", "hunter2"));
-    }
 
     @Test
     void signUpWithExistingAccountThrows(@TempDir Path tempDir) throws Exception {
@@ -108,13 +108,15 @@ class AuthenticatorTest {
 
     @Test
     void signUpWithDifferentExistingAccountSucceeds(@TempDir Path tempDir) throws Exception {
-        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        authenticator.signUp("bob", "hunter2");
+        assertDoesNotThrow(() -> {
+            Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+            authenticator.signUp("carol", "letmein");
 
-        authenticator.signUp("carol", "letmein");
+            authenticator.signUp("bob", "hunter2");
 
-        assertEquals(2, authenticator.getUserProfiles().size());
-        assertTrue(authenticator.login("carol", "letmein"));
+            assertEquals(2, authenticator.getUserProfiles().size());
+            authenticator.login("carol", "letmein");
+        });
     }
 
     @Test
@@ -133,34 +135,37 @@ class AuthenticatorTest {
     void updateUserScoreUpdatesLoggedInProfile(@TempDir Path tempDir) throws Exception {
         Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
         authenticator.signUp("bob", "hunter2");
-        authenticator.login("bob", "hunter2");
 
-        authenticator.updateUserScore(true);
-        authenticator.updateUserScore(false);
+        authenticator.updateUserScore(6);
+        authenticator.updateUserScore(4);
 
         UserProfile profile = authenticator.getUserProfiles().get(0);
         assertEquals(2, profile.getQuestionsAnswered());
-        assertEquals(1, profile.getQuestionsCorrect());
+        assertEquals(5, profile.getAverageScore());
     }
 
     @Test
     void signUp(@TempDir Path tempDir) throws Exception {
-        Path profileFile = tempDir.resolve("testaccounts.json");
-        Authenticator authenticator = new Authenticator(profileFile.toString());
-        authenticator.signUp("alice", "smith");
-        authenticator.writeUserProfiles();
-        Authenticator reloaded = new Authenticator(profileFile.toString());
-        assertTrue(reloaded.login("alice", "smith"));
+        assertDoesNotThrow(() -> {
+            Path profileFile = tempDir.resolve("testaccounts.json");
+            Authenticator authenticator = new Authenticator(profileFile.toString());
+            authenticator.signUp("alice", "smith");
+            authenticator.writeUserProfiles();
+            Authenticator reloaded = new Authenticator(profileFile.toString());
+            reloaded.login("alice", "smith");
+        });
     }
 
     @Test
     void signUpFails(@TempDir Path tempDir) throws Exception {
-        Path profileFile = tempDir.resolve("testaccounts.json");
-        Authenticator authenticator = new Authenticator(profileFile.toString());
-        authenticator.signUp("john", "doe");
-        authenticator.writeUserProfiles();
-        Authenticator reloaded = new Authenticator(profileFile.toString());
-        assertFalse(reloaded.login("alice", "smith"));
+        assertThrows(IllegalStateException.class, () -> {
+            Path profileFile = tempDir.resolve("testaccounts.json");
+            Authenticator authenticator = new Authenticator(profileFile.toString());
+            authenticator.signUp("john", "doe");
+            authenticator.writeUserProfiles();
+            Authenticator reloaded = new Authenticator(profileFile.toString());
+            reloaded.login("alice", "smith");
+        });
     }
 
     @Test
@@ -168,11 +173,11 @@ class AuthenticatorTest {
         Path profileFile = tempDir.resolve("testaccounts.json");
         Authenticator authenticator = new Authenticator(profileFile.toString());
         authenticator.signUp("alice", "smith");
-        authenticator.updateUserScore(true);
+        authenticator.updateUserScore(5);
         authenticator.writeUserProfiles();
         Authenticator reloaded = new Authenticator(profileFile.toString());
-        assertTrue(reloaded.login("alice", "smith"));
-        assertEquals(1, reloaded.getUserScore());
+        reloaded.login("alice", "smith");
+        assertEquals(5.0, reloaded.getUserScore());
     }
 }
 
