@@ -59,17 +59,20 @@ public class Authenticator {
         return userProfiles;
     }
 
-    public boolean login(String username, String password) {
-        if (username == null || password == null) { // return false if information is missing
-            return false;
+    public void login(String username, String password) {
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) { // return false if information is missing
+            throw new IllegalStateException("Username and password are required");
+        }
+        if (currentUserProfile != null && currentUserProfile.nameAndPasswordMatch(username, password)) {
+            throw new IllegalStateException("You are already logged in");
         }
         for (UserProfile userProfile : userProfiles) {
             if (userProfile.nameAndPasswordMatch(username, password)) { // If a matching profile is found, set it as the logged in profile
                 currentUserProfile = userProfile;
-                return true;
+                return;
             }
         }
-        return false;
+        throw new IllegalStateException("Invalid username and password");
     }
 
     public void signUp(String username, String password) {
@@ -83,9 +86,16 @@ public class Authenticator {
         }
         UserProfile userProfile = new UserProfile(username, password);
         userProfiles.add(userProfile); // Add the new account
+
         currentUserProfile = userProfile;
     }
 
+    public String getUsername() {
+        if (currentUserProfile == null) {
+            return "Not logged in";
+        }
+        return currentUserProfile.getUsername();
+    }
 
     public void updateUserScore(boolean correct) {
         currentUserProfile.questionAnswered(correct); // Updates the user score, use true if answer was correct, false if not
