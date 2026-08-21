@@ -15,12 +15,12 @@ public class FeedbackController implements SceneAware {
 
     public TextArea textareaEvaluation;
     public Button buttonTryAgain;
-    public Button buttonSubmitAnswer;
 
-    // References to Practice tab controls for answer extraction
+    // References to the originating tab's controls for answer extraction
     private TextArea questionOutput;
     private TextArea codeEditor;
     private TextInputControl answerInput;
+    private String returnScene = "practice";
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
@@ -28,13 +28,19 @@ public class FeedbackController implements SceneAware {
     }
 
     public void setAnswerControls(TextArea questionOutput, TextArea codeEditor, TextInputControl answerInput) {
+        setAnswerControls(questionOutput, codeEditor, answerInput, "practice");
+    }
+
+    public void setAnswerControls(
+        TextArea questionOutput, TextArea codeEditor, TextInputControl answerInput, String returnScene) {
         this.questionOutput = questionOutput;
         this.codeEditor = codeEditor;
         this.answerInput = answerInput;
+        this.returnScene = returnScene;
     }
 
     public void onTryAgain() {
-        sceneManager.switchToScene("practice");
+        sceneManager.switchToScene(returnScene);
     }
 
     public void runEvaluation() {
@@ -97,9 +103,6 @@ public class FeedbackController implements SceneAware {
     }
 
     private void setEvaluationInProgress(boolean inProgress) {
-        if (buttonSubmitAnswer != null) {
-            buttonSubmitAnswer.setDisable(inProgress);
-        }
         if (buttonTryAgain != null) {
             buttonTryAgain.setDisable(inProgress);
         }

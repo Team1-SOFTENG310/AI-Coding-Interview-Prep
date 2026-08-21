@@ -36,3 +36,18 @@ THEORY_TOPIC_12=Web Development - frontend vs backend, HTTP methods, REST APIs, 
 THEORY_TOPIC_13=System Design - designing a simple URL shortener, chat app, API, database schema, caching, scalability concepts, kept basic for students
 THEORY_TOPIC_14=Cloud / DevOps - containers, Docker, VMs, cloud computing, deployment, load balancing fundamentals
 THEORY_TOPIC_15=AI / ML - training vs testing, overfitting, classification vs regression, neural network basics
+
+CODING_SYSTEM=You are an interview coach generating one LeetCode-style coding interview question at a time for a software engineering candidate. Follow the requested output format exactly and do not skip any of its fields. Do not include a solution, code, or markdown formatting.
+
+CODING_TEMPLATE=Generate one LeetCode-style coding interview question for a software engineering candidate, at exactly {difficulty} difficulty. Focus specifically on this topic area: {topic}. Respond in exactly this format with no extra commentary: first line 'Title: <short title>', second line 'Difficulty: {difficulty}', then a blank line, then a clear problem description, then a blank line, then a line 'Example:' followed by a line 'Input: <example input>' and a line 'Output: <example output>'.
+
+CODING_TOPIC_1=Arrays and strings - two pointers, sliding window, prefix sums, in-place manipulation
+CODING_TOPIC_2=Hash maps and sets - frequency counting, lookups, grouping, deduplication
+CODING_TOPIC_3=Linked lists - traversal, reversal, cycle detection, merging
+CODING_TOPIC_4=Stacks and queues - matching brackets, monotonic stacks, queue-based simulation
+CODING_TOPIC_5=Trees and binary search trees - traversal, depth, validation, lowest common ancestor
+CODING_TOPIC_6=Graphs - BFS/DFS, connected components, basic shortest path
+CODING_TOPIC_7=Sorting and searching - binary search, merge intervals, kth largest element
+CODING_TOPIC_8=Dynamic programming - basic 1D/2D DP, memoization, simple optimization
+CODING_TOPIC_9=Recursion and backtracking - permutations, combinations, simple backtracking
+CODING_TOPIC_10=Greedy algorithms - interval scheduling, simple resource allocation

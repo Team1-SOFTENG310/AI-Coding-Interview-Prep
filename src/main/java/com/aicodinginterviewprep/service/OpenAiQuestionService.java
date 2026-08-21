@@ -26,7 +26,9 @@ public class OpenAiQuestionService {
     private static final String DEFAULT_MODEL = "gpt-5-nano";
     private static final String PROMPTS_RESOURCE = "/prompts/promptengineering.txt";
     private static final int MAX_COMPLETION_TOKENS = 100;
+    private static final int MAX_COMPLETION_TOKENS_CODING = 450;
     private static final String CONTENT_FIELD = "content";
+    private static final List<String> CODING_DIFFICULTIES = List.of("Easy", "Medium", "Hard");
 
     private final HttpClient httpClient;
     private final String apiKey;
@@ -49,7 +51,8 @@ public class OpenAiQuestionService {
         this.prompts = loadPrompts();
         this.topicsByType = Map.of(
             QuestionType.BEHAVIOURAL, extractTopics(prompts, "BEHAVIOURAL_TOPIC_"),
-            QuestionType.THEORY, extractTopics(prompts, "THEORY_TOPIC_"));
+            QuestionType.THEORY, extractTopics(prompts, "THEORY_TOPIC_"),
+            QuestionType.CODING, extractTopics(prompts, "CODING_TOPIC_"));
         this.random = new Random();
     }
 
@@ -61,10 +64,10 @@ public class OpenAiQuestionService {
 
         JSONObject payload = new JSONObject();
         payload.put("model", model);
-        payload.put("max_completion_tokens", MAX_COMPLETION_TOKENS);
+        payload.put("max_completion_tokens", maxCompletionTokensFor(type));
         payload.put("reasoning_effort", "minimal");
         payload.put("messages", new JSONArray()
-            .put(new JSONObject().put("role", "system").put(CONTENT_FIELD, prompts.get("SYSTEM")))
+            .put(new JSONObject().put("role", "system").put(CONTENT_FIELD, systemPromptFor(type)))
             .put(new JSONObject().put("role", "user").put(CONTENT_FIELD, buildUserPrompt(type))));
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -90,10 +93,25 @@ public class OpenAiQuestionService {
             .trim();
     }
 
+    String systemPromptFor(QuestionType type) {
+        return prompts.getOrDefault(type.name() + "_SYSTEM", prompts.get("SYSTEM"));
+    }
+
+    int maxCompletionTokensFor(QuestionType type) {
+        return type == QuestionType.CODING ? MAX_COMPLETION_TOKENS_CODING : MAX_COMPLETION_TOKENS;
+    }
+
     String buildUserPrompt(QuestionType type) {
         List<String> topics = topicsByType.get(type);
         String topic = topics.get(random.nextInt(topics.size()));
-        return prompts.get(type.name() + "_TEMPLATE").replace("{topic}", topic);
+        String template = prompts.get(type.name() + "_TEMPLATE").replace("{topic}", topic);
+
+        if (type == QuestionType.CODING) {
+            String difficulty = CODING_DIFFICULTIES.get(random.nextInt(CODING_DIFFICULTIES.size()));
+            template = template.replace("{difficulty}", difficulty);
+        }
+
+        return template;
     }
 
     private static List<String> extractTopics(Map<String, String> prompts, String prefix) {

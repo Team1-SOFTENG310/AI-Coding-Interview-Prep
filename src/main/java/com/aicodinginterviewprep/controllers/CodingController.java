@@ -7,42 +7,39 @@ import com.aicodinginterviewprep.service.OpenAiQuestionService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 
-public class PracticeController implements SceneAware {
+public class CodingController implements SceneAware {
+    private static final String STARTER_CODE = "// Write your code here";
+
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
     private SceneManager sceneManager;
 
-    public BorderPane practiceRoot;
+    public BorderPane codingRoot;
     public TextArea questionOutput;
-    public TextArea answerInput;
+    public TextArea codeEditor;
 
     @FXML public Button buttonReturn;
     @FXML public Button buttonSubmitAnswer;
     @FXML public Button buttonGenerateQuestion;
-    @FXML public Button buttonCodingPractice;
-    @FXML public ComboBox<QuestionType> comboQuestionType;
+    @FXML public Button buttonPractice;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
-        this.comboQuestionType.getItems().addAll(QuestionType.BEHAVIOURAL, QuestionType.THEORY);
-        this.comboQuestionType.setValue(QuestionType.BEHAVIOURAL);
     }
 
     @FXML
     public void onGenerateQuestion() {
-        QuestionType type = comboQuestionType.getValue();
         buttonGenerateQuestion.setDisable(true);
         questionOutput.setText("Generating question...");
-        answerInput.clear();
+        codeEditor.setText(STARTER_CODE);
 
         Task<String> task = new Task<>() {
             @Override
             protected String call() throws Exception {
-                return questionService.generateQuestion(type);
+                return questionService.generateQuestion(QuestionType.CODING);
             }
         };
 
@@ -58,7 +55,7 @@ public class PracticeController implements SceneAware {
             buttonGenerateQuestion.setDisable(false);
         });
 
-        Thread worker = new Thread(task, "openai-question-generation");
+        Thread worker = new Thread(task, "openai-coding-question-generation");
         worker.setDaemon(true);
         worker.start();
     }
@@ -71,8 +68,8 @@ public class PracticeController implements SceneAware {
         sceneManager.switchToScene("home");
     }
 
-    public void onCodingPractice() {
-        sceneManager.switchToScene("coding");
+    public void onPractice() {
+        sceneManager.switchToScene("practice");
     }
 
     public void runEvaluation() {
@@ -81,7 +78,7 @@ public class PracticeController implements SceneAware {
         if (!(controller instanceof FeedbackController feedbackController)) {
             return;
         }
-        feedbackController.setAnswerControls(questionOutput, null, answerInput, "practice");
+        feedbackController.setAnswerControls(questionOutput, codeEditor, null, "coding");
         feedbackController.runEvaluation();
     }
 }

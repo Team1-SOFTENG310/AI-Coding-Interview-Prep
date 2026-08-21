@@ -2,7 +2,8 @@ package com.aicodinginterviewprep;
 
 public enum QuestionType {
     BEHAVIOURAL("Behavioural"),
-    THEORY("Theory");
+    THEORY("Theory"),
+    CODING("Coding");
 
     private final String label;
 
