@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Authenticator {
 
@@ -54,7 +55,7 @@ public class Authenticator {
         }
     }
 
-    public ArrayList<UserProfile> getUserProfiles() {
+    public List<UserProfile> getUserProfiles() {
         return userProfiles;
     }
 
@@ -80,12 +81,18 @@ public class Authenticator {
                 throw new IllegalArgumentException("Account already exists");
             }
         }
-        userProfiles.add(new UserProfile(username, password)); // Add the new account
+        UserProfile userProfile = new UserProfile(username, password);
+        userProfiles.add(userProfile); // Add the new account
+        currentUserProfile = userProfile;
     }
 
 
     public void updateUserScore(boolean correct) {
         currentUserProfile.questionAnswered(correct); // Updates the user score, use true if answer was correct, false if not
+    }
+
+    public int getUserScore() {
+        return currentUserProfile.getQuestionsCorrect();
     }
 
     private InputStream openInputStream() throws IOException { // Attempt to open the file as a Path first, if it exists, return its InputStream; otherwise, try to load it as a resource from the classpath

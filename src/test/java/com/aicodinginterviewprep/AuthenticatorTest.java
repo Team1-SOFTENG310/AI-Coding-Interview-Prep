@@ -76,5 +76,37 @@ class AuthenticatorTest {
         Authenticator reloaded = new Authenticator(profileFile.toString());
         assertFalse(reloaded.login("jane", "smith"));
     }
+
+    @Test
+    void signUp(@TempDir Path tempDir) throws Exception {
+        Path profileFile = tempDir.resolve("testaccounts.json");
+        Authenticator authenticator = new Authenticator(profileFile.toString());
+        authenticator.signUp("alice", "smith");
+        authenticator.writeUserProfiles();
+        Authenticator reloaded = new Authenticator(profileFile.toString());
+        assertTrue(reloaded.login("alice", "smith"));
+    }
+
+    @Test
+    void signUpFails(@TempDir Path tempDir) throws Exception {
+        Path profileFile = tempDir.resolve("testaccounts.json");
+        Authenticator authenticator = new Authenticator(profileFile.toString());
+        authenticator.signUp("john", "doe");
+        authenticator.writeUserProfiles();
+        Authenticator reloaded = new Authenticator(profileFile.toString());
+        assertFalse(reloaded.login("alice", "smith"));
+    }
+
+    @Test
+    void updateUserScore(@TempDir Path tempDir) throws Exception {
+        Path profileFile = tempDir.resolve("testaccounts.json");
+        Authenticator authenticator = new Authenticator(profileFile.toString());
+        authenticator.signUp("alice", "smith");
+        authenticator.updateUserScore(true);
+        authenticator.writeUserProfiles();
+        Authenticator reloaded = new Authenticator(profileFile.toString());
+        assertTrue(reloaded.login("alice", "smith"));
+        assertEquals(1, reloaded.getUserScore());
+    }
 }
 
