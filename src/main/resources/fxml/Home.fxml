@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane prefHeight="720" prefWidth="1024" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.HomeController">
+<StackPane prefHeight="720" prefWidth="1024" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.HomeController">
    <children>
       <VBox alignment="CENTER" spacing="20">
          <padding>
@@ -26,6 +26,7 @@
             <Button fx:id="buttonGetStarted" mnemonicParsing="false" onAction="#onGetStarted" prefHeight="41.0" prefWidth="133.0" text="Get Started!" />
             <Button fx:id="buttonSignIn" mnemonicParsing="false" onAction="#onSignIn" prefHeight="32.0" prefWidth="111.0" text="Sign In" />
          </HBox>
+         <Label fx:id="labelIdentity" alignment="CENTER" prefHeight="22.0" prefWidth="271.0" />
       </VBox>
    </children>
 </StackPane>

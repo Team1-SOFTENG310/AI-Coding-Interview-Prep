@@ -10,7 +10,7 @@ import javafx.scene.control.TextField;
 
 public class AuthController implements SceneAware {
     private SceneManager sceneManager;
-    private final Authenticator authenticator = new Authenticator("src/main/resources/authorisation/accounts.json");
+    private Authenticator authenticator;
 
     public PasswordField passwordFieldPassword;
     public TextField textfieldUsername;
@@ -22,6 +22,11 @@ public class AuthController implements SceneAware {
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
+    }
+
+    @Override
+    public void setAuthenticator(Authenticator authenticator) {
+        this.authenticator = authenticator;
     }
 
     public void onPassword() {

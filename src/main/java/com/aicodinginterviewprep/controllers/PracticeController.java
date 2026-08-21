@@ -1,5 +1,6 @@
 package com.aicodinginterviewprep.controllers;
 
+import com.aicodinginterviewprep.Authenticator;
 import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
@@ -15,6 +16,7 @@ import javafx.scene.layout.BorderPane;
 public class PracticeController implements SceneAware {
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
     private SceneManager sceneManager;
+    private Authenticator authenticator;
 
     public BorderPane practiceRoot;
     public TextArea questionOutput;
@@ -32,6 +34,11 @@ public class PracticeController implements SceneAware {
         this.sceneManager = sceneManager;
         this.comboQuestionType.getItems().addAll(QuestionType.values());
         this.comboQuestionType.setValue(QuestionType.BEHAVIOURAL);
+    }
+
+    @Override
+    public void setAuthenticator(Authenticator authenticator) {
+        this.authenticator = authenticator;
     }
 
     @FXML

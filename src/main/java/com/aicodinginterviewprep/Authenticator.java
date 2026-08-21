@@ -101,8 +101,12 @@ public class Authenticator {
         currentUserProfile.questionAnswered(correct); // Updates the user score, use true if answer was correct, false if not
     }
 
-    public int getUserScore() {
-        return currentUserProfile.getQuestionsCorrect();
+    public String getUserScore() {
+        return String.valueOf(currentUserProfile.getQuestionsCorrect());
+    }
+
+    public boolean isSignedIn() {
+        return currentUserProfile != null;
     }
 
     private InputStream openInputStream() throws IOException { // Attempt to open the file as a Path first, if it exists, return its InputStream; otherwise, try to load it as a resource from the classpath

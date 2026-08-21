@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="720" prefWidth="1024" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.FeedbackController">
+<BorderPane prefHeight="720" prefWidth="1024" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.FeedbackController">
    <padding>
       <Insets bottom="16" left="16" right="16" top="16" />
    </padding>
@@ -23,6 +23,7 @@
                <Font name="Bodoni MT" size="30.0" />
             </font>
          </Label>
+         <Label fx:id="labelScore" alignment="CENTER" prefHeight="22.0" prefWidth="385.0" />
          <TextArea fx:id="textareaEvaluation" editable="false" prefRowCount="12" wrapText="true" VBox.vgrow="ALWAYS" />
          <HBox alignment="CENTER" spacing="15">
             <Button fx:id="buttonTryAgain" mnemonicParsing="false" onAction="#onTryAgain" prefHeight="42.0" prefWidth="206.0" text="Try Another Question" />

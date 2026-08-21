@@ -1,16 +1,19 @@
 package com.aicodinginterviewprep.controllers;
 
+import com.aicodinginterviewprep.Authenticator;
 import com.aicodinginterviewprep.EvaluatorService;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
 import com.aicodinginterviewprep.openai.EvaluationResult;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputControl;
 
 public class FeedbackController implements SceneAware {
     private SceneManager sceneManager;
+    private Authenticator authenticator;
     private final EvaluatorService evaluatorService = new EvaluatorService();
 
     public TextArea textareaEvaluation;
@@ -21,10 +24,16 @@ public class FeedbackController implements SceneAware {
     private TextArea questionOutput;
     private TextArea codeEditor;
     private TextInputControl answerInput;
+    private Label labelScore;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
+    }
+
+    @Override
+    public void setAuthenticator(Authenticator authenticator) {
+        this.authenticator = authenticator;
     }
 
     public void setAnswerControls(TextArea questionOutput, TextArea codeEditor, TextInputControl answerInput) {

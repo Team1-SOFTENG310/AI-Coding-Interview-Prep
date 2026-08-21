@@ -1,5 +1,6 @@
 package com.aicodinginterviewprep;
 
+import com.aicodinginterviewprep.controllers.HomeController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,10 +16,12 @@ public class SceneManager {
     private Scene currentScene;
     private Map<String, Scene> loadedScenes =  new HashMap<>();
     private Map<String, Object> controllers = new HashMap<>();
+    private final Authenticator authenticator;
 
-    public SceneManager(Stage stage) {
+    public SceneManager(Stage stage,  Authenticator authenticator) {
         this.stage = stage;
         this.sceneMap = new HashMap<>();
+        this.authenticator = authenticator;
         initializeSceneMap();
     }
 
@@ -32,6 +35,7 @@ public class SceneManager {
     public void switchToScene(String sceneName) {
         if (loadedScenes.containsKey(sceneName)) {
             Scene scene = loadedScenes.get(sceneName);
+            refreshHomeIdentity(sceneName);
             currentScene = scene;
             stage.setScene(scene);
             return;
@@ -49,8 +53,12 @@ public class SceneManager {
             Object controller = loader.getController();
             controllers.put(sceneName, controller);
             if (controller instanceof SceneAware) {
-                ((SceneAware) controller).setSceneManager(this);
+                SceneAware sceneAwareController = (SceneAware) controller;
+                sceneAwareController.setSceneManager(this);
+                sceneAwareController.setAuthenticator(authenticator);
             }
+            refreshHomeIdentity(sceneName);
+
 
             Scene scene = new Scene(root);
 
@@ -72,5 +80,14 @@ public class SceneManager {
 
     public void registerScene(String name, String fxmlPath) {
         sceneMap.put(name, fxmlPath);
+    }
+
+    private void refreshHomeIdentity(String sceneName) {
+        if ("home".equals(sceneName)) {
+            Object controller = controllers.get("home");
+            if (controller instanceof HomeController homeController) {
+                homeController.refreshIdentity();
+            }
+        }
     }
 }

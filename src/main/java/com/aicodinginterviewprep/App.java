@@ -12,7 +12,9 @@ public class App extends Application {
         stage.setWidth(1024);
         stage.setHeight(720);
 
-        SceneManager sceneManager = new SceneManager(stage);
+        Authenticator authenticator =
+                new Authenticator("src/main/resources/authorisation/accounts.json");
+        SceneManager sceneManager = new SceneManager(stage, authenticator);
         sceneManager.switchToScene("home");
         stage.show();
     }
