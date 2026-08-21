@@ -10,6 +10,8 @@
 - Create issue templates for bug reports and feature requests
 - Add starter issue for Sonar/Snyk setup
 - Create GitHub issues for each envisioned feature and task, as required by the assignment
+- Integrate OpenAI for question generation and response evaluation
+- Add user account persistence and secure registration/login
 
 ## A2 Vision
 
@@ -19,5 +21,3 @@
 - Add interview performance history and progress tracking
 - Add persistent storage for saved questions and solutions
 - Polish the UI for a professional and responsive appearance
-- Integrate OpenAI for question generation and response evaluation
-- Add user account persistence and secure registration/login
