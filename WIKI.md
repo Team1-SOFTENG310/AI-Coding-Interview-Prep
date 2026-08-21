@@ -100,6 +100,10 @@ While getting the SonarCloud and Snyk CI pipelines working (fixing auth tokens, 
 
 PR #14 was opened from a personal fork instead of a branch on this repo. GitHub does not pass repository secrets (`SONAR_TOKEN`, `SONAR_PROJECT_KEY`, `SONAR_ORGANIZATION`) to workflows triggered by pull requests from forks, so the SonarCloud check failed with an "Not authorized / empty project key" error even though the code itself was fine. All team members already have push access to this repo, so branches should be pushed here directly rather than from a fork — see the updated CONTRIBUTING.md.
 
+PR #25 was accepted by WhoWhatWhereAmI without a proper code review being completed first. Although the pull request was accepted with great quality, this did not follow our agreed review process because another team member should fully review the code before it is merged. This is identified as a workflow mistake, and future pull requests will require a proper review by another team member before being approved and merged.
+
+PR #25 also was not merged with squash and merge, causing main branch consisting of many small commits. This also breaks our agreed review process. This is also identified as a workflow mistake for future pull requests to be aware, and use the squash and merge functionality to avoid overloading main branch. 
+
 ## Quality Tools & Vulnerability Analysis
 A full scan of the project on `main` confirmed no open vulnerabilities:
 
