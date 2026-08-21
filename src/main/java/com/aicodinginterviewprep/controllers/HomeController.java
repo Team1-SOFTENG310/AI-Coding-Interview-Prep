@@ -9,7 +9,6 @@ public class HomeController implements SceneAware {
     private SceneManager sceneManager;
 
     @FXML public Button buttonGetStarted;
-    @FXML public Button buttonSignIn;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
@@ -18,11 +17,6 @@ public class HomeController implements SceneAware {
 
     @FXML
     public void onGetStarted() {
-        sceneManager.switchToScene("practice");
-    }
-
-    @FXML
-    public void onSignIn() {
         sceneManager.switchToScene("authentication");
     }
 }

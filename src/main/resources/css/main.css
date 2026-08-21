@@ -14,7 +14,7 @@
     -fx-background-color: -color-bg;
     -fx-text-fill: -color-text;
     -fx-font-family: "Figtree", "Segoe UI", sans-serif;
-    -fx-font-size: 15px;
+    -fx-font-size: 17px;
 }
 
 /* ---------- Panes ----------- */
@@ -60,13 +60,19 @@
 }
 
 .title-label {
-    -fx-font-size: 28px;
+    -fx-font-size: 30px;
     -fx-font-weight: bold;
     -fx-text-fill: #292522;
 }
 
 .error-label {
     -fx-text-fill: #b3261e;
+}
+
+.section-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #292522;
 }
 
 
@@ -93,6 +99,10 @@
     -fx-background-color: #fffdf9;
 }
 
+.question-label {
+    -fx-font-size: 18px;
+}
+
 /* ---------- Text Fields ---------- */
 
 .text-field {
@@ -111,6 +121,52 @@
     -fx-faint-focus-color: transparent;
 }
 
+/* ---------- Auth form ---------- */
+
+.auth-card {
+    -fx-background-color: #fffdf9;
+    -fx-background-radius: 18px;
+    -fx-border-color: #ded6cc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 18px;
+    -fx-padding: 40px 48px;
+}
+
+.auth-title {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #292522;
+}
+
+.field-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #443b35;
+}
+
+.underline-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent #c9bfae transparent;
+    -fx-border-width: 0 0 2px 0;
+    -fx-border-radius: 0;
+    -fx-padding: 8px 2px;
+    -fx-font-size: 18px;
+    -fx-max-width: infinity;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.underline-field:focused { /* NOSONAR: :focused is JavaFX CSS's real pseudo-class, not a typo of the web CSS :focus */
+    -fx-border-color: transparent transparent #c67139 transparent;
+}
+
+.toggle-link {
+    -fx-font-size: 15px;
+    -fx-text-fill: #c67139;
+}
+
 /* ---------- Buttons ---------- */
 
 .button {
@@ -122,9 +178,8 @@
     -fx-border-radius: 7px;
     -fx-background-insets: 2px;
 
-    -fx-padding: 9px 18px;
-    -fx-max-width: 220px;
-    -fx-font-size: 14px;
+    -fx-padding: 10px 20px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
 
     -fx-cursor: hand;

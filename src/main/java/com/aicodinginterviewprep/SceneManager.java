@@ -26,6 +26,7 @@ public class SceneManager {
         sceneMap.put("home", "/fxml/Home.fxml");
         sceneMap.put("authentication", "/fxml/Authentication.fxml");
         sceneMap.put("practice", "/fxml/Practice.fxml");
+        sceneMap.put("coding", "/fxml/Coding.fxml");
         sceneMap.put("feedback", "/fxml/Feedback.fxml");
     }
 

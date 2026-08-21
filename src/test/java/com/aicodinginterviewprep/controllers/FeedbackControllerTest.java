@@ -99,6 +99,37 @@ class FeedbackControllerTest {
     }
 
     @Test
+    void setAnswerControls_withReturnScene_storesReferencesAndReturnScene() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            FeedbackController controller = createController();
+            TextArea questionOutput = new TextArea();
+            TextArea codeEditor = new TextArea();
+            TextField answerInput = new TextField();
+
+            controller.setAnswerControls(questionOutput, codeEditor, answerInput, "coding");
+
+            assertEquals(questionOutput, getPrivateField(controller, "questionOutput"));
+            assertEquals(codeEditor, getPrivateField(controller, "codeEditor"));
+            assertEquals(answerInput, getPrivateField(controller, "answerInput"));
+            assertEquals("coding", getPrivateField(controller, "returnScene"));
+        });
+    }
+
+    @Test
+    void onTryAgain_afterCodingEvaluation_switchesBackToCodingScene() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            FeedbackController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+
+            controller.setSceneManager(sceneManager);
+            controller.setAnswerControls(new TextArea(), new TextArea(), new TextField(), "coding");
+            controller.onTryAgain();
+
+            assertEquals("coding", sceneManager.lastScene);
+        });
+    }
+
+    @Test
     void runEvaluation_whenQuestionIsEmpty_showsErrorMessage() throws Exception {
         runOnFxThreadAndWait(() -> {
             FeedbackController controller = createController();
@@ -222,7 +253,6 @@ class FeedbackControllerTest {
 
             controller.runEvaluation();
 
-            assertTrue(controller.buttonSubmitAnswer.isDisabled());
             assertTrue(controller.buttonTryAgain.isDisabled());
         });
 
@@ -302,7 +332,6 @@ class FeedbackControllerTest {
         assertTrue(completed.await(5, TimeUnit.SECONDS));
 
         runOnFxThreadAndWait(() -> {
-            assertFalse(holder[0].buttonSubmitAnswer.isDisabled());
             assertFalse(holder[0].buttonTryAgain.isDisabled());
         });
     }
@@ -380,7 +409,6 @@ class FeedbackControllerTest {
         assertTrue(completed.await(5, TimeUnit.SECONDS));
 
         runOnFxThreadAndWait(() -> {
-            assertFalse(holder[0].buttonSubmitAnswer.isDisabled());
             assertFalse(holder[0].buttonTryAgain.isDisabled());
         });
     }
@@ -528,7 +556,6 @@ class FeedbackControllerTest {
         FeedbackController controller = new FeedbackController();
         controller.textareaEvaluation = new TextArea();
         controller.buttonTryAgain = new Button();
-        controller.buttonSubmitAnswer = new Button();
         return controller;
     }
 

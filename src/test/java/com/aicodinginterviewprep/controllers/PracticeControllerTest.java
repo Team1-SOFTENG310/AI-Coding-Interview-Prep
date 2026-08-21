@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,6 @@ import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 class PracticeControllerTest {
@@ -83,9 +83,11 @@ class PracticeControllerTest {
             controller.setSceneManager(sceneManager);
 
             assertEquals(
-                    QuestionType.values().length,
+                    2,
                     controller.comboQuestionType.getItems().size()
             );
+            assertTrue(controller.comboQuestionType.getItems().contains(QuestionType.BEHAVIOURAL));
+            assertTrue(controller.comboQuestionType.getItems().contains(QuestionType.THEORY));
         });
     }
 
@@ -114,6 +116,19 @@ class PracticeControllerTest {
             controller.onReturn();
 
             assertEquals("home", sceneManager.lastScene);
+        });
+    }
+
+    @Test
+    void onCodingPractice_switchesToCodingScene() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+
+            controller.setSceneManager(sceneManager);
+            controller.onCodingPractice();
+
+            assertEquals("coding", sceneManager.lastScene);
         });
     }
 
@@ -150,15 +165,14 @@ class PracticeControllerTest {
                     feedbackController.receivedQuestionOutput
             );
 
-            assertEquals(
-                    controller.codeEditor,
-                    feedbackController.receivedCodeEditor
-            );
+            assertNull(feedbackController.receivedCodeEditor);
 
             assertEquals(
                     controller.answerInput,
                     feedbackController.receivedAnswerInput
             );
+
+            assertEquals("practice", feedbackController.receivedReturnScene);
         });
     }
 
@@ -216,13 +230,12 @@ class PracticeControllerTest {
 
         controller.comboQuestionType = new ComboBox<>();
         controller.questionOutput = new TextArea();
-        controller.codeEditor = new TextArea();
-        controller.answerInput = new TextField();
+        controller.answerInput = new TextArea();
 
         controller.buttonReturn = new Button();
         controller.buttonSubmitAnswer = new Button();
-        controller.buttonRunEvaluation = new Button();
         controller.buttonGenerateQuestion = new Button();
+        controller.buttonCodingPractice = new Button();
 
         return controller;
     }
@@ -274,6 +287,26 @@ class PracticeControllerTest {
             assertEquals("feedback", sceneManager.lastScene);
             assertTrue(feedbackController.evaluationCalled);
         });
+    }
+
+    @Test
+    void onGenerateQuestion_clearsPreviousAnswer() throws Exception {
+        BlockingQuestionService service = new BlockingQuestionService();
+
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+            setQuestionService(controller, service);
+
+            controller.answerInput.setText("My old answer from the previous question");
+
+            controller.onGenerateQuestion();
+
+            assertEquals("", controller.answerInput.getText());
+        });
+
+        service.release();
     }
 
     @Test
@@ -465,7 +498,8 @@ class PracticeControllerTest {
 
         TextArea receivedQuestionOutput;
         TextArea receivedCodeEditor;
-        TextField receivedAnswerInput;
+        javafx.scene.control.TextInputControl receivedAnswerInput;
+        String receivedReturnScene;
 
         boolean evaluationCalled = false;
 
@@ -473,14 +507,13 @@ class PracticeControllerTest {
         public void setAnswerControls(
                 TextArea questionOutput,
                 TextArea codeEditor,
-                javafx.scene.control.TextInputControl answerInput) {
+                javafx.scene.control.TextInputControl answerInput,
+                String returnScene) {
 
             this.receivedQuestionOutput = questionOutput;
             this.receivedCodeEditor = codeEditor;
-
-            if (answerInput instanceof TextField textField) {
-                this.receivedAnswerInput = textField;
-            }
+            this.receivedAnswerInput = answerInput;
+            this.receivedReturnScene = returnScene;
         }
 
         @Override
