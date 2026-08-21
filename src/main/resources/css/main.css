@@ -65,6 +65,10 @@
     -fx-text-fill: #292522;
 }
 
+.error-label {
+    -fx-text-fill: #b3261e;
+}
+
 
 /* ---------- Text Areas ---------- */
 
