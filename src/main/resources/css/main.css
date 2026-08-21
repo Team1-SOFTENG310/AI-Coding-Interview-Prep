@@ -158,7 +158,7 @@
     -fx-faint-focus-color: transparent;
 }
 
-.underline-field:focused {
+.underline-field:focused { /* NOSONAR: :focused is JavaFX CSS's real pseudo-class, not a typo of the web CSS :focus */
     -fx-border-color: transparent transparent #c67139 transparent;
 }
 
