@@ -66,7 +66,7 @@ AI Coding Interview Prep is an AI-supported interview preparation tool that help
 * **Code Contributions:**
   * Implement AI answer evaluation module and test suite (PR #16, Issue #15)
 * **Other Contributions:**
-  * Correcting and editing documentation (PR #)
+  * Correcting and editing documentation (PR #49, Issues #45, #46, #47)
   * Review on PR #13
   * Review on PR #1
 
