@@ -26,3 +26,6 @@ Thank you for contributing to AI Coding Interview Prep.
 - Use SonarLint in the IDE for in-IDE analysis.
 - Ensure SonarCloud analysis passes on `main` branch.
 - Keep pull requests small and reviewable.
+
+## Custom Labels
+- `A2`: For Features/Work related to the A2.
