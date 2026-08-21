@@ -10,6 +10,66 @@ AI Coding Interview Prep is an AI-supported interview preparation tool that help
 - Members: Scott Wallace, Gabriel Liu, Dylan Liddle, Neia Tererei, Kenny Geng, Dandan Wu, Shenol Peiris
 - Course: University of Auckland SOFTENG 310
 
+## Contributions
+
+### Scott Wallace (@Swal289)
+* **Code Contributions:**
+  * Improved UI Design (PR #22, Issue #21)
+  * Created draft UI appearance using stylesheets. (PR #10)
+  * Created draft scenes (PR #9)
+  * adjusted practice tab style and width (PR #5)
+* **Other Contributions:**
+  * Review on PR #17
+  * Review on PR #16
+
+### Gabriel Liu (@Gabeliu)
+* **Code Contributions:**
+  * Remove stray editor lock file (PR #31, Issue #30)
+  * Add AI-generated interview questions via OpenAI (PR #13, Issue #12)
+  * Add initial JavaFX scaffold, Maven wrapper, documentation, and CI workflows (PR #3)
+* **Other Contributions:**
+  * Stop contributors from forking; guard SonarCloud against fork PRs (PR #17, Issue #18)
+  * Document early direct-to-main commits as a workflow mistake (PR #7, Issue #6)
+  * Revise README with project details and description (PR #1)
+  * Review on PR #28
+
+### Dylan Liddle (@DL-Eng-Acc)
+* **Code Contributions:**
+  * Add Coding tab: Code editor, AI evaluation (PR #28)
+* **Other Contributions:**
+
+### Neia Tererei (@rbntres)
+* **Code Contributions:**
+  * UI tab controllers (PR #25)
+* **Other Contributions:**
+  * Review on PR #31
+  * Review on PR #7
+  * Review on PR #3
+  * Review on PR #22
+  * Review on PR #10
+  * Review on PR #5
+  * Review on PR #32
+
+### Kenny Geng (@imke11)
+* **Code Contributions:**
+  * Oversight of the whole project as the project manager
+* **Other Contributions:**
+  * 
+
+### Dandan Wu (@WhoWhatWhereAmI)
+* **Code Contributions:**
+  * Test/UI navigation (PR #32)
+* **Other Contributions:**
+  * Review on PR #25
+
+### Shenol Peiris (@nikopeiris)
+* **Code Contributions:**
+  * Implement AI answer evaluation module and test suite (PR #16, Issue #15)
+* **Other Contributions:**
+  * Correcting and editing documentation (PR #)
+  * Review on PR #13
+  * Review on PR #1
+
 ## Setup
 
 1. Install Java 17 JDK.
