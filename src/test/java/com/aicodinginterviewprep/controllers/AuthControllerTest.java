@@ -10,15 +10,19 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -62,9 +66,11 @@ class AuthControllerTest {
 
         controller.textfieldUsername = new TextField();
         controller.passwordfieldPassword = new PasswordField();
+        controller.textfieldPasswordVisible = new TextField();
         controller.buttonLogIn = new Button();
         controller.buttonSignUp = new Button();
         controller.buttonReturn = new Button();
+        controller.linkTogglePassword = new Hyperlink();
         controller.labelMessage = new Label();
 
         return controller;
@@ -250,6 +256,46 @@ class AuthControllerTest {
     }
 
     @Test
+    void passwordFieldsStayInSyncViaBidirectionalBinding() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            AuthController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            controller.passwordfieldPassword.setText("secret123");
+            assertEquals("secret123", controller.textfieldPasswordVisible.getText());
+
+            controller.textfieldPasswordVisible.setText("changed");
+            assertEquals("changed", controller.passwordfieldPassword.getText());
+        });
+    }
+
+    @Test
+    void onTogglePasswordVisibilitySwapsFieldVisibilityAndButtonText() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            AuthController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            assertTrue(controller.passwordfieldPassword.isVisible());
+            assertFalse(controller.textfieldPasswordVisible.isVisible());
+            assertEquals("Show", controller.linkTogglePassword.getText());
+
+            controller.onTogglePasswordVisibility();
+
+            assertFalse(controller.passwordfieldPassword.isVisible());
+            assertTrue(controller.textfieldPasswordVisible.isVisible());
+            assertEquals("Hide", controller.linkTogglePassword.getText());
+
+            controller.onTogglePasswordVisibility();
+
+            assertTrue(controller.passwordfieldPassword.isVisible());
+            assertFalse(controller.textfieldPasswordVisible.isVisible());
+            assertEquals("Show", controller.linkTogglePassword.getText());
+        });
+    }
+
+    @Test
     void onReturnSwitchesToHomeScene() throws Exception {
         runOnFxThreadAndWait(() -> {
             AuthController controller = createController();
@@ -259,6 +305,73 @@ class AuthControllerTest {
             controller.onReturn();
 
             assertEquals("home", sceneManager.lastScene);
+        });
+    }
+
+    @Test
+    void onReturnClearsUsernameAndPasswordAndResetsVisibility() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            AuthController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            controller.textfieldUsername.setText("alice");
+            controller.passwordfieldPassword.setText("secret123");
+            controller.onTogglePasswordVisibility();
+
+            controller.onReturn();
+
+            assertEquals("", controller.textfieldUsername.getText());
+            assertEquals("", controller.passwordfieldPassword.getText());
+            assertEquals("", controller.textfieldPasswordVisible.getText());
+            assertTrue(controller.passwordfieldPassword.isVisible());
+            assertFalse(controller.textfieldPasswordVisible.isVisible());
+            assertEquals("Show", controller.linkTogglePassword.getText());
+        });
+    }
+
+    @Test
+    void tabFromUsernameSkipsAheadToPasswordField() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            AuthController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            KeyEvent tab = new KeyEvent(
+                KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false, false, false, false);
+            controller.textfieldUsername.getOnKeyPressed().handle(tab);
+
+            assertTrue(tab.isConsumed(), "Tab out of username should be handled explicitly");
+        });
+    }
+
+    @Test
+    void tabFromPasswordFieldSkipsAheadToShowLink() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            AuthController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            KeyEvent tab = new KeyEvent(
+                KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false, false, false, false);
+            controller.passwordfieldPassword.getOnKeyPressed().handle(tab);
+
+            assertTrue(tab.isConsumed(), "Tab out of the password field should be handled explicitly");
+        });
+    }
+
+    @Test
+    void shiftTabIsLeftToDefaultBackwardTraversal() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            AuthController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            KeyEvent shiftTab = new KeyEvent(
+                KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, true, false, false, false);
+            controller.passwordfieldPassword.getOnKeyPressed().handle(shiftTab);
+
+            assertFalse(shiftTab.isConsumed(), "Shift+Tab should fall back to default traversal");
         });
     }
 
