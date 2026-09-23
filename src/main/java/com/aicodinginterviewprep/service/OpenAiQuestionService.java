@@ -1,6 +1,7 @@
 package com.aicodinginterviewprep.service;
 
 import com.aicodinginterviewprep.QuestionType;
+import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.config.EnvConfig;
 import com.aicodinginterviewprep.config.KeyValueFile;
 import org.json.JSONArray;
@@ -38,6 +39,8 @@ public class OpenAiQuestionService {
     private final Map<String, String> prompts;
     private final Map<QuestionType, List<String>> topicsByType;
     private final Random random;
+    // Medium keeps the existing experience as the default while allowing each screen to override it.
+    private volatile Difficulty selectedDifficulty = Difficulty.MEDIUM;
 
     public OpenAiQuestionService() {
         this(
@@ -59,6 +62,10 @@ public class OpenAiQuestionService {
     }
 
     public String generateQuestion(QuestionType type) throws IOException, InterruptedException {
+        return generateQuestion(type, selectedDifficulty);
+    }
+
+    public String generateQuestion(QuestionType type, Difficulty difficulty) throws IOException, InterruptedException {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException(
                 "OPENAI_API_KEY is not set. Add it to your local .env file (see .env.example).");
@@ -69,7 +76,7 @@ public class OpenAiQuestionService {
 
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             try {
-                String question = requestQuestion(type);
+                String question = requestQuestion(type, difficulty);
                 if (!question.isBlank()) {
                     return question;
                 }
@@ -93,14 +100,18 @@ public class OpenAiQuestionService {
         throw lastRuntimeFailure;
     }
 
-    private String requestQuestion(QuestionType type) throws IOException, InterruptedException {
+    public void setDifficulty(Difficulty difficulty) {
+        this.selectedDifficulty = difficulty;
+    }
+
+    private String requestQuestion(QuestionType type, Difficulty difficulty) throws IOException, InterruptedException {
         JSONObject payload = new JSONObject();
         payload.put("model", model);
         payload.put("max_completion_tokens", maxCompletionTokensFor(type));
         payload.put("reasoning_effort", "minimal");
         payload.put("messages", new JSONArray()
-            .put(new JSONObject().put("role", "system").put(CONTENT_FIELD, systemPromptFor(type)))
-            .put(new JSONObject().put("role", "user").put(CONTENT_FIELD, buildUserPrompt(type))));
+            .put(new JSONObject().put("role", "system").put(CONTENT_FIELD, systemPromptFor(type, difficulty)))
+            .put(new JSONObject().put("role", "user").put(CONTENT_FIELD, buildUserPrompt(type, difficulty))));
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(API_URL))
@@ -129,11 +140,21 @@ public class OpenAiQuestionService {
         return prompts.getOrDefault(type.name() + "_SYSTEM", prompts.get("SYSTEM"));
     }
 
+    String systemPromptFor(QuestionType type, Difficulty difficulty) {
+        return systemPromptFor(type) + " The requested difficulty is " + difficulty
+            + "; enforce its expected depth and complexity strictly.";
+    }
+
     int maxCompletionTokensFor(QuestionType type) {
         return type == QuestionType.CODING ? MAX_COMPLETION_TOKENS_CODING : MAX_COMPLETION_TOKENS;
     }
 
     String buildUserPrompt(QuestionType type) {
+        // Retain the package-visible helper's original random coding behavior for existing callers.
+        if (type != QuestionType.CODING) {
+            return buildUserPrompt(type, selectedDifficulty);
+        }
+
         List<String> topics = topicsByType.get(type);
         String topic = topics.get(random.nextInt(topics.size()));
         String template = prompts.get(type.name() + "_TEMPLATE").replace("{topic}", topic);
@@ -143,6 +164,15 @@ public class OpenAiQuestionService {
             template = template.replace("{difficulty}", difficulty);
         }
 
+        return template;
+    }
+
+    String buildUserPrompt(QuestionType type, Difficulty difficulty) {
+        List<String> topics = topicsByType.get(type);
+        String topic = topics.get(random.nextInt(topics.size()));
+        String template = prompts.get(type.name() + "_TEMPLATE")
+            .replace("{topic}", topic)
+            .replace("{difficulty}", difficulty.toString());
         return template;
     }
 

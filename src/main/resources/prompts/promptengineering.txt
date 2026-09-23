@@ -8,7 +8,7 @@
 
 SYSTEM=You are an interview coach generating one interview question at a time for a software engineering candidate. Respond with only the question text: a single concise sentence, no more than 25 words, no numbering, no quotes, no preamble, no answer.
 
-BEHAVIOURAL_TEMPLATE=Generate one behavioural interview question for a software engineering candidate, styled like a real interview question. Focus specifically on this topic area: {topic}.
+BEHAVIOURAL_TEMPLATE=Generate one behavioural interview question for a software engineering candidate at exactly {difficulty} difficulty. Easy should be accessible to a beginner, Medium should require specific technical context and reflection, and Hard should probe nuanced trade-offs, ambiguity, and measurable impact. Focus specifically on this topic area: {topic}.
 
 BEHAVIOURAL_TOPIC_1=Teamwork - working effectively with others, dividing tasks, supporting teammates
 BEHAVIOURAL_TOPIC_2=Conflict resolution - disagreeing with a teammate or stakeholder and resolving it productively
@@ -19,7 +19,7 @@ BEHAVIOURAL_TOPIC_6=Leadership - leading, mentoring, or influencing others witho
 BEHAVIOURAL_TOPIC_7=Deadlines - managing competing priorities or a tight deadline
 BEHAVIOURAL_TOPIC_8=Learning something new - picking up an unfamiliar technology, tool, or domain quickly
 
-THEORY_TEMPLATE=Generate one technical theory interview question for a software engineering candidate, styled like a real technical interview question rather than a textbook exercise. Focus specifically on this topic area: {topic}. Favor conceptual "what is" or "how does X work" questions over rote definitions.
+THEORY_TEMPLATE=Generate one technical theory interview question for a software engineering candidate at exactly {difficulty} difficulty. Easy should test fundamentals, Medium should require explanation of interactions or trade-offs, and Hard should require deep reasoning about edge cases, performance, or design choices. Focus specifically on this topic area: {topic}. Favor conceptual "what is" or "how does X work" questions over rote definitions.
 
 THEORY_TOPIC_1=Data Structures - arrays, strings, linked lists, stacks, queues, hash maps, sets, trees, heaps, graphs
 THEORY_TOPIC_2=Algorithms - searching, sorting, recursion, BFS/DFS, two pointers, binary search, basic greedy algorithms, basic dynamic programming

@@ -1,6 +1,7 @@
 package com.aicodinginterviewprep.service;
 
 import com.aicodinginterviewprep.QuestionType;
+import com.aicodinginterviewprep.Difficulty;
 import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpClient;
@@ -193,6 +194,47 @@ class OpenAiQuestionServiceTest {
                 "expected an explicit difficulty in the prompt: " + prompt
             );
         }
+
+    }
+
+    @Test
+    void buildUserPromptUsesSelectedDifficultyForBehaviouralQuestions() {
+        OpenAiQuestionService service = new OpenAiQuestionService(mock(HttpClient.class), "key", "model");
+
+        String prompt = service.buildUserPrompt(QuestionType.BEHAVIOURAL, Difficulty.HARD);
+
+        assertTrue(prompt.contains("at exactly Hard difficulty"));
+        assertFalse(prompt.contains("{difficulty}"));
+    }
+
+    @Test
+    void buildUserPromptUsesSelectedDifficultyForTheoryQuestions() {
+        OpenAiQuestionService service = new OpenAiQuestionService(mock(HttpClient.class), "key", "model");
+
+        String prompt = service.buildUserPrompt(QuestionType.THEORY, Difficulty.EASY);
+
+        assertTrue(prompt.contains("at exactly Easy difficulty"));
+        assertFalse(prompt.contains("{difficulty}"));
+    }
+
+    @Test
+    void buildUserPromptUsesSelectedDifficultyForCodingQuestions() {
+        OpenAiQuestionService service = new OpenAiQuestionService(mock(HttpClient.class), "key", "model");
+
+        String prompt = service.buildUserPrompt(QuestionType.CODING, Difficulty.HARD);
+
+        assertTrue(prompt.contains("at exactly Hard difficulty"));
+        assertTrue(prompt.contains("Difficulty: Hard"));
+        assertFalse(prompt.contains("{difficulty}"));
+    }
+
+    @Test
+    void setDifficultyChangesDefaultGenerationPromptDifficulty() {
+        OpenAiQuestionService service = new OpenAiQuestionService(mock(HttpClient.class), "key", "model");
+
+        service.setDifficulty(Difficulty.EASY);
+
+        assertTrue(service.buildUserPrompt(QuestionType.THEORY).contains("at exactly Easy difficulty"));
     }
 
     @Test

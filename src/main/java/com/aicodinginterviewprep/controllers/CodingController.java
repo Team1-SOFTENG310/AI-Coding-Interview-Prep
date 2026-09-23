@@ -1,6 +1,7 @@
 package com.aicodinginterviewprep.controllers;
 
 import com.aicodinginterviewprep.QuestionType;
+import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
@@ -9,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
@@ -38,10 +40,15 @@ public class CodingController implements SceneAware {
     @FXML public Button buttonPractice;
     @FXML public Label labelLoggedInAs;
     @FXML public Button buttonLogOut;
+    @FXML public ComboBox<Difficulty> comboDifficulty;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
+        if (comboDifficulty != null) {
+            comboDifficulty.getItems().addAll(Difficulty.values());
+            comboDifficulty.setValue(Difficulty.MEDIUM);
+        }
         setUpCodeEditor();
     }
 
@@ -95,6 +102,7 @@ public class CodingController implements SceneAware {
 
     @FXML
     public void onGenerateQuestion() {
+        questionService.setDifficulty(comboDifficulty == null ? Difficulty.MEDIUM : comboDifficulty.getValue());
         buttonGenerateQuestion.setDisable(true);
         questionOutput.setText("Generating question...");
         codeEditor.clear();

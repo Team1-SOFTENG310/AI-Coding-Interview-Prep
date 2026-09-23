@@ -58,7 +58,8 @@
          <padding>
             <Insets left="8" right="8" top="12" />
          </padding>
-         <ComboBox fx:id="comboQuestionType" prefWidth="260" />
+         <ComboBox fx:id="comboQuestionType" prefWidth="260" promptText="Question type" />
+         <ComboBox fx:id="comboDifficulty" prefWidth="150" promptText="Difficulty" />
          <Button fx:id="buttonGenerateQuestion" onAction="#onGenerateQuestion" text="Generate new question" />
          <Button fx:id="buttonCodingPractice" onAction="#onCodingPractice" text="LeetCode Practice" />
          <Region HBox.hgrow="ALWAYS" />

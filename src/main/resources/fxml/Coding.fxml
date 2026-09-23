@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.ComboBox?>
 <BorderPane fx:id="codingRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.CodingController">
 
    <padding>
@@ -53,6 +54,7 @@
          <padding>
             <Insets left="8" right="8" top="12" />
          </padding>
+         <ComboBox fx:id="comboDifficulty" prefWidth="150" promptText="Difficulty" />
          <Button fx:id="buttonGenerateQuestion" onAction="#onGenerateQuestion" text="Generate new question" />
          <Button fx:id="buttonPractice" onAction="#onPractice" text="Behavioural / Theory Practice" />
          <Region HBox.hgrow="ALWAYS" />

@@ -2,6 +2,7 @@ package com.aicodinginterviewprep.controllers;
 
 import com.aicodinginterviewprep.MicrophoneRecorder;
 import com.aicodinginterviewprep.QuestionType;
+import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
@@ -43,12 +44,17 @@ public class PracticeController implements SceneAware {
     @FXML public Label labelLoggedInAs;
     @FXML public Button buttonLogOut;
     @FXML public ComboBox<QuestionType> comboQuestionType;
+    @FXML public ComboBox<Difficulty> comboDifficulty;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
         this.comboQuestionType.getItems().addAll(QuestionType.BEHAVIOURAL, QuestionType.THEORY);
         this.comboQuestionType.setValue(QuestionType.BEHAVIOURAL);
+        if (this.comboDifficulty != null) {
+            this.comboDifficulty.getItems().addAll(Difficulty.values());
+            this.comboDifficulty.setValue(Difficulty.MEDIUM);
+        }
 
         buttonSubmitAnswer.disableProperty().bind(Bindings.createBooleanBinding(
             () -> answerInput.getText() == null || answerInput.getText().trim().isEmpty(),
@@ -83,6 +89,8 @@ public class PracticeController implements SceneAware {
     public void onGenerateQuestion() {
         cancelRecordingIfActive();
         QuestionType type = comboQuestionType.getValue();
+        Difficulty difficulty = comboDifficulty == null ? Difficulty.MEDIUM : comboDifficulty.getValue();
+        questionService.setDifficulty(difficulty);
         buttonGenerateQuestion.setDisable(true);
         questionOutput.setText("Generating question...");
         answerInput.clear();

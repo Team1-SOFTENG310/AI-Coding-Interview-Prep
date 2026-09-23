@@ -12,11 +12,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.aicodinginterviewprep.QuestionType;
+import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.SceneManager;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
@@ -31,6 +33,19 @@ class CodingControllerTest {
         } catch (IllegalStateException ignored) {
             // JavaFX already started.
         }
+
+    }
+
+    @Test
+    void setSceneManager_addsAllDifficultyLevelsAndDefaultsToMedium() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            CodingController controller = createController();
+
+            controller.setSceneManager(new FakeSceneManager());
+
+            assertEquals(3, controller.comboDifficulty.getItems().size());
+            assertEquals(Difficulty.MEDIUM, controller.comboDifficulty.getValue());
+        });
     }
 
     private void runOnFxThreadAndWait(Runnable action) throws Exception {
@@ -81,6 +96,7 @@ class CodingControllerTest {
         controller.buttonPractice = new Button();
         controller.labelLoggedInAs = new Label();
         controller.buttonLogOut = new Button();
+        controller.comboDifficulty = new ComboBox<>();
 
         return controller;
     }

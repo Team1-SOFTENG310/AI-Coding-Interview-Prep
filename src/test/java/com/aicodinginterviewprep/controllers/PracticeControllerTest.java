@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.aicodinginterviewprep.MicrophoneRecorder;
+import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.SceneManager;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
@@ -108,6 +109,18 @@ class PracticeControllerTest {
                     QuestionType.BEHAVIOURAL,
                     controller.comboQuestionType.getValue()
             );
+        });
+    }
+
+    @Test
+    void setSceneManager_addsAllDifficultyLevelsAndDefaultsToMedium() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+
+            controller.setSceneManager(new FakeSceneManager());
+
+            assertEquals(3, controller.comboDifficulty.getItems().size());
+            assertEquals(Difficulty.MEDIUM, controller.comboDifficulty.getValue());
         });
     }
 
@@ -285,6 +298,7 @@ class PracticeControllerTest {
         PracticeController controller = new PracticeController();
 
         controller.comboQuestionType = new ComboBox<>();
+        controller.comboDifficulty = new ComboBox<>();
         controller.questionOutput = new TextArea();
         controller.answerInput = new TextArea();
 
