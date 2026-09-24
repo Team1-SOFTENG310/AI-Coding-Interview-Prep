@@ -12,7 +12,11 @@ public class FeedbackController implements SceneAware {
     private SceneManager sceneManager;
     private final EvaluatorService evaluatorService = new EvaluatorService();
 
-    public TextArea textareaEvaluation;
+    public TextArea correctnessTextArea;
+    public TextArea efficiencyTextArea;
+    public TextArea communicationTextArea;
+    public TextArea codeQualityTextArea;
+
     public Button buttonTryAgain;
     public Button buttonQuit;
 
@@ -49,18 +53,18 @@ public class FeedbackController implements SceneAware {
     public void runEvaluation() {
         String validQuestion = extractValidQuestion();
         if (validQuestion == null) {
-            showFeedback("Please generate a question first before running an evaluation.");
+            displayTextAreaError("Please generate a question first before running an evaluation.");
             return;
         }
 
         String userAnswer = buildUserAnswer();
         if (userAnswer.isEmpty()) {
-            showFeedback("Please provide an answer explanation or code solution before submitting for evaluation.");
+            displayTextAreaError("Please provide an answer explanation or code solution before submitting for evaluation.");
             return;
         }
 
         setEvaluationInProgress(true);
-        showFeedback("Evaluating your response with AI, please wait...");
+        displayTextAreaError("Evaluating your response with AI, please wait...");
 
         evaluatorService.evaluateAnswerAsync(validQuestion, userAnswer)
             .thenAccept(result -> Platform.runLater(() -> handleEvaluationSuccess(result)))
@@ -95,11 +99,28 @@ public class FeedbackController implements SceneAware {
         return answerBuilder.toString().trim();
     }
 
-    private void showFeedback(String message) {
-        if (textareaEvaluation != null) {
-            textareaEvaluation.setText(message);
-        }
+    private void showCategoryFeedback(
+        TextArea textArea,
+        Integer rating,
+        String feedback) {
+
+    if (textArea == null) {
+        return;
     }
+
+    if (rating == null) {
+        textArea.setText(feedback);
+        return;
+    }
+
+    textArea.setText(
+            String.format(
+                    "Rating: %d/10%n%n%s",
+                    rating,
+                    feedback
+            )
+    );
+}
 
     private void setEvaluationInProgress(boolean inProgress) {
         if (buttonTryAgain != null) {
@@ -111,15 +132,53 @@ public class FeedbackController implements SceneAware {
     }
 
     private void handleEvaluationSuccess(EvaluationResult result) {
-        showFeedback(String.format("Rating: %d/10%n%nEvaluation:%n%s",
-                result.getRating(), result.getEvaluation()));
-        setEvaluationInProgress(false);
-    }
+
+    showCategoryFeedback(
+            correctnessTextArea,
+            result.getCorrectnessRating(),
+            result.getCorrectnessEvaluation()
+    );
+
+    showCategoryFeedback(
+            efficiencyTextArea,
+            result.getEfficiencyRating(),
+            result.getEfficiencyEvaluation()
+    );
+
+    showCategoryFeedback(
+            communicationTextArea,
+            result.getCommunicationRating(),
+            result.getCommunicationEvaluation()
+    );
+
+    showCategoryFeedback(
+            codeQualityTextArea,
+            result.getCodeQualityRating(),
+            result.getCodeQualityEvaluation()
+    );
+
+    setEvaluationInProgress(false);
+}
 
     private void handleEvaluationError(Throwable ex) {
         Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
         String errorMessage = cause.getMessage() != null ? cause.getMessage() : "Unknown error.";
-        showFeedback("Evaluation failed: " + errorMessage);
+        displayTextAreaError("Evaluation failed: " + errorMessage);
         setEvaluationInProgress(false);
+    }
+
+    private void displayTextAreaError(String errorMessage){
+        if (correctnessTextArea != null) {
+            correctnessTextArea.setText(errorMessage);
+        }
+        if (efficiencyTextArea != null) {
+            efficiencyTextArea.setText(errorMessage);
+        }
+        if (communicationTextArea != null) {
+            communicationTextArea.setText(errorMessage);
+        }
+        if (codeQualityTextArea != null) {
+            codeQualityTextArea.setText(errorMessage);
+        }
     }
 }
