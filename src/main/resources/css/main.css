@@ -66,6 +66,10 @@
     -fx-background-color: #fffdf9;
 }
 
+.feedback-text-area {
+    -fx-font-size: 13px;
+}
+
 /* ---------- Code editor (VS Code dark theme look) ---------- */
 
 .code-editor-shell {

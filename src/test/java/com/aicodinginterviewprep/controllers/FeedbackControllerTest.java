@@ -157,7 +157,7 @@ class FeedbackControllerTest {
 
             controller.runEvaluation();
 
-            assertTrue(controller.textareaEvaluation.getText()
+            assertTrue(controller.correctnessTextArea.getText()
                     .contains("Please generate a question first"));
         });
     }
@@ -170,7 +170,7 @@ class FeedbackControllerTest {
             controller.setAnswerControls("Question will appear here.", "", "");
             controller.runEvaluation();
 
-            assertTrue(controller.textareaEvaluation.getText()
+            assertTrue(controller.correctnessTextArea.getText()
                     .contains("Please generate a question first"));
         });
     }
@@ -183,7 +183,7 @@ class FeedbackControllerTest {
             controller.setAnswerControls("What is Java?", "", "");
             controller.runEvaluation();
 
-            assertTrue(controller.textareaEvaluation.getText()
+            assertTrue(controller.correctnessTextArea.getText()
                     .contains("Please provide an answer explanation or code solution"));
         });
     }
@@ -203,7 +203,7 @@ class FeedbackControllerTest {
 
             controller.runEvaluation();
 
-            assertTrue(controller.textareaEvaluation.getText()
+            assertTrue(controller.correctnessTextArea.getText()
                     .contains("Evaluating your response with AI"));
         });
 
@@ -235,7 +235,7 @@ class FeedbackControllerTest {
     @Test
     void runEvaluation_successDisplaysResultWithRating() throws Exception {
         FakeEvaluatorService service = new FakeEvaluatorService(
-                new EvaluationResult("Your answer was good", 8)
+                new EvaluationResult(1,2, 3, 4, "correctness", "efficiency", "communication", "code_quality")
         );
 
         FeedbackController[] holder = new FeedbackController[1];
@@ -248,9 +248,27 @@ class FeedbackControllerTest {
             controller.setAnswerControls("What is Java?", "", "Java is a programming language");
             setEvaluatorService(controller, service);
 
-            controller.textareaEvaluation.textProperty()
+            controller.correctnessTextArea.textProperty()
                     .addListener((observable, oldValue, newValue) -> {
-                        if (newValue.contains("Rating: 8")) {
+                        if (newValue.contains("Rating: 1")) {
+                            completed.countDown();
+                        }
+                    });
+            controller.efficiencyTextArea.textProperty()
+                    .addListener((observable, oldValue, newValue) -> {
+                        if (newValue.contains("Rating: 2")) {
+                            completed.countDown();
+                        }
+                    });
+            controller.communicationTextArea.textProperty()
+                    .addListener((observable, oldValue, newValue) -> {
+                        if (newValue.contains("Rating: 3")) {
+                            completed.countDown();
+                        }
+                    });
+            controller.codeQualityTextArea.textProperty()
+                    .addListener((observable, oldValue, newValue) -> {
+                        if (newValue.contains("Rating: 4")) {
                             completed.countDown();
                         }
                     });
@@ -261,15 +279,22 @@ class FeedbackControllerTest {
         assertTrue(completed.await(5, TimeUnit.SECONDS));
 
         runOnFxThreadAndWait(() -> {
-            assertTrue(holder[0].textareaEvaluation.getText().contains("Rating: 8"));
-            assertTrue(holder[0].textareaEvaluation.getText().contains("Your answer was good"));
+            assertTrue(holder[0].correctnessTextArea.getText().contains("Rating: 1"));
+            assertTrue(holder[0].correctnessTextArea.getText().contains("correctness"));
+            assertTrue(holder[0].efficiencyTextArea.getText().contains("Rating: 2"));
+            assertTrue(holder[0].efficiencyTextArea.getText().contains("efficiency"));
+            assertTrue(holder[0].communicationTextArea.getText().contains("Rating: 3"));
+            assertTrue(holder[0].communicationTextArea.getText().contains("communication"));
+            assertTrue(holder[0].codeQualityTextArea.getText().contains("Rating: 4"));
+            assertTrue(holder[0].codeQualityTextArea.getText().contains("code_quality"));
+
         });
     }
 
     @Test
     void runEvaluation_successEnablesButtons() throws Exception {
         FakeEvaluatorService service = new FakeEvaluatorService(
-                new EvaluationResult("Good effort", 7)
+                new EvaluationResult(7, 0, 0, 0, "Good effort", "", "", "")
         );
 
         FeedbackController[] holder = new FeedbackController[1];
@@ -282,7 +307,7 @@ class FeedbackControllerTest {
             controller.setAnswerControls("What is Java?", "", "Java is a programming language");
             setEvaluatorService(controller, service);
 
-            controller.textareaEvaluation.textProperty()
+            controller.correctnessTextArea.textProperty()
                     .addListener((observable, oldValue, newValue) -> {
                         if (newValue.contains("Rating: 7")) {
                             completed.countDown();
@@ -316,7 +341,7 @@ class FeedbackControllerTest {
             controller.setAnswerControls("What is Java?", "", "Java is a programming language");
             setEvaluatorService(controller, service);
 
-            controller.textareaEvaluation.textProperty()
+            controller.correctnessTextArea.textProperty()
                     .addListener((observable, oldValue, newValue) -> {
                         if (newValue.contains("Evaluation failed")) {
                             completed.countDown();
@@ -329,7 +354,7 @@ class FeedbackControllerTest {
         assertTrue(completed.await(5, TimeUnit.SECONDS));
 
         runOnFxThreadAndWait(() -> {
-            assertTrue(holder[0].textareaEvaluation.getText()
+            assertTrue(holder[0].correctnessTextArea.getText()
                     .contains("Evaluation failed: Network connection failed"));
         });
     }
@@ -350,7 +375,7 @@ class FeedbackControllerTest {
             controller.setAnswerControls("What is Java?", "", "Java is a programming language");
             setEvaluatorService(controller, service);
 
-            controller.textareaEvaluation.textProperty()
+            controller.correctnessTextArea.textProperty()
                     .addListener((observable, oldValue, newValue) -> {
                         if (newValue.contains("Evaluation failed")) {
                             completed.countDown();
@@ -461,14 +486,14 @@ class FeedbackControllerTest {
     @Test
     void runEvaluation_whenTextareaEvaluationIsNull_doesNotCrash() throws Exception {
         FakeEvaluatorService service = new FakeEvaluatorService(
-                new EvaluationResult("Test", 5)
+                new EvaluationResult(5 ,0 ,0, 0, "Test", "", "", "")
         );
 
         CountDownLatch completed = new CountDownLatch(1);
 
         runOnFxThreadAndWait(() -> {
             FeedbackController controller = createController();
-            controller.textareaEvaluation = null;
+            controller.correctnessTextArea = null;
 
             controller.setAnswerControls("What is Java?", "", "Java is a language");
             setEvaluatorService(controller, service);
@@ -487,7 +512,10 @@ class FeedbackControllerTest {
 
     private FeedbackController createController() {
         FeedbackController controller = new FeedbackController();
-        controller.textareaEvaluation = new TextArea();
+        controller.correctnessTextArea = new TextArea();
+        controller.efficiencyTextArea = new TextArea();
+        controller.communicationTextArea = new TextArea();
+        controller.codeQualityTextArea = new TextArea();
         controller.buttonTryAgain = new Button();
         controller.buttonQuit = new Button();
         return controller;
@@ -538,7 +566,7 @@ class FeedbackControllerTest {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException(e);
                 }
-                return new EvaluationResult("Test", 5);
+                return new EvaluationResult(5, 0, 0, 0, "Test", "", "", "");
             });
         }
 
@@ -587,7 +615,7 @@ class FeedbackControllerTest {
             receivedQuestion = question;
             receivedAnswer = answer;
             completed.setValue(completed.getValue() + 1);
-            return CompletableFuture.completedFuture(new EvaluationResult("Test", 5));
+            return CompletableFuture.completedFuture(new EvaluationResult(5, 0, 0, 0, "Test", "", "", ""));
         }
     }
 }
