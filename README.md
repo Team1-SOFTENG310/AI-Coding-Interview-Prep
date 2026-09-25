@@ -75,8 +75,12 @@ docker compose down -v
 To check that it works, run the app once (see "Run the application"), then:
 
 ```bash
-docker exec -it interviewprep-mysql sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "SHOW TABLES;"'
+docker exec -it interviewprep-mysql mysql -u appuser -p appdb
 ```
+
+Replace `appuser` and `appdb` with your own `DB_USER` and `DB_NAME` from `.env`.
+Enter your `DB_PASSWORD` when prompted (the input stays hidden), then run
+`SHOW TABLES;`. You should see `user_account` and `flyway_schema_history`.
 
 You should see `user_account` and `flyway_schema_history`.
 
@@ -97,6 +101,9 @@ On macOS/Linux:
 ```
 
 ## Run tests
+
+Database tests use Testcontainers, which starts a temporary MySQL container.
+Docker must be running when you execute the tests.
 
 On Windows:
 
