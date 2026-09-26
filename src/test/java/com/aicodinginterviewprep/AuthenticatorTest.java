@@ -92,48 +92,123 @@ class AuthenticatorTest {
     @Test
     void signUpAddsNewAccountAndAllowsLogin(@TempDir Path tempDir) throws Exception {
         Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        authenticator.signUp("bob", "hunter2");
+        authenticator.signUp("bob", "hunter22");
 
         assertEquals(1, authenticator.getUserProfiles().size());
-        assertTrue(authenticator.login("bob", "hunter2"));
+        assertTrue(authenticator.login("bob", "hunter22"));
     }
 
     @Test
     void signUpWithExistingAccountThrows(@TempDir Path tempDir) throws Exception {
         Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        authenticator.signUp("bob", "hunter2");
+        authenticator.signUp("bob", "hunter22");
 
-        assertThrows(IllegalArgumentException.class, () -> authenticator.signUp("bob", "hunter2"));
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, "bob", "hunter22");
     }
 
     @Test
     void signUpWithDifferentExistingAccountSucceeds(@TempDir Path tempDir) throws Exception {
         Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        authenticator.signUp("bob", "hunter2");
+        authenticator.signUp("bob", "hunter22");
 
-        authenticator.signUp("carol", "letmein");
+        authenticator.signUp("carol", "letmein8");
 
         assertEquals(2, authenticator.getUserProfiles().size());
-        assertTrue(authenticator.login("carol", "letmein"));
+        assertTrue(authenticator.login("carol", "letmein8"));
     }
 
     @Test
     void signUpWithNullUsernameThrows(@TempDir Path tempDir) throws Exception {
         Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        assertThrows(IllegalArgumentException.class, () -> authenticator.signUp(null, "hunter2"));
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, null, "hunter22");
     }
 
     @Test
     void signUpWithNullPasswordThrows(@TempDir Path tempDir) throws Exception {
         Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        assertThrows(IllegalArgumentException.class, () -> authenticator.signUp("bob", null));
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, "bob", null);
+    }
+
+    @Test
+    void signUpWithBlankUsernameThrows(@TempDir Path tempDir) throws Exception {
+        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, "", "hunter22");
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, " \t\n ", "hunter22");
+    }
+
+    @Test
+    void signUpWithBlankPasswordThrows(@TempDir Path tempDir) throws Exception {
+        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, "bob", "");
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, "bob", " \t\n ");
+    }
+
+    @Test
+    void signUpTrimsUsernameAndPassword(@TempDir Path tempDir) throws Exception {
+        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+
+        authenticator.signUp(" \t bob \n ", " \t hunter22 \n ");
+
+        assertEquals(1, authenticator.getUserProfiles().size());
+        UserProfile profile = authenticator.getUserProfiles().get(0);
+        assertEquals("bob", profile.getUsername());
+        assertEquals("hunter22", profile.getPassword());
+        assertTrue(authenticator.login("bob", "hunter22"));
+    }
+
+    @Test
+    void signUpRejectsDuplicateUsernameAfterTrimming(@TempDir Path tempDir) throws Exception {
+        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+        authenticator.signUp("bob", "hunter22");
+
+        assertRejectedSignUpDoesNotChangeProfileCount(
+            authenticator,
+            " \t bob \n ",
+            "differentPassword"
+        );
+    }
+
+    @Test
+    void signUpRejectsSevenCharacterPassword(@TempDir Path tempDir) throws Exception {
+        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, "bob", "a".repeat(7));
+    }
+
+    @Test
+    void signUpAcceptsEightCharacterPassword(@TempDir Path tempDir) throws Exception {
+        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+
+        authenticator.signUp("bob", "a".repeat(8));
+
+        assertEquals(1, authenticator.getUserProfiles().size());
+        assertEquals("a".repeat(8), authenticator.getUserProfiles().get(0).getPassword());
+    }
+
+    @Test
+    void signUpAcceptsSixtyFourCharacterPassword(@TempDir Path tempDir) throws Exception {
+        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+
+        authenticator.signUp("bob", "a".repeat(64));
+
+        assertEquals(1, authenticator.getUserProfiles().size());
+        assertEquals("a".repeat(64), authenticator.getUserProfiles().get(0).getPassword());
+    }
+
+    @Test
+    void signUpRejectsSixtyFiveCharacterPassword(@TempDir Path tempDir) throws Exception {
+        Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
+
+        assertRejectedSignUpDoesNotChangeProfileCount(authenticator, "bob", "a".repeat(65));
     }
 
     @Test
     void updateUserScoreUpdatesLoggedInProfile(@TempDir Path tempDir) throws Exception {
         Authenticator authenticator = new Authenticator(tempDir.resolve("testaccounts.json").toString());
-        authenticator.signUp("bob", "hunter2");
-        authenticator.login("bob", "hunter2");
+        authenticator.signUp("bob", "hunter22");
+        authenticator.login("bob", "hunter22");
 
         authenticator.updateUserScore(true);
         authenticator.updateUserScore(false);
@@ -147,17 +222,17 @@ class AuthenticatorTest {
     void signUp(@TempDir Path tempDir) throws Exception {
         Path profileFile = tempDir.resolve("testaccounts.json");
         Authenticator authenticator = new Authenticator(profileFile.toString());
-        authenticator.signUp("alice", "smith");
+        authenticator.signUp("alice", "password123");
         authenticator.writeUserProfiles();
         Authenticator reloaded = new Authenticator(profileFile.toString());
-        assertTrue(reloaded.login("alice", "smith"));
+        assertTrue(reloaded.login("alice", "password123"));
     }
 
     @Test
     void signUpFails(@TempDir Path tempDir) throws Exception {
         Path profileFile = tempDir.resolve("testaccounts.json");
         Authenticator authenticator = new Authenticator(profileFile.toString());
-        authenticator.signUp("john", "doe");
+        authenticator.signUp("john", "password123");
         authenticator.writeUserProfiles();
         Authenticator reloaded = new Authenticator(profileFile.toString());
         assertFalse(reloaded.login("alice", "smith"));
@@ -167,12 +242,22 @@ class AuthenticatorTest {
     void updateUserScore(@TempDir Path tempDir) throws Exception {
         Path profileFile = tempDir.resolve("testaccounts.json");
         Authenticator authenticator = new Authenticator(profileFile.toString());
-        authenticator.signUp("alice", "smith");
+        authenticator.signUp("alice", "password123");
         authenticator.updateUserScore(true);
         authenticator.writeUserProfiles();
         Authenticator reloaded = new Authenticator(profileFile.toString());
-        assertTrue(reloaded.login("alice", "smith"));
+        assertTrue(reloaded.login("alice", "password123"));
         assertEquals(1, reloaded.getUserScore());
     }
-}
 
+    private static void assertRejectedSignUpDoesNotChangeProfileCount(
+        Authenticator authenticator,
+        String username,
+        String password
+    ) {
+        int profileCount = authenticator.getUserProfiles().size();
+
+        assertThrows(IllegalArgumentException.class, () -> authenticator.signUp(username, password));
+        assertEquals(profileCount, authenticator.getUserProfiles().size());
+    }
+}
