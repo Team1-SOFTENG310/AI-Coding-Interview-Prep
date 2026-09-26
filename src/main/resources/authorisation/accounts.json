@@ -1,1 +1,16 @@
-[  ]
+[ {
+  "username" : "jason",
+  "password" : "1234",
+  "questionsAnswered" : 0,
+  "questionsCorrect" : 0
+}, {
+  "username" : "Jason",
+  "password" : "1234",
+  "questionsAnswered" : 0,
+  "questionsCorrect" : 0
+}, {
+  "username" : "newuser",
+  "password" : "1234",
+  "questionsAnswered" : 0,
+  "questionsCorrect" : 0
+} ]

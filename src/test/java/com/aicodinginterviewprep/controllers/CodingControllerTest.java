@@ -90,7 +90,7 @@ class CodingControllerTest {
         controller.questionOutput = new TextArea();
         controller.codeEditorContainer = new StackPane();
 
-        controller.buttonReturn = new Button();
+        
         controller.buttonSubmitAnswer = new Button();
         controller.buttonGenerateQuestion = new Button();
         controller.buttonPractice = new Button();
@@ -194,18 +194,7 @@ class CodingControllerTest {
         });
     }
 
-    @Test
-    void onReturn_switchesToHomeScene() throws Exception {
-        runOnFxThreadAndWait(() -> {
-            CodingController controller = createController();
-            FakeSceneManager sceneManager = new FakeSceneManager();
-            controller.setSceneManager(sceneManager);
 
-            controller.onReturn();
-
-            assertEquals("home", sceneManager.lastScene);
-        });
-    }
 
     @Test
     void onPractice_switchesToPracticeScene() throws Exception {

@@ -175,18 +175,7 @@ class PracticeControllerTest {
         });
     }
 
-    @Test
-    void onReturn_switchesToHomeScene() throws Exception {
-        runOnFxThreadAndWait(() -> {
-            PracticeController controller = createController();
-            FakeSceneManager sceneManager = new FakeSceneManager();
 
-            controller.setSceneManager(sceneManager);
-            controller.onReturn();
-
-            assertEquals("home", sceneManager.lastScene);
-        });
-    }
 
     @Test
     void onCodingPractice_switchesToCodingScene() throws Exception {
@@ -302,7 +291,7 @@ class PracticeControllerTest {
         controller.questionOutput = new TextArea();
         controller.answerInput = new TextArea();
 
-        controller.buttonReturn = new Button();
+        
         controller.buttonSubmitAnswer = new Button();
         controller.buttonGenerateQuestion = new Button();
         controller.buttonCodingPractice = new Button();
@@ -854,24 +843,7 @@ class PracticeControllerTest {
         });
     }
 
-    @Test
-    void onReturn_stopsActiveRecording() throws Exception {
-        runOnFxThreadAndWait(() -> {
-            PracticeController controller = createController();
-            FakeSceneManager sceneManager = new FakeSceneManager();
-            controller.setSceneManager(sceneManager);
-            FakeMicrophoneRecorder recorder = new FakeMicrophoneRecorder();
-            setMicrophoneRecorder(controller, recorder);
 
-            controller.onVoiceInput();
-            assertTrue(recorder.isRecording());
-
-            controller.onReturn();
-
-            assertFalse(recorder.isRecording());
-            assertEquals("home", sceneManager.lastScene);
-        });
-    }
 
     @Test
     void onGenerateQuestion_stopsActiveRecording() throws Exception {

@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="practiceRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.PracticeController">
+<BorderPane fx:id="practiceRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.PracticeController">
 
    <padding>
       <Insets bottom="16" left="16" right="16" top="16" />
@@ -18,7 +18,6 @@
 
    <top>
       <HBox alignment="CENTER_LEFT" spacing="10">
-         <Button fx:id="buttonReturn" mnemonicParsing="false" onAction="#onReturn" text="Return" />
          <Region HBox.hgrow="ALWAYS" />
          <Label fx:id="labelLoggedInAs" styleClass="muted-label" />
          <Button fx:id="buttonLogOut" mnemonicParsing="false" onAction="#onLogOut" text="Log Out" />

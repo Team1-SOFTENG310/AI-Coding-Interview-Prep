@@ -35,7 +35,7 @@ public class PracticeController implements SceneAware {
     public TextArea questionOutput;
     public TextArea answerInput;
 
-    @FXML public Button buttonReturn;
+    
     @FXML public Button buttonSubmitAnswer;
     @FXML public Button buttonGenerateQuestion;
     @FXML public Button buttonCodingPractice;
@@ -81,6 +81,7 @@ public class PracticeController implements SceneAware {
 
     public void onLogOut() {
         cancelRecordingIfActive();
+        clearQuestionAndAnswer();
         sceneManager.setCurrentUsername(null);
         sceneManager.switchToScene("home");
     }
@@ -129,10 +130,7 @@ public class PracticeController implements SceneAware {
         runEvaluation();
     }
 
-    public void onReturn() {
-        cancelRecordingIfActive();
-        sceneManager.switchToScene("home");
-    }
+
 
     public void onCodingPractice() {
         sceneManager.switchToScene("coding");
@@ -231,6 +229,13 @@ public class PracticeController implements SceneAware {
             labelVoiceStatus.setText(message);
         }
     }
+    
+    private void clearQuestionAndAnswer(){
+        questionOutput.clear();
+        answerInput.clear();
+        
+
+    }
 
     public void runEvaluation() {
         sceneManager.switchToScene("feedback");
@@ -239,6 +244,7 @@ public class PracticeController implements SceneAware {
             return;
         }
         feedbackController.setAnswerControls(questionOutput.getText(), "", answerInput.getText(), "practice");
+        clearQuestionAndAnswer();
         feedbackController.runEvaluation();
     }
 }
