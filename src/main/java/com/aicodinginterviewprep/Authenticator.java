@@ -81,6 +81,10 @@ public class Authenticator {
         // strip blank spaces around username and password
         username = username.strip();
         password = password.strip();
+        // reject blank username and password after stripping
+        if (username.isBlank() || password.isBlank()) {
+            throw new IllegalArgumentException("Username and password cannot be blank");
+        }
         // password length check (8 to 64 characters)
         if (password.length() < 8 || password.length() > 64) {
             throw new IllegalArgumentException("Password must be between 8 and 64 characters");
