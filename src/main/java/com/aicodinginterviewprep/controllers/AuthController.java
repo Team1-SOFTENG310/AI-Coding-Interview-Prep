@@ -109,6 +109,10 @@ public class AuthController implements SceneAware {
             return;
         }
 
+        // strip whitespaces to match authenticator format
+        username = username.strip();
+        password = password.strip();
+
         authenticator.login(username, password);
         sceneManager.setCurrentUsername(username);
         resetForm();

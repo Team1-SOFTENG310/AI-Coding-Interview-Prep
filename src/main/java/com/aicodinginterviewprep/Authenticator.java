@@ -78,6 +78,13 @@ public class Authenticator {
         if (username == null || password == null) {
             throw new IllegalArgumentException("Username and password cannot be null");
         }
+        // strip blank spaces around username and password
+        username = username.strip();
+        password = password.strip();
+        // password length check (8 to 64 characters)
+        if (password.length() < 8 || password.length() > 64) {
+            throw new IllegalArgumentException("Password must be between 8 and 64 characters");
+        }
         for (UserProfile userProfile : userProfiles) { // Checks if the account already exists
             if (userProfile.getUsername().equals(username)) {
                 throw new IllegalArgumentException("Account already exists");
