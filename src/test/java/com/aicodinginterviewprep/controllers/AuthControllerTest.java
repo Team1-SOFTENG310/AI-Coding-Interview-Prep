@@ -92,7 +92,7 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("alice");
-                controller.passwordfieldPassword.setText("secret123");
+                controller.passwordfieldPassword.setText("Secret123!");
                 controller.onSignUp();
 
                 assertEquals("practice", sceneManager.lastScene);
@@ -113,7 +113,7 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("alice");
-                controller.passwordfieldPassword.setText("secret123");
+                controller.passwordfieldPassword.setText("Secret123!");
                 controller.onSignUp();
 
                 assertEquals("alice", sceneManager.getCurrentUsername());
@@ -133,7 +133,7 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("");
-                controller.passwordfieldPassword.setText("secret123");
+                controller.passwordfieldPassword.setText("Secret123!");
                 controller.onSignUp();
 
                 assertNull(sceneManager.lastScene);
@@ -154,12 +154,39 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("alice");
-                controller.passwordfieldPassword.setText("short7!");
+                controller.passwordfieldPassword.setText("Short7!");
                 controller.onSignUp();
 
                 assertNull(sceneManager.lastScene);
                 assertEquals(
                     "Password must be between 8 and 64 characters",
+                    controller.labelMessage.getText()
+                );
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @Test
+    void signUpWithPasswordMissingRequiredCharacterTypeShowsMessageAndDoesNotNavigate(
+        @TempDir Path tempDir
+    ) throws Exception {
+        runOnFxThreadAndWait(() -> {
+            try {
+                AuthController controller = createController();
+                FakeSceneManager sceneManager = new FakeSceneManager();
+                controller.setSceneManager(sceneManager);
+                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+
+                controller.textfieldUsername.setText("alice");
+                controller.passwordfieldPassword.setText("lowercase1!");
+                controller.onSignUp();
+
+                assertNull(sceneManager.lastScene);
+                assertEquals(
+                    "Password must contain at least one uppercase letter, one lowercase letter, "
+                        + "one number and one special character.",
                     controller.labelMessage.getText()
                 );
             } catch (Exception e) {
@@ -178,7 +205,7 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("  alice  ");
-                controller.passwordfieldPassword.setText("  secret123  ");
+                controller.passwordfieldPassword.setText("  Secret123!  ");
                 controller.onSignUp();
 
                 assertEquals("practice", sceneManager.lastScene);
@@ -188,7 +215,7 @@ class AuthControllerTest {
                 sceneManager.lastScene = null;
                 sceneManager.setCurrentUsername(null);
                 controller.textfieldUsername.setText("alice");
-                controller.passwordfieldPassword.setText("secret123");
+                controller.passwordfieldPassword.setText("Secret123!");
                 controller.onLogIn();
 
                 assertEquals("practice", sceneManager.lastScene);
@@ -210,12 +237,12 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("bob");
-                controller.passwordfieldPassword.setText("hunter22");
+                controller.passwordfieldPassword.setText("Hunter2!");
                 controller.onSignUp();
 
                 sceneManager.lastScene = null;
                 controller.textfieldUsername.setText("bob");
-                controller.passwordfieldPassword.setText("hunter22");
+                controller.passwordfieldPassword.setText("Hunter2!");
                 controller.onSignUp();
 
                 assertNull(sceneManager.lastScene, "Duplicate sign up should not navigate away");
@@ -236,12 +263,12 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("carol");
-                controller.passwordfieldPassword.setText("letmein8");
+                controller.passwordfieldPassword.setText("Letmein8!");
                 controller.onSignUp();
 
                 sceneManager.lastScene = null;
                 controller.textfieldUsername.setText("carol");
-                controller.passwordfieldPassword.setText("letmein8");
+                controller.passwordfieldPassword.setText("Letmein8!");
                 controller.onLogIn();
 
                 assertEquals("practice", sceneManager.lastScene);
@@ -262,12 +289,12 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("carol");
-                controller.passwordfieldPassword.setText("letmein8");
+                controller.passwordfieldPassword.setText("Letmein8!");
                 controller.onSignUp();
 
                 sceneManager.setCurrentUsername(null);
                 controller.textfieldUsername.setText("carol");
-                controller.passwordfieldPassword.setText("letmein8");
+                controller.passwordfieldPassword.setText("Letmein8!");
                 controller.onLogIn();
 
                 assertEquals("carol", sceneManager.getCurrentUsername());
@@ -287,7 +314,7 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("dave");
-                controller.passwordfieldPassword.setText("correcthorse");
+                controller.passwordfieldPassword.setText("Correct1!");
                 controller.onSignUp();
 
                 sceneManager.lastScene = null;
@@ -313,12 +340,12 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("erin");
-                controller.passwordfieldPassword.setText("passw0rd");
+                controller.passwordfieldPassword.setText("Passw0rd!");
                 controller.onSignUp();
 
                 sceneManager.lastScene = null;
                 controller.textfieldUsername.setText("erin");
-                controller.passwordfieldPassword.setText("passw0rd");
+                controller.passwordfieldPassword.setText("Passw0rd!");
                 controller.onPassword();
 
                 assertEquals("practice", sceneManager.lastScene, "Pressing Enter in the password field should submit login");
@@ -360,7 +387,7 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("missing-dir").resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("frank");
-                controller.passwordfieldPassword.setText("secret123");
+                controller.passwordfieldPassword.setText("Secret123!");
                 controller.onSignUp();
 
                 assertNull(sceneManager.lastScene);
@@ -456,7 +483,7 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("grace");
-                controller.passwordfieldPassword.setText("hopper123");
+                controller.passwordfieldPassword.setText("Hopper123!");
                 controller.onSignUp();
 
                 assertEquals("", controller.textfieldUsername.getText());
@@ -477,11 +504,11 @@ class AuthControllerTest {
                 useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
 
                 controller.textfieldUsername.setText("heidi");
-                controller.passwordfieldPassword.setText("letmein456");
+                controller.passwordfieldPassword.setText("Letmein456!");
                 controller.onSignUp();
 
                 controller.textfieldUsername.setText("heidi");
-                controller.passwordfieldPassword.setText("letmein456");
+                controller.passwordfieldPassword.setText("Letmein456!");
                 controller.onLogIn();
 
                 assertEquals("", controller.textfieldUsername.getText());
