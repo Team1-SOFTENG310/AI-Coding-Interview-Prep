@@ -89,6 +89,12 @@ public class Authenticator {
         if (password.length() < 8 || password.length() > 64) {
             throw new IllegalArgumentException("Password must be between 8 and 64 characters");
         }
+        if (!meetsPasswordComplexityRequirements(password)) {
+            throw new IllegalArgumentException(
+                "Password must contain at least one uppercase letter, one " +
+                        "lowercase letter, one number and one special character."
+            );
+        }
         for (UserProfile userProfile : userProfiles) { // Checks if the account already exists
             if (userProfile.getUsername().equals(username)) {
                 throw new IllegalArgumentException("Account already exists");
@@ -97,6 +103,17 @@ public class Authenticator {
         UserProfile userProfile = new UserProfile(username, password);
         userProfiles.add(userProfile); // Add the new account
         currentUserProfile = userProfile;
+    }
+
+    private static boolean meetsPasswordComplexityRequirements(String password) {
+        boolean hasUppercaseLetter = password.chars().anyMatch(character -> character >= 'A' && character <= 'Z');
+        boolean hasLowercaseLetter = password.chars().anyMatch(character -> character >= 'a' && character <= 'z');
+        boolean hasNumber = password.chars().anyMatch(character -> character >= '0' && character <= '9');
+        boolean hasSymbol = password.chars().anyMatch(
+            character -> !Character.isLetterOrDigit(character) && !Character.isWhitespace(character)
+        );
+
+        return hasUppercaseLetter && hasLowercaseLetter && hasNumber && hasSymbol;
     }
 
 
