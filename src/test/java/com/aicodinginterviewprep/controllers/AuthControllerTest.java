@@ -214,8 +214,8 @@ class AuthControllerTest {
 
                 sceneManager.lastScene = null;
                 sceneManager.setCurrentUsername(null);
-                controller.textfieldUsername.setText("alice");
-                controller.passwordfieldPassword.setText("Secret123!");
+                controller.textfieldUsername.setText("  alice  ");
+                controller.passwordfieldPassword.setText("  Secret123!  ");
                 controller.onLogIn();
 
                 assertEquals("practice", sceneManager.lastScene);
