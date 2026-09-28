@@ -80,6 +80,14 @@ public class AuthController implements SceneAware {
         String username = textfieldUsername.getText();
         String password = passwordfieldPassword.getText();
 
+        // strip whitespaces to match authenticator format
+        if (username != null) {
+            username = username.strip();
+        }
+        if (password != null) {
+            password = password.strip();
+        }
+
         if (!authenticator.login(username, password)) {
             labelMessage.setText("Incorrect username or password.");
             return;
