@@ -23,30 +23,42 @@
                <Font name="Bodoni MT" size="24.0" />
             </font>
          </Label>
-         <VBox maxWidth="Infinity" spacing="8">
+         <VBox maxWidth="Infinity" prefWidth="912.0" spacing="8">
             <VBox spacing="3">
                <Label alignment="CENTER" text="Correctness">
                   <font><Font name="System Bold" size="16.0" /></font>
                </Label>
-               <TextArea fx:id="correctnessTextArea" editable="false" focusTraversable="false" prefHeight="90.0" prefRowCount="4" styleClass="question-label feedback-text-area" wrapText="true" />
+               <TextArea fx:id="correctnessTextArea" editable="false" focusTraversable="false" prefHeight="105.0" prefRowCount="4" styleClass="question-label feedback-text-area" wrapText="true">
+                  <font>
+                     <Font size="11.0" />
+                  </font></TextArea>
             </VBox>
             <VBox spacing="3">
                <Label alignment="CENTER" text="Efficiency">
                   <font><Font name="System Bold" size="16.0" /></font>
                </Label>
-               <TextArea fx:id="efficiencyTextArea" editable="false" focusTraversable="false" prefHeight="90.0" prefRowCount="4" styleClass="question-label feedback-text-area" wrapText="true" />
+               <TextArea fx:id="efficiencyTextArea" editable="false" focusTraversable="false" prefHeight="105.0" prefRowCount="4" styleClass="question-label feedback-text-area" wrapText="true">
+                  <font>
+                     <Font size="11.0" />
+                  </font></TextArea>
             </VBox>
             <VBox spacing="3">
                <Label alignment="CENTER" text="Communication">
                   <font><Font name="System Bold" size="16.0" /></font>
                </Label>
-               <TextArea fx:id="communicationTextArea" editable="false" focusTraversable="false" prefHeight="90.0" prefRowCount="4" styleClass="question-label feedback-text-area" wrapText="true" />
+               <TextArea fx:id="communicationTextArea" editable="false" focusTraversable="false" prefHeight="105.0" prefRowCount="4" styleClass="question-label feedback-text-area" wrapText="true">
+                  <font>
+                     <Font size="11.0" />
+                  </font></TextArea>
             </VBox>
             <VBox spacing="3">
                <Label alignment="CENTER" text="Code Quality">
                   <font><Font name="System Bold" size="16.0" /></font>
                </Label>
-               <TextArea fx:id="codeQualityTextArea" editable="false" focusTraversable="false" prefHeight="90.0" prefRowCount="4" styleClass="question-label feedback-text-area" wrapText="true" />
+               <TextArea fx:id="codeQualityTextArea" editable="false" focusTraversable="false" prefHeight="105.0" prefRowCount="4" styleClass="question-label feedback-text-area" wrapText="true">
+                  <font>
+                     <Font size="11.0" />
+                  </font></TextArea>
             </VBox>
          </VBox>
          <HBox alignment="CENTER" spacing="12">
