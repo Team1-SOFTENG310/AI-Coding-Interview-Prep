@@ -125,6 +125,32 @@ class PracticeControllerTest {
     }
 
     @Test
+    void setSceneManager_addsBehaviouralTopicsAndDefaultsToRandomTopic() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+
+            controller.setSceneManager(new FakeSceneManager());
+
+            assertEquals("Random topic", controller.comboTopic.getValue());
+            assertTrue(controller.comboTopic.getItems().contains("Teamwork"));
+        });
+    }
+
+    @Test
+    void changingQuestionTypeUpdatesTopicOptions() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            controller.setSceneManager(new FakeSceneManager());
+
+            controller.comboQuestionType.setValue(QuestionType.THEORY);
+
+            assertEquals("Random topic", controller.comboTopic.getValue());
+            assertTrue(controller.comboTopic.getItems().contains("Databases / SQL"));
+            assertFalse(controller.comboTopic.getItems().contains("Teamwork"));
+        });
+    }
+
+    @Test
     void setSceneManager_submitButtonDisabledWhenAnswerIsEmpty() throws Exception {
         runOnFxThreadAndWait(() -> {
             PracticeController controller = createController();
@@ -287,6 +313,7 @@ class PracticeControllerTest {
         PracticeController controller = new PracticeController();
 
         controller.comboQuestionType = new ComboBox<>();
+        controller.comboTopic = new ComboBox<>();
         controller.comboDifficulty = new ComboBox<>();
         controller.questionOutput = new TextArea();
         controller.answerInput = new TextArea();
@@ -486,7 +513,7 @@ class PracticeControllerTest {
     }
 
     @Test
-    void onGenerateQuestion_passesSelectedQuestionType()
+    void onGenerateQuestion_passesSelectedOptions()
             throws Exception {
 
         RecordingQuestionService service =
@@ -506,8 +533,10 @@ class PracticeControllerTest {
             setQuestionService(controller, service);
 
             controller.comboQuestionType.setValue(
-                    QuestionType.BEHAVIOURAL
+                    QuestionType.THEORY
             );
+            controller.comboTopic.setValue("Databases / SQL");
+            controller.comboDifficulty.setValue(Difficulty.HARD);
 
             controller.onGenerateQuestion();
         });
@@ -517,9 +546,11 @@ class PracticeControllerTest {
         );
 
         assertEquals(
-                QuestionType.BEHAVIOURAL,
+                QuestionType.THEORY,
                 service.receivedType
         );
+        assertEquals("Databases / SQL", service.receivedTopic);
+        assertEquals(Difficulty.HARD, service.receivedDifficulty);
     }
 
     @Test
@@ -903,7 +934,7 @@ class PracticeControllerTest {
                 new CountDownLatch(1);
 
         @Override
-        public String generateQuestion(QuestionType type) {
+        public String generateQuestion(QuestionType type, Difficulty difficulty, String topic) {
             try {
                 latch.await();
             } catch (InterruptedException e) {
@@ -929,7 +960,7 @@ class PracticeControllerTest {
         }
 
         @Override
-        public String generateQuestion(QuestionType type) {
+        public String generateQuestion(QuestionType type, Difficulty difficulty, String topic) {
             return result;
         }
     }
@@ -938,14 +969,18 @@ class PracticeControllerTest {
         extends OpenAiQuestionService {
 
         QuestionType receivedType;
+        Difficulty receivedDifficulty;
+        String receivedTopic;
 
         CountDownLatch completed =
                 new CountDownLatch(1);
 
         @Override
-        public String generateQuestion(QuestionType type) {
+        public String generateQuestion(QuestionType type, Difficulty difficulty, String topic) {
 
             receivedType = type;
+            receivedDifficulty = difficulty;
+            receivedTopic = topic;
             completed.countDown();
 
             return "Test question";
@@ -956,7 +991,7 @@ class PracticeControllerTest {
         extends OpenAiQuestionService {
 
         @Override
-        public String generateQuestion(QuestionType type) {
+        public String generateQuestion(QuestionType type, Difficulty difficulty, String topic) {
             throw new RuntimeException(
                     "Test API failure"
             );

@@ -25,6 +25,7 @@ public class PracticeController implements SceneAware {
     private static final String VOICE_RECORDING_TEXT = "Stop Recording";
     private static final String VOICE_TRANSCRIBING_TEXT = "Transcribing...";
     private static final String RECORDING_STYLE_CLASS = "recording";
+    private static final String RANDOM_TOPIC = "Random topic";
 
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
     private final MicrophoneRecorder microphoneRecorder = new MicrophoneRecorder();
@@ -44,15 +45,19 @@ public class PracticeController implements SceneAware {
     @FXML public Label labelLoggedInAs;
     @FXML public Button buttonLogOut;
     @FXML public ComboBox<QuestionType> comboQuestionType;
+    @FXML public ComboBox<String> comboTopic;
     @FXML public ComboBox<Difficulty> comboDifficulty;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
-        this.comboQuestionType.getItems().addAll(QuestionType.BEHAVIOURAL, QuestionType.THEORY);
+        this.comboQuestionType.getItems().setAll(QuestionType.BEHAVIOURAL, QuestionType.THEORY);
         this.comboQuestionType.setValue(QuestionType.BEHAVIOURAL);
+        this.comboQuestionType.valueProperty().addListener(
+            (observable, oldType, newType) -> updateTopicOptions(newType));
+        updateTopicOptions(QuestionType.BEHAVIOURAL);
         if (this.comboDifficulty != null) {
-            this.comboDifficulty.getItems().addAll(Difficulty.values());
+            this.comboDifficulty.getItems().setAll(Difficulty.values());
             this.comboDifficulty.setValue(Difficulty.MEDIUM);
         }
 
@@ -91,7 +96,7 @@ public class PracticeController implements SceneAware {
         cancelRecordingIfActive();
         QuestionType type = comboQuestionType.getValue();
         Difficulty difficulty = comboDifficulty == null ? Difficulty.MEDIUM : comboDifficulty.getValue();
-        questionService.setDifficulty(difficulty);
+        String topic = selectedTopic();
         buttonGenerateQuestion.setDisable(true);
         questionOutput.setText("Generating question...");
         answerInput.clear();
@@ -102,7 +107,7 @@ public class PracticeController implements SceneAware {
         Task<String> task = new Task<>() {
             @Override
             protected String call() throws Exception {
-                return questionService.generateQuestion(type);
+                return questionService.generateQuestion(type, difficulty, topic);
             }
         };
 
@@ -124,6 +129,17 @@ public class PracticeController implements SceneAware {
         Thread worker = new Thread(task, "openai-question-generation");
         worker.setDaemon(true);
         worker.start();
+    }
+
+    private void updateTopicOptions(QuestionType type) {
+        comboTopic.getItems().setAll(RANDOM_TOPIC);
+        comboTopic.getItems().addAll(questionService.getAvailableTopics(type));
+        comboTopic.setValue(RANDOM_TOPIC);
+    }
+
+    private String selectedTopic() {
+        String topic = comboTopic.getValue();
+        return RANDOM_TOPIC.equals(topic) ? null : topic;
     }
 
     public void onSubmitAnswer() {

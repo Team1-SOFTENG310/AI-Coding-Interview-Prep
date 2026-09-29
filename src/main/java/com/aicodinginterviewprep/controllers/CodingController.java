@@ -24,6 +24,7 @@ import org.fxmisc.richtext.LineNumberFactory;
 public class CodingController implements SceneAware {
     private static final String PLACEHOLDER_TEXT = "// Write your code here";
     private static final String GENERATE_FIRST_TEXT = "Generate a question first to start coding.";
+    private static final String RANDOM_TOPIC = "Random topic";
 
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
     private SceneManager sceneManager;
@@ -40,13 +41,17 @@ public class CodingController implements SceneAware {
     @FXML public Button buttonPractice;
     @FXML public Label labelLoggedInAs;
     @FXML public Button buttonLogOut;
+    @FXML public ComboBox<String> comboTopic;
     @FXML public ComboBox<Difficulty> comboDifficulty;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
+        comboTopic.getItems().setAll(RANDOM_TOPIC);
+        comboTopic.getItems().addAll(questionService.getAvailableTopics(QuestionType.CODING));
+        comboTopic.setValue(RANDOM_TOPIC);
         if (comboDifficulty != null) {
-            comboDifficulty.getItems().addAll(Difficulty.values());
+            comboDifficulty.getItems().setAll(Difficulty.values());
             comboDifficulty.setValue(Difficulty.MEDIUM);
         }
         setUpCodeEditor();
@@ -103,7 +108,9 @@ public class CodingController implements SceneAware {
 
     @FXML
     public void onGenerateQuestion() {
-        questionService.setDifficulty(comboDifficulty == null ? Difficulty.MEDIUM : comboDifficulty.getValue());
+        Difficulty difficulty = comboDifficulty == null ? Difficulty.MEDIUM : comboDifficulty.getValue();
+        String selectedTopic = comboTopic.getValue();
+        String topic = RANDOM_TOPIC.equals(selectedTopic) ? null : selectedTopic;
         buttonGenerateQuestion.setDisable(true);
         questionOutput.setText("Generating question...");
         codeEditor.clear();
@@ -113,7 +120,7 @@ public class CodingController implements SceneAware {
         Task<String> task = new Task<>() {
             @Override
             protected String call() throws Exception {
-                return questionService.generateQuestion(QuestionType.CODING);
+                return questionService.generateQuestion(QuestionType.CODING, difficulty, topic);
             }
         };
 

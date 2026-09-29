@@ -48,6 +48,18 @@ class CodingControllerTest {
         });
     }
 
+    @Test
+    void setSceneManager_addsCodingTopicsAndDefaultsToRandomTopic() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            CodingController controller = createController();
+
+            controller.setSceneManager(new FakeSceneManager());
+
+            assertEquals("Random topic", controller.comboTopic.getValue());
+            assertTrue(controller.comboTopic.getItems().contains("Graphs"));
+        });
+    }
+
     private void runOnFxThreadAndWait(Runnable action) throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         java.util.concurrent.atomic.AtomicReference<Throwable> error =
@@ -96,6 +108,7 @@ class CodingControllerTest {
         controller.buttonPractice = new Button();
         controller.labelLoggedInAs = new Label();
         controller.buttonLogOut = new Button();
+        controller.comboTopic = new ComboBox<>();
         controller.comboDifficulty = new ComboBox<>();
 
         return controller;
@@ -356,7 +369,7 @@ class CodingControllerTest {
     }
 
     @Test
-    void onGenerateQuestion_alwaysRequestsCodingQuestionType() throws Exception {
+    void onGenerateQuestion_passesSelectedOptions() throws Exception {
         RecordingQuestionService service = new RecordingQuestionService();
         CountDownLatch completed = service.completed;
 
@@ -364,12 +377,16 @@ class CodingControllerTest {
             CodingController controller = createController();
             controller.setSceneManager(new FakeSceneManager());
             setQuestionService(controller, service);
+            controller.comboTopic.setValue("Graphs");
+            controller.comboDifficulty.setValue(Difficulty.HARD);
 
             controller.onGenerateQuestion();
         });
 
         assertTrue(completed.await(5, TimeUnit.SECONDS));
         assertEquals(QuestionType.CODING, service.receivedType);
+        assertEquals("Graphs", service.receivedTopic);
+        assertEquals(Difficulty.HARD, service.receivedDifficulty);
     }
 
     @Test
@@ -501,7 +518,7 @@ class CodingControllerTest {
         private final CountDownLatch latch = new CountDownLatch(1);
 
         @Override
-        public String generateQuestion(QuestionType type) {
+        public String generateQuestion(QuestionType type, Difficulty difficulty, String topic) {
             try {
                 latch.await();
             } catch (InterruptedException e) {
@@ -524,18 +541,22 @@ class CodingControllerTest {
         }
 
         @Override
-        public String generateQuestion(QuestionType type) {
+        public String generateQuestion(QuestionType type, Difficulty difficulty, String topic) {
             return result;
         }
     }
 
     private static class RecordingQuestionService extends OpenAiQuestionService {
         QuestionType receivedType;
+        Difficulty receivedDifficulty;
+        String receivedTopic;
         CountDownLatch completed = new CountDownLatch(1);
 
         @Override
-        public String generateQuestion(QuestionType type) {
+        public String generateQuestion(QuestionType type, Difficulty difficulty, String topic) {
             receivedType = type;
+            receivedDifficulty = difficulty;
+            receivedTopic = topic;
             completed.countDown();
             return "Test question";
         }
@@ -543,7 +564,7 @@ class CodingControllerTest {
 
     private static class FailingQuestionService extends OpenAiQuestionService {
         @Override
-        public String generateQuestion(QuestionType type) {
+        public String generateQuestion(QuestionType type, Difficulty difficulty, String topic) {
             throw new RuntimeException("Test API failure");
         }
     }
