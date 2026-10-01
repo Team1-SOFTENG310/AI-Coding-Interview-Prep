@@ -1,5 +1,7 @@
 package com.aicodinginterviewprep.controllers;
 
+import com.aicodinginterviewprep.errors.SyntaxHighlightException;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -11,13 +13,13 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 final class JavaSyntaxHighlighter {
 
     private static final String[] KEYWORDS = {
-        "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
-        "const", "continue", "default", "do", "double", "else", "enum", "extends", "final",
-        "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
-        "interface", "long", "native", "new", "package", "private", "protected", "public",
-        "record", "return", "short", "static", "strictfp", "super", "switch", "synchronized",
-        "this", "throw", "throws", "transient", "try", "var", "void", "volatile", "while",
-        "yield", "true", "false", "null"
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
+            "const", "continue", "default", "do", "double", "else", "enum", "extends", "final",
+            "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
+            "interface", "long", "native", "new", "package", "private", "protected", "public",
+            "record", "return", "short", "static", "strictfp", "super", "switch", "synchronized",
+            "this", "throw", "throws", "transient", "try", "var", "void", "volatile", "while",
+            "yield", "true", "false", "null"
     };
 
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
@@ -30,14 +32,14 @@ final class JavaSyntaxHighlighter {
     private static final String ANNOTATION_PATTERN = "@\\w+";
 
     private static final Pattern PATTERN = Pattern.compile(
-        "(?<COMMENT>" + COMMENT_PATTERN + ")"
-        + "|(?<STRING>" + STRING_PATTERN + ")"
-        + "|(?<KEYWORD>" + KEYWORD_PATTERN + ")"
-        + "|(?<ANNOTATION>" + ANNOTATION_PATTERN + ")"
-        + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
-        + "|(?<PAREN>" + PAREN_PATTERN + ")"
-        + "|(?<BRACE>" + BRACE_PATTERN + ")"
-        + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
+            "(?<COMMENT>" + COMMENT_PATTERN + ")"
+                    + "|(?<STRING>" + STRING_PATTERN + ")"
+                    + "|(?<KEYWORD>" + KEYWORD_PATTERN + ")"
+                    + "|(?<ANNOTATION>" + ANNOTATION_PATTERN + ")"
+                    + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
+                    + "|(?<PAREN>" + PAREN_PATTERN + ")"
+                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
+                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
     );
 
     private JavaSyntaxHighlighter() {
@@ -77,6 +79,6 @@ final class JavaSyntaxHighlighter {
         if (matcher.group("PAREN") != null || matcher.group("BRACE") != null || matcher.group("BRACKET") != null) {
             return "code-bracket";
         }
-        throw new IllegalStateException("Unhandled syntax token: " + matcher.group());
+        throw new SyntaxHighlightException("Unhandled syntax token: " + matcher.group());
     }
 }

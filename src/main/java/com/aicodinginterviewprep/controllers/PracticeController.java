@@ -5,6 +5,7 @@ import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
+import com.aicodinginterviewprep.errors.AppErrorHandler;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
 import com.aicodinginterviewprep.service.SpeechToTextService;
 import javafx.beans.binding.Bindings;
@@ -35,7 +36,7 @@ public class PracticeController implements SceneAware {
     public TextArea questionOutput;
     public TextArea answerInput;
 
-    
+
     @FXML public Button buttonSubmitAnswer;
     @FXML public Button buttonGenerateQuestion;
     @FXML public Button buttonCodingPractice;
@@ -57,8 +58,8 @@ public class PracticeController implements SceneAware {
         }
 
         buttonSubmitAnswer.disableProperty().bind(Bindings.createBooleanBinding(
-            () -> answerInput.getText() == null || answerInput.getText().trim().isEmpty(),
-            answerInput.textProperty()
+                () -> answerInput.getText() == null || answerInput.getText().trim().isEmpty(),
+                answerInput.textProperty()
         ));
 
         answerInput.setDisable(true);
@@ -116,9 +117,8 @@ public class PracticeController implements SceneAware {
         });
 
         task.setOnFailed(event -> {
-            Throwable error = task.getException();
-            String message = error != null ? error.getMessage() : "Unknown error.";
-            questionOutput.setText("Failed to generate question: " + message);
+            AppErrorHandler.report(task.getException(), "Generating interview question",
+                    message -> questionOutput.setText("Failed to generate question: " + message));
             buttonGenerateQuestion.setDisable(false);
         });
 
@@ -150,7 +150,8 @@ public class PracticeController implements SceneAware {
         try {
             microphoneRecorder.startRecording();
         } catch (LineUnavailableException e) {
-            setVoiceStatus("Microphone unavailable: " + e.getMessage());
+            AppErrorHandler.report(e, "Starting microphone recording",
+                    message -> setVoiceStatus("Microphone unavailable: " + message));
             return;
         }
         setVoiceStatus("Recording... click again to stop.");
@@ -186,9 +187,8 @@ public class PracticeController implements SceneAware {
         });
 
         task.setOnFailed(event -> {
-            Throwable error = task.getException();
-            String message = error != null ? error.getMessage() : "Unknown error.";
-            setVoiceStatus("Transcription failed: " + message);
+            AppErrorHandler.report(task.getException(), "Transcribing recorded answer",
+                    message -> setVoiceStatus("Transcription failed: " + message));
             resetVoiceButton();
         });
 
@@ -200,8 +200,8 @@ public class PracticeController implements SceneAware {
     private void appendTranscript(String transcript) {
         String existing = answerInput.getText();
         String combined = existing == null || existing.isBlank()
-            ? transcript
-            : existing.trim() + " " + transcript;
+                ? transcript
+                : existing.trim() + " " + transcript;
         answerInput.setText(combined);
         answerInput.positionCaret(combined.length());
     }
@@ -214,6 +214,8 @@ public class PracticeController implements SceneAware {
             microphoneRecorder.stopRecording();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            AppErrorHandler.report(e, "Stopping microphone recording",
+                    message -> setVoiceStatus("Unable to stop recording: " + message));
         }
         setVoiceStatus("");
         resetVoiceButton();
@@ -230,12 +232,12 @@ public class PracticeController implements SceneAware {
             labelVoiceStatus.setText(message);
         }
     }
-    
+
     private void clearQuestionAndAnswer(){
         questionOutput.clear();
         questionOutput.setMouseTransparent(true);
         answerInput.clear();
-        
+
 
     }
 

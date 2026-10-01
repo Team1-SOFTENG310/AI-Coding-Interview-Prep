@@ -162,7 +162,7 @@ public class EvaluatorService {
           efficiency_evaluation,
           communication_evaluation,
           code_quality_evaluation);
-    } catch (Exception e) {
+    } catch (JsonProcessingException | IndexOutOfBoundsException | NullPointerException e) {
       throw new OpenAiApiException("Failed to parse OpenAI JSON response", e);
     }
   }

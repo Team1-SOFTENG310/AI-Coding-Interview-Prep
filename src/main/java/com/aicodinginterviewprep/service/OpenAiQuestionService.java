@@ -1,10 +1,13 @@
 package com.aicodinginterviewprep.service;
 
+import com.aicodinginterviewprep.errors.ConfigurationException;
+import com.aicodinginterviewprep.errors.NetworkException;
 import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.config.EnvConfig;
 import com.aicodinginterviewprep.config.KeyValueFile;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -44,9 +47,9 @@ public class OpenAiQuestionService {
 
     public OpenAiQuestionService() {
         this(
-            HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build(),
-            EnvConfig.get("OPENAI_API_KEY"),
-            EnvConfig.get("OPENAI_MODEL", DEFAULT_MODEL));
+                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build(),
+                EnvConfig.get("OPENAI_API_KEY"),
+                EnvConfig.get("OPENAI_MODEL", DEFAULT_MODEL));
     }
 
     OpenAiQuestionService(HttpClient httpClient, String apiKey, String model) {
@@ -55,9 +58,9 @@ public class OpenAiQuestionService {
         this.model = model;
         this.prompts = loadPrompts();
         this.topicsByType = Map.of(
-            QuestionType.BEHAVIOURAL, extractTopics(prompts, "BEHAVIOURAL_TOPIC_"),
-            QuestionType.THEORY, extractTopics(prompts, "THEORY_TOPIC_"),
-            QuestionType.CODING, extractTopics(prompts, "CODING_TOPIC_"));
+                QuestionType.BEHAVIOURAL, extractTopics(prompts, "BEHAVIOURAL_TOPIC_"),
+                QuestionType.THEORY, extractTopics(prompts, "THEORY_TOPIC_"),
+                QuestionType.CODING, extractTopics(prompts, "CODING_TOPIC_"));
         this.random = new Random();
     }
 
@@ -67,12 +70,12 @@ public class OpenAiQuestionService {
 
     public String generateQuestion(QuestionType type, Difficulty difficulty) throws IOException, InterruptedException {
         if (apiKey == null || apiKey.isBlank()) {
-            throw new IllegalStateException(
-                "OPENAI_API_KEY is not set. Add it to your local .env file (see .env.example).");
+            throw new ConfigurationException(
+                    "OPENAI_API_KEY is not set. Add it to your local .env file (see .env.example).");
         }
 
         IOException lastIoFailure = null;
-        RuntimeException lastRuntimeFailure = null;
+        NetworkException lastNetworkFailure = null;
 
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             try {
@@ -80,12 +83,12 @@ public class OpenAiQuestionService {
                 if (!question.isBlank()) {
                     return question;
                 }
-                lastRuntimeFailure = new IllegalStateException("OpenAI returned an empty response.");
+                lastNetworkFailure = new NetworkException("OpenAI returned an empty response.");
             } catch (IOException e) {
                 lastIoFailure = e;
-                lastRuntimeFailure = null;
-            } catch (RuntimeException e) {
-                lastRuntimeFailure = e;
+                lastNetworkFailure = null;
+            } catch (NetworkException e) {
+                lastNetworkFailure = e;
                 lastIoFailure = null;
             }
 
@@ -95,9 +98,9 @@ public class OpenAiQuestionService {
         }
 
         if (lastIoFailure != null) {
-            throw lastIoFailure;
+            throw new NetworkException("OpenAI question request failed after retries.", lastIoFailure);
         }
-        throw lastRuntimeFailure;
+        throw lastNetworkFailure;
     }
 
     public void setDifficulty(Difficulty difficulty) {
@@ -110,30 +113,34 @@ public class OpenAiQuestionService {
         payload.put("max_completion_tokens", maxCompletionTokensFor(type));
         payload.put("reasoning_effort", "minimal");
         payload.put("messages", new JSONArray()
-            .put(new JSONObject().put("role", "system").put(CONTENT_FIELD, systemPromptFor(type, difficulty)))
-            .put(new JSONObject().put("role", "user").put(CONTENT_FIELD, buildUserPrompt(type, difficulty))));
+                .put(new JSONObject().put("role", "system").put(CONTENT_FIELD, systemPromptFor(type, difficulty)))
+                .put(new JSONObject().put("role", "user").put(CONTENT_FIELD, buildUserPrompt(type, difficulty))));
 
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(API_URL))
-            .timeout(Duration.ofSeconds(30))
-            .header("Authorization", "Bearer " + apiKey)
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
-            .build();
+                .uri(URI.create(API_URL))
+                .timeout(Duration.ofSeconds(30))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
+                .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            throw new IllegalStateException(
-                "OpenAI request failed (HTTP " + response.statusCode() + "): " + response.body());
+            throw new NetworkException(
+                    "OpenAI request failed (HTTP " + response.statusCode() + "): " + response.body());
         }
 
-        JSONObject json = new JSONObject(response.body());
-        return json.getJSONArray("choices")
-            .getJSONObject(0)
-            .getJSONObject("message")
-            .getString(CONTENT_FIELD)
-            .trim();
+        try {
+            JSONObject json = new JSONObject(response.body());
+            return json.getJSONArray("choices")
+                    .getJSONObject(0)
+                    .getJSONObject("message")
+                    .getString(CONTENT_FIELD)
+                    .trim();
+        } catch (JSONException | IndexOutOfBoundsException e) {
+            throw new NetworkException("OpenAI returned an invalid question response.", e);
+        }
     }
 
     String systemPromptFor(QuestionType type) {
@@ -142,7 +149,7 @@ public class OpenAiQuestionService {
 
     String systemPromptFor(QuestionType type, Difficulty difficulty) {
         return systemPromptFor(type) + " The requested difficulty is " + difficulty
-            + "; enforce its expected depth and complexity strictly.";
+                + "; enforce its expected depth and complexity strictly.";
     }
 
     int maxCompletionTokensFor(QuestionType type) {
@@ -171,29 +178,29 @@ public class OpenAiQuestionService {
         List<String> topics = topicsByType.get(type);
         String topic = topics.get(random.nextInt(topics.size()));
         String template = prompts.get(type.name() + "_TEMPLATE")
-            .replace("{topic}", topic)
-            .replace("{difficulty}", difficulty.toString());
+                .replace("{topic}", topic)
+                .replace("{difficulty}", difficulty.toString());
         return template;
     }
 
     private static List<String> extractTopics(Map<String, String> prompts, String prefix) {
         return prompts.entrySet().stream()
-            .filter(entry -> entry.getKey().startsWith(prefix))
-            .sorted(Comparator.comparingInt(entry -> Integer.parseInt(entry.getKey().substring(prefix.length()))))
-            .map(Map.Entry::getValue)
-            .toList();
+                .filter(entry -> entry.getKey().startsWith(prefix))
+                .sorted(Comparator.comparingInt(entry -> Integer.parseInt(entry.getKey().substring(prefix.length()))))
+                .map(Map.Entry::getValue)
+                .toList();
     }
 
     private static Map<String, String> loadPrompts() {
         try (InputStream in = OpenAiQuestionService.class.getResourceAsStream(PROMPTS_RESOURCE)) {
             if (in == null) {
-                throw new IllegalStateException("Missing prompts resource: " + PROMPTS_RESOURCE);
+                throw new ConfigurationException("Missing prompts resource: " + PROMPTS_RESOURCE);
             }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
                 return KeyValueFile.parse(reader.lines());
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to read prompts resource: " + PROMPTS_RESOURCE, e);
+            throw new ConfigurationException("Failed to read prompts resource: " + PROMPTS_RESOURCE, e);
         }
     }
 }
