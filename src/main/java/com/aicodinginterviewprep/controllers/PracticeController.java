@@ -108,6 +108,7 @@ public class PracticeController implements SceneAware {
 
         task.setOnSucceeded(event -> {
             questionOutput.setText(task.getValue());
+            questionOutput.setMouseTransparent(false);
             buttonGenerateQuestion.setDisable(false);
             answerInput.setDisable(false);
             answerInput.setPromptText(ANSWER_PROMPT);
@@ -232,6 +233,7 @@ public class PracticeController implements SceneAware {
     
     private void clearQuestionAndAnswer(){
         questionOutput.clear();
+        questionOutput.setMouseTransparent(true);
         answerInput.clear();
         
 

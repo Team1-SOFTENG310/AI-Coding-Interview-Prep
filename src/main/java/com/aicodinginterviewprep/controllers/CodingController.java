@@ -80,7 +80,7 @@ public class CodingController implements SceneAware {
         codePlaceholder.getStyleClass().add("code-editor-placeholder");
         codePlaceholder.setMouseTransparent(true);
         StackPane.setAlignment(codePlaceholder, Pos.TOP_LEFT);
-        StackPane.setMargin(codePlaceholder, new Insets(1, 0, 0, 54));
+        StackPane.setMargin(codePlaceholder, new Insets(0, 0, 0, 30));
 
         codeEditor.textProperty().addListener((observable, oldText, newText) -> {
             updateCodePlaceholderVisibility();
@@ -119,6 +119,7 @@ public class CodingController implements SceneAware {
 
         task.setOnSucceeded(event -> {
             questionOutput.setText(task.getValue());
+            questionOutput.setMouseTransparent(false);
             buttonGenerateQuestion.setDisable(false);
             codeEditor.setDisable(false);
             codePlaceholder.setText(PLACEHOLDER_TEXT);
@@ -147,6 +148,7 @@ public class CodingController implements SceneAware {
 
     private void clearQuestionAndCode() {
         questionOutput.clear();
+        questionOutput.setMouseTransparent(true);
         codeEditor.clear();
     }
     public void runEvaluation() {
