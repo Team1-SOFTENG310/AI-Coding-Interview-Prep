@@ -1,5 +1,7 @@
 package com.aicodinginterviewprep;
 
+import com.aicodinginterviewprep.errors.AudioStateException;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -27,7 +29,7 @@ public class MicrophoneRecorder {
 
     void startRecording(TargetDataLine line) throws LineUnavailableException {
         if (recording) {
-            throw new IllegalStateException("Already recording.");
+            throw new AudioStateException("Already recording.");
         }
 
         this.line = line;
@@ -43,7 +45,7 @@ public class MicrophoneRecorder {
 
     public byte[] stopRecording() throws InterruptedException {
         if (!recording) {
-            throw new IllegalStateException("Not currently recording.");
+            throw new AudioStateException("Not currently recording.");
         }
 
         recording = false;

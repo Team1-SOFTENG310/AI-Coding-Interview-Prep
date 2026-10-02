@@ -1,6 +1,7 @@
 package com.aicodinginterviewprep;
 
 import com.aicodinginterviewprep.db.DatabaseMigrator;
+import com.aicodinginterviewprep.errors.AppErrorHandler;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -8,6 +9,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+        AppErrorHandler.install();
         // Basic JavaFX scaffold for the project setup
         stage.setTitle("AI Coding Interview Prep");
         stage.setWidth(1024);
@@ -26,6 +28,7 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
+        AppErrorHandler.install();
         launch();
     }
 }

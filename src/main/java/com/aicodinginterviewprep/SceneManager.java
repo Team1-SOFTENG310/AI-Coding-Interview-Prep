@@ -1,5 +1,7 @@
 package com.aicodinginterviewprep;
 
+import com.aicodinginterviewprep.errors.SceneLoadException;
+import com.aicodinginterviewprep.errors.ValidationException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -42,7 +44,7 @@ public class SceneManager {
 
         String fxmlPath = sceneMap.get(sceneName);
         if (fxmlPath == null) {
-            throw new IllegalArgumentException("Scene not found: " + sceneName);
+            throw new ValidationException("Scene not found: " + sceneName);
         }
 
         try {
@@ -62,7 +64,7 @@ public class SceneManager {
             stage.setScene(scene);
             notifySceneShown(sceneName);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load scene: " + sceneName, e);
+            throw new SceneLoadException("Failed to load scene: " + sceneName, e);
         }
     }
 

@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="practiceRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.PracticeController">
+<BorderPane fx:id="practiceRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.PracticeController">
 
    <padding>
       <Insets bottom="16" left="16" right="16" top="16" />
@@ -26,12 +26,18 @@
 
    <!-- ===== Question output ===== -->
    <left>
-      <VBox>
+      <VBox spacing="4.0">
          <padding>
             <Insets bottom="8" left="8" right="8" top="8" />
          </padding>
-         <Label styleClass="section-label" text="Question" />
-         <TextArea fx:id="questionOutput" editable="false" prefHeight="634.0" prefRowCount="8" prefWidth="400.0" promptText="Generate a question to begin." styleClass="question-label" wrapText="true" VBox.vgrow="ALWAYS" />
+         <HBox alignment="CENTER_LEFT" minHeight="-Infinity" prefHeight="45.0" prefWidth="200.0">
+            <children>
+               <Label styleClass="section-label" text="Question" />
+               <Region prefHeight="45.0" prefWidth="54.0" />
+               <ComboBox fx:id="comboQuestionType" prefWidth="260" promptText="Question type" />
+            </children>
+         </HBox>
+         <TextArea fx:id="questionOutput" mouseTransparent="true" editable="false" prefHeight="634.0" prefRowCount="8" prefWidth="400.0" promptText="Generate a question to begin." styleClass="question-label" wrapText="true" VBox.vgrow="ALWAYS" />
       </VBox>
    </left>
 
@@ -43,10 +49,10 @@
          </padding>
          <HBox alignment="CENTER_LEFT" spacing="10">
             <Label styleClass="section-label" text="Your explanation" />
+            <Label fx:id="labelVoiceStatus" styleClass="voice-status-label" />
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="buttonVoiceInput" disable="true" mnemonicParsing="false" onAction="#onVoiceInput" text="Record Answer" />
          </HBox>
-         <Label fx:id="labelVoiceStatus" styleClass="voice-status-label" />
          <TextArea fx:id="answerInput" disable="true" prefHeight="633.0" prefRowCount="20" promptText="Generate a question first to start answering." wrapText="true" VBox.vgrow="ALWAYS" />
       </VBox>
    </center>
@@ -57,7 +63,6 @@
          <padding>
             <Insets left="8" right="8" top="12" />
          </padding>
-         <ComboBox fx:id="comboQuestionType" prefWidth="260" promptText="Question type" />
          <ComboBox fx:id="comboDifficulty" prefWidth="150" promptText="Difficulty" />
          <Button fx:id="buttonGenerateQuestion" onAction="#onGenerateQuestion" text="Generate new question" />
          <Button fx:id="buttonCodingPractice" onAction="#onCodingPractice" text="LeetCode Practice" />

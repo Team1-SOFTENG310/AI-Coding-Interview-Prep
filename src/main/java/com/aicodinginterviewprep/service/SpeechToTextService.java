@@ -1,5 +1,6 @@
 package com.aicodinginterviewprep.service;
 
+import com.aicodinginterviewprep.errors.SpeechRecognitionException;
 import org.json.JSONObject;
 import org.vosk.LibVosk;
 import org.vosk.LogLevel;
@@ -46,7 +47,7 @@ public class SpeechToTextService {
 
     public synchronized String transcribe(byte[] pcmAudio) throws IOException {
         if (pcmAudio == null || pcmAudio.length == 0) {
-            throw new IllegalStateException("No audio was recorded.");
+            throw new SpeechRecognitionException("No audio was recorded.");
         }
         if (isSilent(pcmAudio)) {
             return "";
@@ -81,9 +82,9 @@ public class SpeechToTextService {
             return;
         }
         if (!Files.isDirectory(modelPath)) {
-            throw new IllegalStateException(
-                "Offline speech model not found at " + modelPath.toAbsolutePath()
-                    + ". See README for setup instructions.");
+            throw new SpeechRecognitionException(
+                    "Offline speech model not found at " + modelPath.toAbsolutePath()
+                            + ". See README for setup instructions.");
         }
 
         LibVosk.setLogLevel(LogLevel.WARNINGS);

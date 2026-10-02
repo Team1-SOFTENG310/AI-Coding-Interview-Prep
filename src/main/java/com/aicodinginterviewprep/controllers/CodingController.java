@@ -4,6 +4,7 @@ import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
+import com.aicodinginterviewprep.errors.AppErrorHandler;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -34,7 +35,7 @@ public class CodingController implements SceneAware {
     public Label codePlaceholder;
 
     @FXML public StackPane codeEditorContainer;
-   
+
     @FXML public Button buttonSubmitAnswer;
     @FXML public Button buttonGenerateQuestion;
     @FXML public Button buttonPractice;
@@ -80,7 +81,7 @@ public class CodingController implements SceneAware {
         codePlaceholder.getStyleClass().add("code-editor-placeholder");
         codePlaceholder.setMouseTransparent(true);
         StackPane.setAlignment(codePlaceholder, Pos.TOP_LEFT);
-        StackPane.setMargin(codePlaceholder, new Insets(1, 0, 0, 54));
+        StackPane.setMargin(codePlaceholder, new Insets(0, 0, 0, 30));
 
         codeEditor.textProperty().addListener((observable, oldText, newText) -> {
             updateCodePlaceholderVisibility();
@@ -119,15 +120,15 @@ public class CodingController implements SceneAware {
 
         task.setOnSucceeded(event -> {
             questionOutput.setText(task.getValue());
+            questionOutput.setMouseTransparent(false);
             buttonGenerateQuestion.setDisable(false);
             codeEditor.setDisable(false);
             codePlaceholder.setText(PLACEHOLDER_TEXT);
         });
 
         task.setOnFailed(event -> {
-            Throwable error = task.getException();
-            String message = error != null ? error.getMessage() : "Unknown error.";
-            questionOutput.setText("Failed to generate question: " + message);
+            AppErrorHandler.report(task.getException(), "Generating coding question",
+                    message -> questionOutput.setText("Failed to generate question: " + message));
             buttonGenerateQuestion.setDisable(false);
         });
 
@@ -147,6 +148,7 @@ public class CodingController implements SceneAware {
 
     private void clearQuestionAndCode() {
         questionOutput.clear();
+        questionOutput.setMouseTransparent(true);
         codeEditor.clear();
     }
     public void runEvaluation() {
