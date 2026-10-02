@@ -85,14 +85,14 @@ public class Authenticator {
         password = password.strip();
         // reject blank username and password after stripping
         if (username.isBlank() || password.isBlank()) {
-            throw new IllegalArgumentException("Username and password cannot be blank");
+            throw new ValidationException("Username and password cannot be blank");
         }
         // password length check (8 to 64 characters)
         if (password.length() < 8 || password.length() > 64) {
-            throw new IllegalArgumentException("Password must be between 8 and 64 characters");
+            throw new ValidationException("Password must be between 8 and 64 characters");
         }
         if (!meetsPasswordComplexityRequirements(password)) {
-            throw new IllegalArgumentException(
+            throw new ValidationException(
                 "Password must contain at least one uppercase letter, one " +
                         "lowercase letter, one number and one special character."
             );
