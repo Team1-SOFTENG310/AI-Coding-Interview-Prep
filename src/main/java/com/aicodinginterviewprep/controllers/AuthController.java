@@ -83,6 +83,14 @@ public class AuthController implements SceneAware {
         String username = textfieldUsername.getText();
         String password = passwordfieldPassword.getText();
 
+        // strip whitespaces to match authenticator format
+        if (username != null) {
+            username = username.strip();
+        }
+        if (password != null) {
+            password = password.strip();
+        }
+
         if (!authenticator.login(username, password)) {
             labelMessage.setText("Incorrect username or password.");
             return;
@@ -112,6 +120,10 @@ public class AuthController implements SceneAware {
                     "Saving account", message -> labelMessage.setText("Unable to save account: " + message));
             return;
         }
+
+        // strip whitespaces to match authenticator format
+        username = username.strip();
+        password = password.strip();
 
         authenticator.login(username, password);
         sceneManager.setCurrentUsername(username);
