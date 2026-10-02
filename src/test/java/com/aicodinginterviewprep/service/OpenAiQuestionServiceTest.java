@@ -138,6 +138,41 @@ class OpenAiQuestionServiceTest {
     }
 
     @Test
+    void getAvailableTopicsReturnsShortTopicNames() {
+        OpenAiQuestionService service = new OpenAiQuestionService(mock(HttpClient.class), "key", "model");
+
+        assertTrue(service.getAvailableTopics(QuestionType.BEHAVIOURAL).contains("Teamwork"));
+        assertTrue(service.getAvailableTopics(QuestionType.THEORY).contains("Databases / SQL"));
+        assertTrue(service.getAvailableTopics(QuestionType.CODING).contains("Graphs"));
+    }
+
+    @Test
+    void buildUserPromptUsesSelectedTopicAndDifficulty() {
+        OpenAiQuestionService service = new OpenAiQuestionService(mock(HttpClient.class), "key", "model");
+
+        String prompt = service.buildUserPrompt(
+            QuestionType.THEORY,
+            Difficulty.HARD,
+            "Databases / SQL"
+        );
+
+        assertTrue(prompt.contains("Databases / SQL - SQL queries, joins"));
+        assertTrue(prompt.contains("at exactly Hard difficulty"));
+    }
+
+    @Test
+    void buildUserPromptRejectsUnknownTopic() {
+        OpenAiQuestionService service = new OpenAiQuestionService(mock(HttpClient.class), "key", "model");
+
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> service.buildUserPrompt(QuestionType.CODING, Difficulty.MEDIUM, "Databases / SQL")
+        );
+
+        assertTrue(exception.getMessage().contains("Unknown coding topic"));
+    }
+
+    @Test
     void buildUserPromptRotatesAcrossMultipleBehaviouralTopics() {
         OpenAiQuestionService service = new OpenAiQuestionService(mock(HttpClient.class), "key", "model");
 

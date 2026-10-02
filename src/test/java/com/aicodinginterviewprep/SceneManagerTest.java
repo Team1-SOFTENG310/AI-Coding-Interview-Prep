@@ -246,6 +246,32 @@ class SceneManagerTest {
     }
 
     @Test
+    void switchToScene_practiceLoadsTopicSelector() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+
+            manager.switchToScene("practice");
+
+            assertNotNull(manager.getCurrentScene().lookup("#comboTopic"));
+            stage.close();
+        });
+    }
+
+    @Test
+    void switchToScene_codingLoadsTopicSelector() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+
+            manager.switchToScene("coding");
+
+            assertNotNull(manager.getCurrentScene().lookup("#comboTopic"));
+            stage.close();
+        });
+    }
+
+    @Test
     void getCurrentUsername_initiallyNull() {
         assertNull(sceneManager.getCurrentUsername());
     }

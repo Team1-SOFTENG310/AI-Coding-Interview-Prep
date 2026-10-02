@@ -32,6 +32,7 @@ public class OpenAiQuestionService {
     private static final int MAX_COMPLETION_TOKENS = 100;
     private static final int MAX_COMPLETION_TOKENS_CODING = 450;
     private static final String CONTENT_FIELD = "content";
+    private static final String TOPIC_SEPARATOR = " - ";
     private static final List<String> CODING_DIFFICULTIES = List.of("Easy", "Medium", "Hard");
     private static final int MAX_ATTEMPTS = 3;
     private static final long RETRY_DELAY_MS = 400;
@@ -69,6 +70,11 @@ public class OpenAiQuestionService {
     }
 
     public String generateQuestion(QuestionType type, Difficulty difficulty) throws IOException, InterruptedException {
+        return generateQuestion(type, difficulty, null);
+    }
+
+    public String generateQuestion(QuestionType type, Difficulty difficulty, String topic)
+            throws IOException, InterruptedException {
         if (apiKey == null || apiKey.isBlank()) {
             throw new ConfigurationException(
                     "OPENAI_API_KEY is not set. Add it to your local .env file (see .env.example).");
@@ -79,7 +85,7 @@ public class OpenAiQuestionService {
 
         for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             try {
-                String question = requestQuestion(type, difficulty);
+                String question = requestQuestion(type, difficulty, topic);
                 if (!question.isBlank()) {
                     return question;
                 }
@@ -107,14 +113,22 @@ public class OpenAiQuestionService {
         this.selectedDifficulty = difficulty;
     }
 
-    private String requestQuestion(QuestionType type, Difficulty difficulty) throws IOException, InterruptedException {
+    public List<String> getAvailableTopics(QuestionType type) {
+        return topicsFor(type).stream()
+            .map(OpenAiQuestionService::topicName)
+            .toList();
+    }
+
+    private String requestQuestion(QuestionType type, Difficulty difficulty, String topic)
+            throws IOException, InterruptedException {
         JSONObject payload = new JSONObject();
         payload.put("model", model);
         payload.put("max_completion_tokens", maxCompletionTokensFor(type));
         payload.put("reasoning_effort", "minimal");
         payload.put("messages", new JSONArray()
                 .put(new JSONObject().put("role", "system").put(CONTENT_FIELD, systemPromptFor(type, difficulty)))
-                .put(new JSONObject().put("role", "user").put(CONTENT_FIELD, buildUserPrompt(type, difficulty))));
+                .put(new JSONObject().put("role", "user")
+                        .put(CONTENT_FIELD, buildUserPrompt(type, difficulty, topic))));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(API_URL))
@@ -175,12 +189,41 @@ public class OpenAiQuestionService {
     }
 
     String buildUserPrompt(QuestionType type, Difficulty difficulty) {
-        List<String> topics = topicsByType.get(type);
-        String topic = topics.get(random.nextInt(topics.size()));
+        return buildUserPrompt(type, difficulty, null);
+    }
+
+    String buildUserPrompt(QuestionType type, Difficulty difficulty, String topic) {
+        String promptTopic = resolveTopic(type, topic);
         String template = prompts.get(type.name() + "_TEMPLATE")
-                .replace("{topic}", topic)
+                .replace("{topic}", promptTopic)
                 .replace("{difficulty}", difficulty.toString());
         return template;
+    }
+
+    private String resolveTopic(QuestionType type, String topic) {
+        List<String> topics = topicsFor(type);
+        if (topic == null) {
+            return topics.get(random.nextInt(topics.size()));
+        }
+
+        return topics.stream()
+            .filter(configuredTopic -> topicName(configuredTopic).equals(topic))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Unknown " + type.toString().toLowerCase() + " topic: " + topic));
+    }
+
+    private List<String> topicsFor(QuestionType type) {
+        List<String> topics = topicsByType.get(type);
+        if (topics == null || topics.isEmpty()) {
+            throw new IllegalArgumentException("No topics configured for question type: " + type);
+        }
+        return topics;
+    }
+
+    private static String topicName(String topic) {
+        int separatorIndex = topic.indexOf(TOPIC_SEPARATOR);
+        return separatorIndex < 0 ? topic : topic.substring(0, separatorIndex);
     }
 
     private static List<String> extractTopics(Map<String, String> prompts, String prefix) {
