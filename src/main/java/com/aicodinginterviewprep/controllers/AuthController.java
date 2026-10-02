@@ -3,6 +3,9 @@ package com.aicodinginterviewprep.controllers;
 import com.aicodinginterviewprep.Authenticator;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
+import com.aicodinginterviewprep.errors.AppErrorHandler;
+import com.aicodinginterviewprep.errors.PersistenceException;
+import com.aicodinginterviewprep.errors.ValidationException;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -80,6 +83,14 @@ public class AuthController implements SceneAware {
         String username = textfieldUsername.getText();
         String password = passwordfieldPassword.getText();
 
+        // strip whitespaces to match authenticator format
+        if (username != null) {
+            username = username.strip();
+        }
+        if (password != null) {
+            password = password.strip();
+        }
+
         if (!authenticator.login(username, password)) {
             labelMessage.setText("Incorrect username or password.");
             return;
@@ -101,13 +112,18 @@ public class AuthController implements SceneAware {
         try {
             authenticator.signUp(username, password);
             authenticator.writeUserProfiles();
-        } catch (IllegalArgumentException e) {
-            labelMessage.setText(e.getMessage());
+        } catch (ValidationException e) {
+            AppErrorHandler.report(e, "Validating account details", labelMessage::setText);
             return;
         } catch (IOException e) {
-            labelMessage.setText("Unable to save account: " + e.getMessage());
+            AppErrorHandler.report(new PersistenceException("Unable to save account", e),
+                    "Saving account", message -> labelMessage.setText("Unable to save account: " + message));
             return;
         }
+
+        // strip whitespaces to match authenticator format
+        username = username.strip();
+        password = password.strip();
 
         authenticator.login(username, password);
         sceneManager.setCurrentUsername(username);

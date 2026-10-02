@@ -1,5 +1,7 @@
 package com.aicodinginterviewprep;
 
+import com.aicodinginterviewprep.errors.PersistenceException;
+import com.aicodinginterviewprep.errors.ValidationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,7 +30,7 @@ public class Authenticator {
         try {
             readUserProfiles();
         } catch (IOException exception) {
-            throw new IllegalStateException("Unable to read user profiles from " + fileName, exception);
+            throw new PersistenceException("Unable to read user profiles from " + fileName, exception);
         }
     }
 
@@ -39,8 +41,8 @@ public class Authenticator {
                 return;
             }
             userProfiles = objectMapper.readValue(
-                inputStream,
-                new TypeReference<ArrayList<UserProfile>>() {}
+                    inputStream,
+                    new TypeReference<ArrayList<UserProfile>>() {}
             );
         }
     }
@@ -48,10 +50,10 @@ public class Authenticator {
     public void writeUserProfiles() throws IOException {
         Path outputPath = Path.of(fileName);
         try (OutputStream outputStream = Files.newOutputStream(
-            outputPath,
-            StandardOpenOption.CREATE,
-            StandardOpenOption.TRUNCATE_EXISTING,
-            StandardOpenOption.WRITE
+                outputPath,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE
         )) {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, userProfiles);
         }
@@ -76,16 +78,44 @@ public class Authenticator {
 
     public void signUp(String username, String password) {
         if (username == null || password == null) {
-            throw new IllegalArgumentException("Username and password cannot be null");
+            throw new ValidationException("Username and password cannot be null");
+        }
+        // strip blank spaces around username and password
+        username = username.strip();
+        password = password.strip();
+        // reject blank username and password after stripping
+        if (username.isBlank() || password.isBlank()) {
+            throw new ValidationException("Username and password cannot be blank");
+        }
+        // password length check (8 to 64 characters)
+        if (password.length() < 8 || password.length() > 64) {
+            throw new ValidationException("Password must be between 8 and 64 characters");
+        }
+        if (!meetsPasswordComplexityRequirements(password)) {
+            throw new ValidationException(
+                "Password must contain at least one uppercase letter, one " +
+                        "lowercase letter, one number and one special character."
+            );
         }
         for (UserProfile userProfile : userProfiles) { // Checks if the account already exists
             if (userProfile.getUsername().equals(username)) {
-                throw new IllegalArgumentException("Account already exists");
+                throw new ValidationException("Account already exists");
             }
         }
         UserProfile userProfile = new UserProfile(username, password);
         userProfiles.add(userProfile); // Add the new account
         currentUserProfile = userProfile;
+    }
+
+    private static boolean meetsPasswordComplexityRequirements(String password) {
+        boolean hasUppercaseLetter = password.chars().anyMatch(character -> character >= 'A' && character <= 'Z');
+        boolean hasLowercaseLetter = password.chars().anyMatch(character -> character >= 'a' && character <= 'z');
+        boolean hasNumber = password.chars().anyMatch(character -> character >= '0' && character <= '9');
+        boolean hasSymbol = password.chars().anyMatch(
+            character -> !Character.isLetterOrDigit(character) && !Character.isWhitespace(character)
+        );
+
+        return hasUppercaseLetter && hasLowercaseLetter && hasNumber && hasSymbol;
     }
 
 

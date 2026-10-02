@@ -1,5 +1,7 @@
 package com.aicodinginterviewprep.config;
 
+import com.aicodinginterviewprep.errors.ConfigurationException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +36,7 @@ public final class EnvConfig {
         try (Stream<String> lines = Files.lines(envFile)) {
             return KeyValueFile.parse(lines);
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to read .env file", e);
+            throw new ConfigurationException("Failed to read .env file", e);
         }
     }
 }

@@ -1,9 +1,11 @@
 package com.aicodinginterviewprep.openai;
 
+import com.aicodinginterviewprep.errors.NetworkException;
+
 /**
  * Custom exception representing errors occurring during OpenAI API calls or response processing.
  */
-public class OpenAiApiException extends RuntimeException {
+public class OpenAiApiException extends NetworkException {
 
     private final int statusCode;
     private final String responseBody;
