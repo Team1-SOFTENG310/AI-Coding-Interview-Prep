@@ -3,6 +3,7 @@ package com.aicodinginterviewprep.controllers;
 import com.aicodinginterviewprep.Authenticator;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
+import com.aicodinginterviewprep.db.UserRepository;
 import com.aicodinginterviewprep.errors.AppErrorHandler;
 import com.aicodinginterviewprep.errors.PersistenceException;
 import com.aicodinginterviewprep.errors.ValidationException;
@@ -14,11 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-import java.io.IOException;
-
 public class AuthController implements SceneAware {
-    private static final String ACCOUNTS_FILE = "src/main/resources/authorisation/accounts.json";
-
     private SceneManager sceneManager;
     private Authenticator authenticator;
     private boolean passwordVisible = false;
@@ -35,7 +32,7 @@ public class AuthController implements SceneAware {
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
-        this.authenticator = new Authenticator(ACCOUNTS_FILE);
+        this.authenticator = new Authenticator(new UserRepository());
         textfieldPasswordVisible.textProperty().bindBidirectional(passwordfieldPassword.textProperty());
         textfieldPasswordVisible.setVisible(false);
         textfieldPasswordVisible.setManaged(false);
@@ -91,7 +88,15 @@ public class AuthController implements SceneAware {
             password = password.strip();
         }
 
-        if (!authenticator.login(username, password)) {
+        boolean loggedIn;
+        try {
+            loggedIn = authenticator.login(username, password);
+        } catch (PersistenceException e) {
+            AppErrorHandler.report(e, "Logging in",
+                    message -> labelMessage.setText("Unable to log in: " + message));
+            return;
+        }
+        if (!loggedIn) {
             labelMessage.setText("Incorrect username or password.");
             return;
         }
@@ -111,21 +116,18 @@ public class AuthController implements SceneAware {
 
         try {
             authenticator.signUp(username, password);
-            authenticator.writeUserProfiles();
         } catch (ValidationException e) {
             AppErrorHandler.report(e, "Validating account details", labelMessage::setText);
             return;
-        } catch (IOException e) {
-            AppErrorHandler.report(new PersistenceException("Unable to save account", e),
-                    "Saving account", message -> labelMessage.setText("Unable to save account: " + message));
+        } catch (PersistenceException e) {
+            AppErrorHandler.report(e, "Saving account",
+                    message -> labelMessage.setText("Unable to save account: " + message));
             return;
         }
 
         // strip whitespaces to match authenticator format
         username = username.strip();
-        password = password.strip();
 
-        authenticator.login(username, password);
         sceneManager.setCurrentUsername(username);
         resetForm();
         sceneManager.switchToScene("practice");

@@ -139,9 +139,7 @@ https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip
   data) - if `models/vosk-model-en-us-0.22-lgraph/` is missing locally, voice
   input will show a clear error telling you to download it; every other
   feature works without it.
-- **Account data is stored as plaintext JSON** in
-  `src/main/resources/authorisation/accounts.json` - this is fine for local
-  development and demos, but isn't representative of how a real production
-  auth system would store credentials.
+- **Accounts are stored in the database** (`user_account` table) with PBKDF2-hashed
+  passwords; the app needs the MySQL connection settings described above.
 - **Java Version 25** will lead to failing tests. The project itself compiles and runs but the test will fail.
   To resolve it, a lower version is necessary. Either Java 17 or 21

@@ -1,77 +1,31 @@
 package com.aicodinginterviewprep;
 
-import com.aicodinginterviewprep.errors.PersistenceException;
+import com.aicodinginterviewprep.db.UserAccount;
+import com.aicodinginterviewprep.db.UserRepository;
 import com.aicodinginterviewprep.errors.ValidationException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-
-//
+import java.util.Optional;
 
 public class Authenticator {
 
-    private final String fileName;
-    private ArrayList<UserProfile> userProfiles;
-    private final ObjectMapper objectMapper;
-    private UserProfile currentUserProfile;
+    private static final int MIN_USERNAME_LENGTH = 3;
+    private static final int MAX_USERNAME_LENGTH = 30;
 
-    public Authenticator(String fileName) {
-        this.fileName = fileName;
-        this.objectMapper = new ObjectMapper();
-        this.userProfiles = new ArrayList<>();
-        try {
-            readUserProfiles();
-        } catch (IOException exception) {
-            throw new PersistenceException("Unable to read user profiles from " + fileName, exception);
-        }
-    }
+    private final UserRepository users;
+    private UserAccount currentUser;
 
-    public void readUserProfiles() throws IOException {
-        try (InputStream inputStream = openInputStream()) {
-            if (inputStream == null) {
-                userProfiles = new ArrayList<>();
-                return;
-            }
-            userProfiles = objectMapper.readValue(
-                    inputStream,
-                    new TypeReference<ArrayList<UserProfile>>() {}
-            );
-        }
-    }
-
-    public void writeUserProfiles() throws IOException {
-        Path outputPath = Path.of(fileName);
-        try (OutputStream outputStream = Files.newOutputStream(
-                outputPath,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.WRITE
-        )) {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, userProfiles);
-        }
-    }
-
-    public List<UserProfile> getUserProfiles() {
-        return userProfiles;
+    public Authenticator(UserRepository users) {
+        this.users = users;
     }
 
     public boolean login(String username, String password) {
         if (username == null || password == null) { // return false if information is missing
             return false;
         }
-        for (UserProfile userProfile : userProfiles) {
-            if (userProfile.nameAndPasswordMatch(username, password)) { // If a matching profile is found, set it as the logged in profile
-                currentUserProfile = userProfile;
-                return true;
-            }
+        Optional<UserAccount> account = users.findByUsername(username);
+        if (account.isPresent() && PasswordHasher.verify(password, account.get().passwordHash())) {
+            currentUser = account.get();
+            return true;
         }
         return false;
     }
@@ -87,6 +41,9 @@ public class Authenticator {
         if (username.isBlank() || password.isBlank()) {
             throw new ValidationException("Username and password cannot be blank");
         }
+        if (username.length() < MIN_USERNAME_LENGTH || username.length() > MAX_USERNAME_LENGTH) {
+            throw new ValidationException("Username must be between 3 and 30 characters");
+        }
         // password length check (8 to 64 characters)
         if (password.length() < 8 || password.length() > 64) {
             throw new ValidationException("Password must be between 8 and 64 characters");
@@ -97,14 +54,15 @@ public class Authenticator {
                         "lowercase letter, one number and one special character."
             );
         }
-        for (UserProfile userProfile : userProfiles) { // Checks if the account already exists
-            if (userProfile.getUsername().equals(username)) {
-                throw new ValidationException("Account already exists");
-            }
+        try {
+            currentUser = users.create(username, PasswordHasher.hash(password));
+        } catch (UserRepository.DuplicateUsernameException e) {
+            throw new ValidationException("Account already exists");
         }
-        UserProfile userProfile = new UserProfile(username, password);
-        userProfiles.add(userProfile); // Add the new account
-        currentUserProfile = userProfile;
+    }
+
+    public Optional<UserAccount> getCurrentUser() {
+        return Optional.ofNullable(currentUser);
     }
 
     private static boolean meetsPasswordComplexityRequirements(String password) {
@@ -117,21 +75,5 @@ public class Authenticator {
 
         return hasUppercaseLetter && hasLowercaseLetter && hasNumber && hasSymbol;
     }
-
-
-    public void updateUserScore(boolean correct) {
-        currentUserProfile.questionAnswered(correct); // Updates the user score, use true if answer was correct, false if not
-    }
-
-    public int getUserScore() {
-        return currentUserProfile.getQuestionsCorrect();
-    }
-
-    private InputStream openInputStream() throws IOException { // Attempt to open the file as a Path first, if it exists, return its InputStream; otherwise, try to load it as a resource from the classpath
-        Path inputPath = Path.of(fileName);
-        if (Files.exists(inputPath)) {
-            return Files.newInputStream(inputPath);
-        }
-        return Authenticator.class.getClassLoader().getResourceAsStream(fileName);
-    }
 }
+

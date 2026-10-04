@@ -93,7 +93,7 @@ public class SavedQuestionRepository {
         }
     }
 
-    static String hash(String text) {
+    public static String hash(String text) {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256")
                     .digest(text.strip().getBytes(StandardCharsets.UTF_8));

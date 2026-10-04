@@ -2,9 +2,11 @@ package com.aicodinginterviewprep.controllers;
 
 import com.aicodinginterviewprep.Authenticator;
 import com.aicodinginterviewprep.SceneManager;
+import com.aicodinginterviewprep.db.ConnectionFactory;
+import com.aicodinginterviewprep.db.TestDatabase;
+import com.aicodinginterviewprep.db.UserRepository;
 
 import java.lang.reflect.Field;
-import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -19,7 +21,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -76,20 +77,24 @@ class AuthControllerTest {
         return controller;
     }
 
-    private void useTempAuthenticator(AuthController controller, Path accountsFile) throws Exception {
+    private void useTestAuthenticator(AuthController controller) throws Exception {
+        setAuthenticator(controller, new TestDatabase().connections());
+    }
+
+    private void setAuthenticator(AuthController controller, ConnectionFactory connections) throws Exception {
         Field field = AuthController.class.getDeclaredField("authenticator");
         field.setAccessible(true);
-        field.set(controller, new Authenticator(accountsFile.toString()));
+        field.set(controller, new Authenticator(new UserRepository(connections)));
     }
 
     @Test
-    void signUpWithNewAccountNavigatesToPractice(@TempDir Path tempDir) throws Exception {
+    void signUpWithNewAccountNavigatesToPractice() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("alice");
                 controller.passwordfieldPassword.setText("Secret123!");
@@ -104,13 +109,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void signUpWithNewAccount_setsCurrentUsernameOnSceneManager(@TempDir Path tempDir) throws Exception {
+    void signUpWithNewAccount_setsCurrentUsernameOnSceneManager() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("alice");
                 controller.passwordfieldPassword.setText("Secret123!");
@@ -124,13 +129,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void signUpWithBlankUsernameShowsMessageAndDoesNotNavigate(@TempDir Path tempDir) throws Exception {
+    void signUpWithBlankUsernameShowsMessageAndDoesNotNavigate() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("");
                 controller.passwordfieldPassword.setText("Secret123!");
@@ -145,13 +150,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void signUpWithShortPasswordShowsMessageAndDoesNotNavigate(@TempDir Path tempDir) throws Exception {
+    void signUpWithShortPasswordShowsMessageAndDoesNotNavigate() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("alice");
                 controller.passwordfieldPassword.setText("Short7!");
@@ -169,15 +174,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void signUpWithPasswordMissingRequiredCharacterTypeShowsMessageAndDoesNotNavigate(
-        @TempDir Path tempDir
-    ) throws Exception {
+    void signUpWithPasswordMissingRequiredCharacterTypeShowsMessageAndDoesNotNavigate() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("alice");
                 controller.passwordfieldPassword.setText("lowercase1!");
@@ -196,13 +199,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void signUpWithSurroundingSpacesUsesTrimmedCredentials(@TempDir Path tempDir) throws Exception {
+    void signUpWithSurroundingSpacesUsesTrimmedCredentials() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("  alice  ");
                 controller.passwordfieldPassword.setText("  Secret123!  ");
@@ -228,13 +231,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void signUpWithExistingAccountShowsErrorInsteadOfCrashing(@TempDir Path tempDir) throws Exception {
+    void signUpWithExistingAccountShowsErrorInsteadOfCrashing() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("bob");
                 controller.passwordfieldPassword.setText("Hunter2!");
@@ -254,13 +257,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void logInWithCorrectCredentialsNavigatesToPractice(@TempDir Path tempDir) throws Exception {
+    void logInWithCorrectCredentialsNavigatesToPractice() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("carol");
                 controller.passwordfieldPassword.setText("Letmein8!");
@@ -280,13 +283,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void logInWithCorrectCredentials_setsCurrentUsernameOnSceneManager(@TempDir Path tempDir) throws Exception {
+    void logInWithCorrectCredentials_setsCurrentUsernameOnSceneManager() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("carol");
                 controller.passwordfieldPassword.setText("Letmein8!");
@@ -305,13 +308,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void logInWithWrongPasswordShowsMessageAndDoesNotNavigate(@TempDir Path tempDir) throws Exception {
+    void logInWithWrongPasswordShowsMessageAndDoesNotNavigate() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("dave");
                 controller.passwordfieldPassword.setText("Correct1!");
@@ -331,13 +334,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void onPasswordSubmitsLogIn(@TempDir Path tempDir) throws Exception {
+    void onPasswordSubmitsLogIn() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("erin");
                 controller.passwordfieldPassword.setText("Passw0rd!");
@@ -377,14 +380,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void signUpWhenWriteFailsShowsErrorMessage(@TempDir Path tempDir) throws Exception {
+    void signUpWhenWriteFailsShowsErrorMessage() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                // Parent directory does not exist, so writing the accounts file will fail.
-                useTempAuthenticator(controller, tempDir.resolve("missing-dir").resolve("accounts.json"));
+                setAuthenticator(controller, TestDatabase.failing());
 
                 controller.textfieldUsername.setText("frank");
                 controller.passwordfieldPassword.setText("Secret123!");
@@ -392,6 +394,27 @@ class AuthControllerTest {
 
                 assertNull(sceneManager.lastScene);
                 assertTrue(controller.labelMessage.getText().startsWith("Unable to save account"));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @Test
+    void logInWhenDatabaseFailsShowsErrorMessage() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            try {
+                AuthController controller = createController();
+                FakeSceneManager sceneManager = new FakeSceneManager();
+                controller.setSceneManager(sceneManager);
+                setAuthenticator(controller, TestDatabase.failing());
+
+                controller.textfieldUsername.setText("frank");
+                controller.passwordfieldPassword.setText("Secret123!");
+                controller.onLogIn();
+
+                assertNull(sceneManager.lastScene);
+                assertTrue(controller.labelMessage.getText().startsWith("Unable to log in"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -474,13 +497,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void onSignUp_success_clearsUsernameAndPassword(@TempDir Path tempDir) throws Exception {
+    void onSignUp_success_clearsUsernameAndPassword() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("grace");
                 controller.passwordfieldPassword.setText("Hopper123!");
@@ -495,13 +518,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void onLogIn_success_clearsUsernameAndPassword(@TempDir Path tempDir) throws Exception {
+    void onLogIn_success_clearsUsernameAndPassword() throws Exception {
         runOnFxThreadAndWait(() -> {
             try {
                 AuthController controller = createController();
                 FakeSceneManager sceneManager = new FakeSceneManager();
                 controller.setSceneManager(sceneManager);
-                useTempAuthenticator(controller, tempDir.resolve("accounts.json"));
+                useTestAuthenticator(controller);
 
                 controller.textfieldUsername.setText("heidi");
                 controller.passwordfieldPassword.setText("Letmein456!");

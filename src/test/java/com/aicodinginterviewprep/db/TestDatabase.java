@@ -5,11 +5,11 @@ import org.flywaydb.core.Flyway;
 import java.util.UUID;
 
 /** Fresh in-memory H2 database (MySQL mode) with the real Flyway migrations applied. */
-final class TestDatabase {
+public final class TestDatabase {
 
     private final String url;
 
-    TestDatabase() {
+    public TestDatabase() {
         url = "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=MySQL;DB_CLOSE_DELAY=-1";
         Flyway.configure()
                 .dataSource(url, "sa", "")
@@ -18,11 +18,11 @@ final class TestDatabase {
                 .migrate();
     }
 
-    ConnectionFactory connections() {
+    public ConnectionFactory connections() {
         return () -> java.sql.DriverManager.getConnection(url, "sa", "");
     }
 
-    static ConnectionFactory failing() {
+    public static ConnectionFactory failing() {
         return () -> {
             throw new java.sql.SQLException("boom");
         };
