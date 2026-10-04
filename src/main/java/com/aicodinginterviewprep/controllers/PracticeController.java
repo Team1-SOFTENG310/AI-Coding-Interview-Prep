@@ -7,6 +7,7 @@ import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
 import com.aicodinginterviewprep.errors.AppErrorHandler;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
+import com.aicodinginterviewprep.service.SavedContentService;
 import com.aicodinginterviewprep.service.SpeechToTextService;
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
@@ -31,6 +32,8 @@ public class PracticeController implements SceneAware {
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
     private final MicrophoneRecorder microphoneRecorder = new MicrophoneRecorder();
     private final SpeechToTextService speechToTextService = new SpeechToTextService();
+    private SavedContentService savedContentService = new SavedContentService();
+    private SaveContentButton saveContent;
     private SceneManager sceneManager;
 
     public BorderPane practiceRoot;
@@ -45,6 +48,8 @@ public class PracticeController implements SceneAware {
     @FXML public Label labelVoiceStatus;
     @FXML public Label labelLoggedInAs;
     @FXML public Button buttonLogOut;
+    @FXML public Button buttonSave;
+    @FXML public Label labelSaveStatus;
     @FXML public ComboBox<QuestionType> comboQuestionType;
     @FXML public ComboBox<String> comboTopic;
     @FXML public ComboBox<Difficulty> comboDifficulty;
@@ -52,6 +57,8 @@ public class PracticeController implements SceneAware {
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
+        this.saveContent = new SaveContentButton(buttonSave, labelSaveStatus, () -> savedContentService,
+            () -> this.sceneManager.getCurrentUsername(), () -> answerInput.getText(), "text");
         this.comboQuestionType.getItems().setAll(QuestionType.BEHAVIOURAL, QuestionType.THEORY);
         this.comboQuestionType.setValue(QuestionType.BEHAVIOURAL);
         this.comboQuestionType.valueProperty().addListener(
@@ -99,6 +106,7 @@ public class PracticeController implements SceneAware {
         Difficulty difficulty = comboDifficulty == null ? Difficulty.MEDIUM : comboDifficulty.getValue();
         String topic = selectedTopic();
         buttonGenerateQuestion.setDisable(true);
+        saveContent.reset();
         questionOutput.setText("Generating question...");
         answerInput.clear();
         answerInput.setDisable(true);
@@ -119,6 +127,7 @@ public class PracticeController implements SceneAware {
             answerInput.setDisable(false);
             answerInput.setPromptText(ANSWER_PROMPT);
             buttonVoiceInput.setDisable(false);
+            saveContent.offer(task.getValue(), type, difficulty);
         });
 
         task.setOnFailed(event -> {
@@ -145,6 +154,11 @@ public class PracticeController implements SceneAware {
 
     public void onSubmitAnswer() {
         runEvaluation();
+    }
+
+    @FXML
+    public void onSave() {
+        saveContent.save();
     }
 
 
@@ -253,6 +267,7 @@ public class PracticeController implements SceneAware {
         questionOutput.clear();
         questionOutput.setMouseTransparent(true);
         answerInput.clear();
+        saveContent.reset();
 
 
     }

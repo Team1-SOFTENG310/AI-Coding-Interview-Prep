@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="codingRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.CodingController">
+<BorderPane fx:id="codingRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.CodingController">
 
    <padding>
       <Insets bottom="16" left="16" right="16" top="16" />
@@ -36,7 +36,7 @@
                <Label styleClass="section-label" text="Question" />
             </children>
          </HBox>
-         <TextArea fx:id="questionOutput" mouseTransparent="true" editable="false" prefHeight="634.0" prefRowCount="8" prefWidth="400.0" promptText="Generate a coding question to begin." styleClass="question-label" wrapText="true" VBox.vgrow="ALWAYS" />
+         <TextArea fx:id="questionOutput" editable="false" mouseTransparent="true" prefHeight="634.0" prefRowCount="8" prefWidth="400.0" promptText="Generate a coding question to begin." styleClass="question-label" wrapText="true" VBox.vgrow="ALWAYS" />
       </VBox>
    </left>
 
@@ -64,7 +64,9 @@
          <ComboBox fx:id="comboTopic" prefWidth="210" promptText="Topic" />
          <ComboBox fx:id="comboDifficulty" prefWidth="150" promptText="Difficulty" />
          <Button fx:id="buttonGenerateQuestion" onAction="#onGenerateQuestion" text="Generate new question" />
-         <Button fx:id="buttonPractice" onAction="#onPractice" text="Behavioural / Theory Practice" />
+         <Button fx:id="buttonPractice" onAction="#onPractice" text="Written Practice" />
+         <Button fx:id="buttonSave" disable="true" onAction="#onSave" text="Save" />
+         <Label fx:id="labelSaveStatus" styleClass="muted-label" />
          <Region HBox.hgrow="ALWAYS" />
          <Button fx:id="buttonSubmitAnswer" onAction="#onSubmitAnswer" text="Submit answer" />
       </HBox>
