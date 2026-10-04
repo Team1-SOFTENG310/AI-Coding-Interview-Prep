@@ -437,6 +437,19 @@ class PracticeControllerTest {
     }
 
     @Test
+    void onSavedQuestions_switchesToSavedScene() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            controller.onSavedQuestions();
+
+            assertEquals("saved", sceneManager.lastScene);
+        });
+    }
+
+    @Test
     void submittingAnAnswerResetsTheSaveButton() throws Exception {
         runOnFxThreadAndWait(() -> {
             PracticeController controller = createController();

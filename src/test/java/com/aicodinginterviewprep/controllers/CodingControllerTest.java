@@ -220,6 +220,19 @@ class CodingControllerTest {
     }
 
     @Test
+    void onSavedQuestions_switchesToSavedScene() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            CodingController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            controller.onSavedQuestions();
+
+            assertEquals("saved", sceneManager.lastScene);
+        });
+    }
+
+    @Test
     void submittingAnAnswerResetsTheSaveButton() throws Exception {
         runOnFxThreadAndWait(() -> {
             CodingController controller = createController();

@@ -168,6 +168,14 @@ public class PracticeController implements SceneAware {
     }
 
     @FXML
+    public void onSavedQuestions() {
+        sceneManager.switchToScene("saved");
+        if (sceneManager.getController("saved") instanceof SavedQuestionsController savedQuestions) {
+            savedQuestions.setReturnScene("practice");
+        }
+    }
+
+    @FXML
     public void onVoiceInput() {
         if (microphoneRecorder.isRecording()) {
             stopRecordingAndTranscribe();

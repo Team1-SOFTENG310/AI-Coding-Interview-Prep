@@ -21,6 +21,7 @@
       <HBox alignment="CENTER_LEFT" spacing="10">
          <Region HBox.hgrow="ALWAYS" />
          <Label fx:id="labelLoggedInAs" styleClass="muted-label" />
+         <Button mnemonicParsing="false" onAction="#onSavedQuestions" text="Saved Questions" />
          <Button fx:id="buttonLogOut" mnemonicParsing="false" onAction="#onLogOut" text="Log Out" />
       </HBox>
    </top>

@@ -167,6 +167,14 @@ public class CodingController implements SceneAware {
         sceneManager.switchToScene("practice");
     }
 
+    @FXML
+    public void onSavedQuestions() {
+        sceneManager.switchToScene("saved");
+        if (sceneManager.getController("saved") instanceof SavedQuestionsController savedQuestions) {
+            savedQuestions.setReturnScene("coding");
+        }
+    }
+
     private void clearQuestionAndCode() {
         questionOutput.clear();
         questionOutput.setMouseTransparent(true);

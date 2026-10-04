@@ -80,14 +80,26 @@ public class SavedQuestionRepository {
         return findByUserAndHash(userId, hash(questionText)).isPresent();
     }
 
-    /** Deletes only if the bookmark belongs to the given user. */
+    /** Deletes only if the bookmark belongs to the given user; its saved answers are deleted with it. */
     public boolean delete(long userId, long savedQuestionId) {
-        String sql = "DELETE FROM saved_question WHERE id = ? AND user_id = ?";
-        try (Connection connection = connections.open();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, savedQuestionId);
-            statement.setLong(2, userId);
-            return statement.executeUpdate() > 0;
+        String deleteSubmissions = "DELETE FROM code_submission WHERE saved_question_id = ? AND user_id = ?";
+        String deleteQuestion = "DELETE FROM saved_question WHERE id = ? AND user_id = ?";
+        try (Connection connection = connections.open()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement submissions = connection.prepareStatement(deleteSubmissions);
+                 PreparedStatement question = connection.prepareStatement(deleteQuestion)) {
+                submissions.setLong(1, savedQuestionId);
+                submissions.setLong(2, userId);
+                submissions.executeUpdate();
+                question.setLong(1, savedQuestionId);
+                question.setLong(2, userId);
+                boolean deleted = question.executeUpdate() > 0;
+                connection.commit();
+                return deleted;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new DataAccessException("Failed to delete saved question", e);
         }

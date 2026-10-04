@@ -117,15 +117,27 @@ class CodeSubmissionRepositoryTest {
     }
 
     @Test
-    void deletingBookmarkKeepsSubmissionButClearsLink() {
+    void deletingBookmarkDeletesItsSubmissionsOnly() {
+        SavedQuestion deleted = questions.save(aliceId, "Q1", "CODING", "EASY");
+        SavedQuestion kept = questions.save(aliceId, "Q2", "CODING", "EASY");
+        submissions.save(aliceId, deleted.id(), "Q1", "a", "java", null, null);
+        submissions.save(aliceId, deleted.id(), "Q1", "b", "java", null, null);
+        submissions.save(aliceId, kept.id(), "Q2", "c", "java", null, null);
+        submissions.save(aliceId, null, "Q3", "d", "java", null, null);
+
+        assertTrue(questions.delete(aliceId, deleted.id()));
+
+        assertEquals(List.of("d", "c"), submissions.findByUser(aliceId).stream().map(CodeSubmission::code).toList());
+    }
+
+    @Test
+    void deletingAnotherUsersBookmarkKeepsItsSubmissions() {
         SavedQuestion question = questions.save(aliceId, "Q1", "CODING", "EASY");
-        CodeSubmission saved = submissions.save(aliceId, question.id(), "Q1", "a", "java", null, null);
+        submissions.save(aliceId, question.id(), "Q1", "a", "java", null, null);
 
-        questions.delete(aliceId, question.id());
+        assertFalse(questions.delete(bobId, question.id()));
 
-        CodeSubmission reloaded = submissions.findById(aliceId, saved.id()).orElseThrow();
-        assertNull(reloaded.savedQuestionId());
-        assertEquals("a", reloaded.code());
+        assertEquals(1, submissions.findBySavedQuestion(aliceId, question.id()).size());
     }
 
     @Test
