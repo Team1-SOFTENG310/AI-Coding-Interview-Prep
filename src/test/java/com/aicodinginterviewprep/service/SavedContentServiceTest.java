@@ -117,6 +117,24 @@ class SavedContentServiceTest {
     }
 
     @Test
+    void saveQuestionAndAnswerWithoutAnAnswerStoresOnlyTheQuestion() {
+        var outcome = service.saveQuestionAndAnswer("alice", "Two Sum", "CODING", "EASY", "  ", "java");
+
+        assertEquals(SavedContentService.SaveOutcome.QUESTION_SAVED, outcome);
+        assertEquals(1, service.listSavedQuestions("alice").size());
+        assertTrue(service.listSubmissions("alice").isEmpty());
+    }
+
+    @Test
+    void saveQuestionAndAnswerStoresTheAnswerLinkedToTheQuestion() {
+        var outcome = service.saveQuestionAndAnswer("alice", "Two Sum", "CODING", "EASY", "int x;", "java");
+
+        assertEquals(SavedContentService.SaveOutcome.QUESTION_AND_ANSWER_SAVED, outcome);
+        long questionId = service.listSavedQuestions("alice").get(0).id();
+        assertEquals(1, service.listSubmissionsForQuestion("alice", questionId).size());
+    }
+
+    @Test
     void submissionRequiresQuestionCodeAndLanguage() {
         assertThrows(ValidationException.class, () -> service.recordSubmission("alice", "", "c", "java", null, null));
         assertThrows(ValidationException.class, () -> service.recordSubmission("alice", "Q", " ", "java", null, null));

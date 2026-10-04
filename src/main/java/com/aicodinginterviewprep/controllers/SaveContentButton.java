@@ -27,8 +27,6 @@ final class SaveContentButton {
     private String questionText;
     private QuestionType type;
     private Difficulty difficulty;
-    private boolean questionSaved;
-    private String lastSavedAnswer;
     private boolean saving;
     // Incremented on reset so a save finishing for an earlier question is ignored.
     private int generation;
@@ -52,8 +50,6 @@ final class SaveContentButton {
         questionText = null;
         type = null;
         difficulty = null;
-        questionSaved = false;
-        lastSavedAnswer = null;
         saving = false;
         button.setDisable(true);
         statusLabel.setText("");
@@ -72,11 +68,6 @@ final class SaveContentButton {
             return;
         }
         String answerText = answer.get();
-        boolean hasAnswer = answerText != null && !answerText.isBlank();
-        if (questionSaved && (!hasAnswer || answerText.equals(lastSavedAnswer))) {
-            statusLabel.setText(ALREADY_SAVED_MESSAGE);
-            return;
-        }
         SavedContentService savedContent = service.get();
         String user = username.get();
         String question = questionText;
@@ -87,25 +78,18 @@ final class SaveContentButton {
         saving = true;
         button.setDisable(true);
         statusLabel.setText(SAVING_MESSAGE);
-        background.get().run(() -> {
-            savedContent.saveQuestion(user, question, questionType, questionDifficulty);
-            if (hasAnswer) {
-                savedContent.recordSubmission(user, question, answerText, language, null, null);
-            }
-            return hasAnswer;
-        }, answerSaved -> {
+        background.get().run(() -> savedContent.saveQuestionAndAnswer(
+                user, question, questionType, questionDifficulty, answerText, language), outcome -> {
             if (savedGeneration != generation) {
                 return;
             }
             saving = false;
             button.setDisable(false);
-            questionSaved = true;
-            if (answerSaved) {
-                lastSavedAnswer = answerText;
-                statusLabel.setText(SAVED_QUESTION_AND_ANSWER_MESSAGE);
-            } else {
-                statusLabel.setText(SAVED_QUESTION_MESSAGE);
-            }
+            statusLabel.setText(switch (outcome) {
+                case QUESTION_SAVED -> SAVED_QUESTION_MESSAGE;
+                case QUESTION_AND_ANSWER_SAVED -> SAVED_QUESTION_AND_ANSWER_MESSAGE;
+                case ALREADY_SAVED -> ALREADY_SAVED_MESSAGE;
+            });
         }, error -> {
             if (savedGeneration != generation) {
                 return;

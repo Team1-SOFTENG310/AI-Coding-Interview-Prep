@@ -13,6 +13,9 @@ import java.util.List;
 /** Saved questions and code submissions, keyed by the signed-in user's username. */
 public class SavedContentService {
 
+    /** What a save changed; ALREADY_SAVED means everything requested was already stored. */
+    public enum SaveOutcome { QUESTION_SAVED, QUESTION_AND_ANSWER_SAVED, ALREADY_SAVED }
+
     private final UserRepository users;
     private final SavedQuestionRepository questions;
     private final CodeSubmissionRepository submissions;
@@ -68,6 +71,29 @@ public class SavedContentService {
                 .map(SavedQuestion::id)
                 .orElse(null);
         return submissions.save(userId, savedQuestionId, questionText.strip(), code, language, feedback, correct);
+    }
+
+    /** Bookmarks the question and, if there is a non-blank answer, stores it unless an identical one exists. */
+    public SaveOutcome saveQuestionAndAnswer(String username, String questionText, String questionType,
+                                             String difficulty, String answer, String language) {
+        requireText(questionText, "Question text cannot be blank.");
+        boolean hasAnswer = answer != null && !answer.isBlank();
+        if (hasAnswer) {
+            requireText(language, "Language cannot be blank.");
+        }
+        long userId = resolveUserId(username);
+        boolean alreadyBookmarked = questions.exists(userId, questionText);
+        SavedQuestion question = questions.save(userId, questionText.strip(), questionType, difficulty);
+        if (!hasAnswer) {
+            return alreadyBookmarked ? SaveOutcome.ALREADY_SAVED : SaveOutcome.QUESTION_SAVED;
+        }
+        boolean duplicate = submissions.findBySavedQuestion(userId, question.id()).stream()
+                .anyMatch(existing -> existing.code().equals(answer));
+        if (duplicate) {
+            return SaveOutcome.ALREADY_SAVED;
+        }
+        submissions.save(userId, question.id(), questionText.strip(), answer, language, null, null);
+        return SaveOutcome.QUESTION_AND_ANSWER_SAVED;
     }
 
     public boolean removeSubmission(String username, long submissionId) {
