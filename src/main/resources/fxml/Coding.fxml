@@ -19,10 +19,12 @@
 
    <top>
       <HBox alignment="CENTER_LEFT" spacing="10">
-         <Region HBox.hgrow="ALWAYS" />
-         <Label fx:id="labelLoggedInAs" styleClass="muted-label" />
-         <Button mnemonicParsing="false" onAction="#onSavedQuestions" text="Saved Questions" />
          <Button fx:id="buttonLogOut" mnemonicParsing="false" onAction="#onLogOut" text="Log Out" />
+         <Label fx:id="labelLoggedInAs" styleClass="muted-label" />
+         <Region HBox.hgrow="ALWAYS" />
+         <Label fx:id="labelSaveStatus" styleClass="muted-label" />
+         <Button fx:id="buttonSave" disable="true" onAction="#onSave" text="Save" />
+         <Button mnemonicParsing="false" onAction="#onSavedQuestions" text="Saved Questions" />
       </HBox>
    </top>
 
@@ -66,8 +68,6 @@
          <ComboBox fx:id="comboDifficulty" prefWidth="150" promptText="Difficulty" />
          <Button fx:id="buttonGenerateQuestion" onAction="#onGenerateQuestion" text="Generate new question" />
          <Button fx:id="buttonPractice" onAction="#onPractice" text="Written Practice" />
-         <Button fx:id="buttonSave" disable="true" onAction="#onSave" text="Save" />
-         <Label fx:id="labelSaveStatus" styleClass="muted-label" />
          <Region HBox.hgrow="ALWAYS" />
          <Button fx:id="buttonSubmitAnswer" onAction="#onSubmitAnswer" text="Submit answer" />
       </HBox>
