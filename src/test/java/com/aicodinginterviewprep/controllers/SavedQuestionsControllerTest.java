@@ -76,6 +76,10 @@ class SavedQuestionsControllerTest {
     }
 
     private SavedQuestionsController createController(SavedContentService service) {
+        return createController(service, TestBackgrounds.IMMEDIATE);
+    }
+
+    private SavedQuestionsController createController(SavedContentService service, Background background) {
         SavedQuestionsController controller = new SavedQuestionsController();
         controller.listQuestions = new ListView<>();
         controller.textQuestion = new TextArea();
@@ -90,6 +94,7 @@ class SavedQuestionsControllerTest {
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
+        setBackground(controller, background);
         return controller;
     }
 
@@ -147,6 +152,91 @@ class SavedQuestionsControllerTest {
             assertEquals("", controller.labelStatus.getText());
             assertTrue(controller.buttonDelete.isDisabled());
         });
+    }
+
+    @Test
+    void loadingShowsAMessageUntilTheBackgroundWorkCompletes() throws Exception {
+        SavedContentService service = serviceWithAlice();
+        service.saveQuestion("alice", "Two Sum", "CODING", "EASY");
+        TestBackgrounds.Deferred deferred = new TestBackgrounds.Deferred();
+
+        runOnFxThreadAndWait(() -> {
+            SavedQuestionsController controller = createController(service, deferred);
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+
+            controller.onSceneShown();
+            assertEquals(SavedQuestionsController.LOADING_MESSAGE, controller.labelStatus.getText());
+            assertTrue(controller.listQuestions.getItems().isEmpty());
+
+            deferred.runAll();
+
+            assertEquals(1, controller.listQuestions.getItems().size());
+            assertEquals("", controller.labelStatus.getText());
+        });
+    }
+
+    @Test
+    void answersLoadedForAnEarlierSelectionAreIgnored() throws Exception {
+        SavedContentService service = serviceWithAlice();
+        service.saveQuestion("alice", "Q1", "CODING", "EASY");
+        service.saveQuestion("alice", "Q2", "CODING", "EASY");
+        service.recordSubmission("alice", "Q1", "code for q1", "java", null, null);
+        service.recordSubmission("alice", "Q2", "code for q2", "java", null, null);
+        TestBackgrounds.Deferred deferred = new TestBackgrounds.Deferred();
+
+        runOnFxThreadAndWait(() -> {
+            SavedQuestionsController controller = createController(service);
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            controller.onSceneShown();
+            SavedQuestion q1 = controller.listQuestions.getItems().stream()
+                    .filter(q -> q.questionText().equals("Q1")).findFirst().orElseThrow();
+            SavedQuestion q2 = controller.listQuestions.getItems().stream()
+                    .filter(q -> q.questionText().equals("Q2")).findFirst().orElseThrow();
+            setBackground(controller, deferred);
+
+            controller.listQuestions.getSelectionModel().select(q1);
+            controller.listQuestions.getSelectionModel().select(q2);
+            deferred.runAll();
+
+            assertEquals(1, controller.listSubmissions.getItems().size());
+            assertEquals("code for q2", controller.listSubmissions.getItems().get(0).code());
+        });
+    }
+
+    @Test
+    void removeDisablesTheButtonUntilTheBackgroundWorkCompletes() throws Exception {
+        SavedContentService service = serviceWithAlice();
+        service.saveQuestion("alice", "Two Sum", "CODING", "EASY");
+        TestBackgrounds.Deferred deferred = new TestBackgrounds.Deferred();
+
+        runOnFxThreadAndWait(() -> {
+            SavedQuestionsController controller = createController(service);
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            controller.onSceneShown();
+            controller.listQuestions.getSelectionModel().select(0);
+            setBackground(controller, deferred);
+
+            controller.onDelete();
+
+            assertTrue(controller.buttonDelete.isDisabled());
+            assertEquals(1, service.listSavedQuestions("alice").size());
+        });
+    }
+
+    private static void setBackground(SavedQuestionsController controller, Background background) {
+        try {
+            Field field = SavedQuestionsController.class.getDeclaredField("background");
+            field.setAccessible(true);
+            field.set(controller, background);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

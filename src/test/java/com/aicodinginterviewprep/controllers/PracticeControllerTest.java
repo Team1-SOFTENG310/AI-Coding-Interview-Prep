@@ -347,6 +347,9 @@ class PracticeControllerTest {
             Field field = PracticeController.class.getDeclaredField("savedContentService");
             field.setAccessible(true);
             field.set(controller, service);
+            Field background = PracticeController.class.getDeclaredField("background");
+            background.setAccessible(true);
+            background.set(controller, TestBackgrounds.IMMEDIATE);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

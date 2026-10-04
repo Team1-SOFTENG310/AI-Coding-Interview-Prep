@@ -30,6 +30,7 @@ public class CodingController implements SceneAware {
 
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
     private SavedContentService savedContentService = new SavedContentService();
+    private Background background = Background.THREAD;
     private SaveContentButton saveContent;
     private SceneManager sceneManager;
 
@@ -54,6 +55,7 @@ public class CodingController implements SceneAware {
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
         saveContent = new SaveContentButton(buttonSave, labelSaveStatus, () -> savedContentService,
+            () -> background,
             () -> this.sceneManager.getCurrentUsername(), () -> codeEditor.getText(), "java");
         comboTopic.getItems().setAll(RANDOM_TOPIC);
         comboTopic.getItems().addAll(questionService.getAvailableTopics(QuestionType.CODING));

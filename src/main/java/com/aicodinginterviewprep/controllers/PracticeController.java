@@ -33,6 +33,7 @@ public class PracticeController implements SceneAware {
     private final MicrophoneRecorder microphoneRecorder = new MicrophoneRecorder();
     private final SpeechToTextService speechToTextService = new SpeechToTextService();
     private SavedContentService savedContentService = new SavedContentService();
+    private Background background = Background.THREAD;
     private SaveContentButton saveContent;
     private SceneManager sceneManager;
 
@@ -58,6 +59,7 @@ public class PracticeController implements SceneAware {
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
         this.saveContent = new SaveContentButton(buttonSave, labelSaveStatus, () -> savedContentService,
+            () -> background,
             () -> this.sceneManager.getCurrentUsername(), () -> answerInput.getText(), "text");
         this.comboQuestionType.getItems().setAll(QuestionType.BEHAVIOURAL, QuestionType.THEORY);
         this.comboQuestionType.setValue(QuestionType.BEHAVIOURAL);

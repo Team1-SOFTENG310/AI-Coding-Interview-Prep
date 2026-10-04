@@ -131,6 +131,9 @@ class CodingControllerTest {
             Field field = CodingController.class.getDeclaredField("savedContentService");
             field.setAccessible(true);
             field.set(controller, service);
+            Field background = CodingController.class.getDeclaredField("background");
+            background.setAccessible(true);
+            background.set(controller, TestBackgrounds.IMMEDIATE);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

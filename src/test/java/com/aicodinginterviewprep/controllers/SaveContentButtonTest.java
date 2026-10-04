@@ -28,6 +28,7 @@ class SaveContentButtonTest {
     private SavedContentService service;
     private String username;
     private String answer;
+    private Background background = TestBackgrounds.IMMEDIATE;
     private SaveContentButton saveContent;
 
     @BeforeAll
@@ -50,7 +51,8 @@ class SaveContentButtonTest {
         answer = "";
         button = new Button();
         status = new Label();
-        saveContent = new SaveContentButton(button, status, () -> service, () -> username, () -> answer, "java");
+        saveContent = new SaveContentButton(button, status, () -> service, () -> background,
+                () -> username, () -> answer, "java");
     }
 
     @Test
@@ -147,6 +149,70 @@ class SaveContentButtonTest {
         saveContent.save();
 
         assertEquals(2, service.listSubmissions("alice").size());
+    }
+
+    @Test
+    void whileSavingTheButtonIsDisabledAndFurtherClicksAreIgnored() {
+        TestBackgrounds.Deferred deferred = new TestBackgrounds.Deferred();
+        background = deferred;
+        saveContent.offer("Two Sum", QuestionType.CODING, Difficulty.EASY);
+
+        saveContent.save();
+        saveContent.save();
+
+        assertTrue(button.isDisabled());
+        assertEquals(SaveContentButton.SAVING_MESSAGE, status.getText());
+        assertEquals(1, deferred.pendingCount());
+        assertTrue(service.listSavedQuestions("alice").isEmpty());
+    }
+
+    @Test
+    void nothingIsWrittenOnTheCallingThreadUntilTheBackgroundRuns() {
+        TestBackgrounds.Deferred deferred = new TestBackgrounds.Deferred();
+        background = deferred;
+        saveContent.offer("Two Sum", QuestionType.CODING, Difficulty.EASY);
+        answer = "int x;";
+
+        saveContent.save();
+        assertTrue(service.listSubmissions("alice").isEmpty());
+
+        deferred.runAll();
+
+        assertEquals(1, service.listSubmissions("alice").size());
+        assertFalse(button.isDisabled());
+        assertEquals(SaveContentButton.SAVED_QUESTION_AND_ANSWER_MESSAGE, status.getText());
+    }
+
+    @Test
+    void failureWhileSavingReenablesTheButton() {
+        TestBackgrounds.Deferred deferred = new TestBackgrounds.Deferred();
+        background = deferred;
+        ConnectionFactory broken = TestDatabase.failing();
+        service = new SavedContentService(new UserRepository(broken), new SavedQuestionRepository(broken),
+                new CodeSubmissionRepository(broken));
+        saveContent.offer("Two Sum", QuestionType.CODING, Difficulty.EASY);
+
+        saveContent.save();
+        deferred.runAll();
+
+        assertFalse(button.isDisabled());
+        assertEquals("Application data could not be loaded or saved.", status.getText());
+    }
+
+    @Test
+    void saveFinishingAfterAResetDoesNotChangeTheNewQuestionsState() {
+        TestBackgrounds.Deferred deferred = new TestBackgrounds.Deferred();
+        background = deferred;
+        saveContent.offer("Q1", QuestionType.CODING, Difficulty.EASY);
+        saveContent.save();
+
+        saveContent.offer("Q2", QuestionType.CODING, Difficulty.EASY);
+        deferred.runAll();
+
+        assertFalse(button.isDisabled());
+        assertEquals("", status.getText());
+        saveContent.save();
+        assertEquals(SaveContentButton.SAVING_MESSAGE, status.getText());
     }
 
     @Test

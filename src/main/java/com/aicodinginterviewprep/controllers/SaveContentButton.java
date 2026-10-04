@@ -3,8 +3,6 @@ package com.aicodinginterviewprep.controllers;
 import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.errors.AppErrorHandler;
-import com.aicodinginterviewprep.errors.PersistenceException;
-import com.aicodinginterviewprep.errors.ValidationException;
 import com.aicodinginterviewprep.service.SavedContentService;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -16,10 +14,12 @@ final class SaveContentButton {
     static final String SAVED_QUESTION_MESSAGE = "Question saved.";
     static final String SAVED_QUESTION_AND_ANSWER_MESSAGE = "Question and answer saved.";
     static final String ALREADY_SAVED_MESSAGE = "Already saved.";
+    static final String SAVING_MESSAGE = "Saving...";
 
     private final Button button;
     private final Label statusLabel;
     private final Supplier<SavedContentService> service;
+    private final Supplier<Background> background;
     private final Supplier<String> username;
     private final Supplier<String> answer;
     private final String language;
@@ -29,12 +29,17 @@ final class SaveContentButton {
     private Difficulty difficulty;
     private boolean questionSaved;
     private String lastSavedAnswer;
+    private boolean saving;
+    // Incremented on reset so a save finishing for an earlier question is ignored.
+    private int generation;
 
     SaveContentButton(Button button, Label statusLabel, Supplier<SavedContentService> service,
-                      Supplier<String> username, Supplier<String> answer, String language) {
+                      Supplier<Background> background, Supplier<String> username,
+                      Supplier<String> answer, String language) {
         this.button = button;
         this.statusLabel = statusLabel;
         this.service = service;
+        this.background = background;
         this.username = username;
         this.answer = answer;
         this.language = language;
@@ -43,11 +48,13 @@ final class SaveContentButton {
 
     /** Disables saving until a question is displayed. */
     void reset() {
+        generation++;
         questionText = null;
         type = null;
         difficulty = null;
         questionSaved = false;
         lastSavedAnswer = null;
+        saving = false;
         button.setDisable(true);
         statusLabel.setText("");
     }
@@ -61,7 +68,7 @@ final class SaveContentButton {
     }
 
     void save() {
-        if (questionText == null) {
+        if (questionText == null || saving) {
             return;
         }
         String answerText = answer.get();
@@ -70,19 +77,42 @@ final class SaveContentButton {
             statusLabel.setText(ALREADY_SAVED_MESSAGE);
             return;
         }
-        try {
-            String user = username.get();
-            service.get().saveQuestion(user, questionText, type.name(), difficulty.name());
-            questionSaved = true;
+        SavedContentService savedContent = service.get();
+        String user = username.get();
+        String question = questionText;
+        String questionType = type.name();
+        String questionDifficulty = difficulty.name();
+        int savedGeneration = generation;
+
+        saving = true;
+        button.setDisable(true);
+        statusLabel.setText(SAVING_MESSAGE);
+        background.get().run(() -> {
+            savedContent.saveQuestion(user, question, questionType, questionDifficulty);
             if (hasAnswer) {
-                service.get().recordSubmission(user, questionText, answerText, language, null, null);
+                savedContent.recordSubmission(user, question, answerText, language, null, null);
+            }
+            return hasAnswer;
+        }, answerSaved -> {
+            if (savedGeneration != generation) {
+                return;
+            }
+            saving = false;
+            button.setDisable(false);
+            questionSaved = true;
+            if (answerSaved) {
                 lastSavedAnswer = answerText;
                 statusLabel.setText(SAVED_QUESTION_AND_ANSWER_MESSAGE);
             } else {
                 statusLabel.setText(SAVED_QUESTION_MESSAGE);
             }
-        } catch (ValidationException | PersistenceException e) {
-            AppErrorHandler.report(e, "Saving question and answer", statusLabel::setText);
-        }
+        }, error -> {
+            if (savedGeneration != generation) {
+                return;
+            }
+            saving = false;
+            button.setDisable(false);
+            AppErrorHandler.report(error, "Saving question and answer", statusLabel::setText);
+        });
     }
 }

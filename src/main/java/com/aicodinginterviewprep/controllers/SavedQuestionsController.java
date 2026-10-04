@@ -5,8 +5,6 @@ import com.aicodinginterviewprep.SceneManager;
 import com.aicodinginterviewprep.db.CodeSubmission;
 import com.aicodinginterviewprep.db.SavedQuestion;
 import com.aicodinginterviewprep.errors.AppErrorHandler;
-import com.aicodinginterviewprep.errors.PersistenceException;
-import com.aicodinginterviewprep.errors.ValidationException;
 import com.aicodinginterviewprep.service.SavedContentService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -21,13 +19,18 @@ import java.time.format.DateTimeFormatter;
 public class SavedQuestionsController implements SceneAware {
     static final String EMPTY_MESSAGE = "No saved questions yet.";
     static final String REMOVED_MESSAGE = "Removed from saved questions.";
+    static final String LOADING_MESSAGE = "Loading saved questions...";
     private static final int PREVIEW_LENGTH = 60;
     private static final DateTimeFormatter TIME_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
     private SavedContentService savedContentService = new SavedContentService();
+    private Background background = Background.THREAD;
     private SceneManager sceneManager;
     private String returnScene = "practice";
+    // Bumped on each load so results arriving for an earlier selection or refresh are ignored.
+    private int questionsLoad;
+    private int submissionsLoad;
 
     @FXML public ListView<SavedQuestion> listQuestions;
     @FXML public TextArea textQuestion;
@@ -63,7 +66,7 @@ public class SavedQuestionsController implements SceneAware {
 
     @Override
     public void onSceneShown() {
-        refresh();
+        refresh(null);
     }
 
     /** Sets the scene that the Back button returns to. */
@@ -82,43 +85,58 @@ public class SavedQuestionsController implements SceneAware {
         if (selected == null) {
             return;
         }
-        try {
-            savedContentService.removeSavedQuestion(sceneManager.getCurrentUsername(), selected.id());
-        } catch (ValidationException | PersistenceException e) {
-            AppErrorHandler.report(e, "Removing saved question", labelStatus::setText);
-            return;
-        }
-        refresh();
-        labelStatus.setText(REMOVED_MESSAGE);
+        SavedContentService savedContent = savedContentService;
+        String user = sceneManager.getCurrentUsername();
+        buttonDelete.setDisable(true);
+        background.run(() -> savedContent.removeSavedQuestion(user, selected.id()),
+                removed -> refresh(REMOVED_MESSAGE),
+                error -> {
+                    buttonDelete.setDisable(listQuestions.getSelectionModel().getSelectedItem() == null);
+                    AppErrorHandler.report(error, "Removing saved question", labelStatus::setText);
+                });
     }
 
-    private void refresh() {
+    private void refresh(String statusWhenLoaded) {
+        int load = ++questionsLoad;
         listQuestions.getItems().clear();
-        try {
-            listQuestions.getItems().setAll(savedContentService.listSavedQuestions(sceneManager.getCurrentUsername()));
-            labelStatus.setText(listQuestions.getItems().isEmpty() ? EMPTY_MESSAGE : "");
-        } catch (ValidationException | PersistenceException e) {
-            AppErrorHandler.report(e, "Loading saved questions", labelStatus::setText);
-        }
         showQuestion(null);
+        labelStatus.setText(statusWhenLoaded == null ? LOADING_MESSAGE : statusWhenLoaded);
+        SavedContentService savedContent = savedContentService;
+        String user = sceneManager.getCurrentUsername();
+        background.run(() -> savedContent.listSavedQuestions(user), questions -> {
+            if (load != questionsLoad) {
+                return;
+            }
+            listQuestions.getItems().setAll(questions);
+            labelStatus.setText(questions.isEmpty() ? EMPTY_MESSAGE : statusWhenLoaded == null ? "" : statusWhenLoaded);
+        }, error -> {
+            if (load == questionsLoad) {
+                AppErrorHandler.report(error, "Loading saved questions", labelStatus::setText);
+            }
+        });
     }
 
     private void showQuestion(SavedQuestion question) {
+        int load = ++submissionsLoad;
         buttonDelete.setDisable(question == null);
         textSubmission.clear();
+        listSubmissions.getItems().clear();
         if (question == null) {
             textQuestion.clear();
-            listSubmissions.getItems().clear();
             return;
         }
         textQuestion.setText(question.questionText());
-        try {
-            listSubmissions.getItems().setAll(
-                    savedContentService.listSubmissionsForQuestion(sceneManager.getCurrentUsername(), question.id()));
-        } catch (ValidationException | PersistenceException e) {
-            listSubmissions.getItems().clear();
-            AppErrorHandler.report(e, "Loading saved answers", labelStatus::setText);
-        }
+        SavedContentService savedContent = savedContentService;
+        String user = sceneManager.getCurrentUsername();
+        background.run(() -> savedContent.listSubmissionsForQuestion(user, question.id()), submissions -> {
+            if (load == submissionsLoad) {
+                listSubmissions.getItems().setAll(submissions);
+            }
+        }, error -> {
+            if (load == submissionsLoad) {
+                AppErrorHandler.report(error, "Loading saved answers", labelStatus::setText);
+            }
+        });
     }
 
     static String describe(SavedQuestion question) {
