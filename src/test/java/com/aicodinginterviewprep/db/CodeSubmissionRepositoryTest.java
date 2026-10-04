@@ -141,6 +141,36 @@ class CodeSubmissionRepositoryTest {
     }
 
     @Test
+    void deleteRemovesOnlyTheGivenSubmission() {
+        CodeSubmission first = submissions.save(aliceId, null, "Q", "a", "java", null, null);
+        submissions.save(aliceId, null, "Q", "b", "java", null, null);
+
+        assertTrue(submissions.delete(aliceId, first.id()));
+
+        assertEquals(List.of("b"), submissions.findByUser(aliceId).stream().map(CodeSubmission::code).toList());
+    }
+
+    @Test
+    void deleteCannotRemoveAnotherUsersSubmissionOrAMissingOne() {
+        CodeSubmission saved = submissions.save(aliceId, null, "Q", "a", "java", null, null);
+
+        assertFalse(submissions.delete(bobId, saved.id()));
+        assertFalse(submissions.delete(aliceId, 999));
+
+        assertTrue(submissions.findById(aliceId, saved.id()).isPresent());
+    }
+
+    @Test
+    void deleteKeepsTheLinkedBookmark() {
+        SavedQuestion question = questions.save(aliceId, "Q1", "CODING", "EASY");
+        CodeSubmission saved = submissions.save(aliceId, question.id(), "Q1", "a", "java", null, null);
+
+        submissions.delete(aliceId, saved.id());
+
+        assertTrue(questions.exists(aliceId, "Q1"));
+    }
+
+    @Test
     void saveForUnknownUserFails() {
         assertThrows(DataAccessException.class,
                 () -> submissions.save(999, null, "Q", "code", "java", null, null));
@@ -164,5 +194,6 @@ class CodeSubmissionRepositoryTest {
         assertThrows(DataAccessException.class, () -> broken.findById(1, 1));
         assertThrows(DataAccessException.class, () -> broken.findByUser(1));
         assertThrows(DataAccessException.class, () -> broken.findBySavedQuestion(1, 1));
+        assertThrows(DataAccessException.class, () -> broken.delete(1, 1));
     }
 }

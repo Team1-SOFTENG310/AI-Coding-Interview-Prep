@@ -102,6 +102,21 @@ class SavedContentServiceTest {
     }
 
     @Test
+    void removeSubmissionDeletesOnlyTheCallersSubmission() {
+        var mine = service.recordSubmission("alice", "Two Sum", "int x;", "java", null, null);
+
+        assertFalse(service.removeSubmission("bobby", mine.id()));
+        assertTrue(service.removeSubmission("alice", mine.id()));
+
+        assertTrue(service.listSubmissions("alice").isEmpty());
+    }
+
+    @Test
+    void removeSubmissionRequiresASignedInUser() {
+        assertThrows(ValidationException.class, () -> service.removeSubmission(null, 1));
+    }
+
+    @Test
     void submissionRequiresQuestionCodeAndLanguage() {
         assertThrows(ValidationException.class, () -> service.recordSubmission("alice", "", "c", "java", null, null));
         assertThrows(ValidationException.class, () -> service.recordSubmission("alice", "Q", " ", "java", null, null));

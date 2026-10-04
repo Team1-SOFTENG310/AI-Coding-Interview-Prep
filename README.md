@@ -103,6 +103,8 @@ Questions are never saved automatically - saving is opt-in.
   bookmarks. Selecting one shows the question and its saved answers; **Back**
   returns to the page you came from.
 - **Remove question** deletes the bookmark **and all answers saved with it**.
+  **Remove answer** deletes just the selected saved answer and keeps the
+  question.
 - Saved data is per user, and database access runs in the background so the
   window stays responsive while saving or loading.
 

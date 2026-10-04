@@ -86,6 +86,7 @@ class SavedQuestionsControllerTest {
         controller.listSubmissions = new ListView<>();
         controller.textSubmission = new TextArea();
         controller.buttonDelete = new Button();
+        controller.buttonDeleteAnswer = new Button();
         controller.labelStatus = new Label();
         try {
             Field field = SavedQuestionsController.class.getDeclaredField("savedContentService");
@@ -240,6 +241,133 @@ class SavedQuestionsControllerTest {
     }
 
     @Test
+    void removeAnswerButtonIsEnabledOnlyWhileAnAnswerIsSelected() throws Exception {
+        SavedContentService service = serviceWithAlice();
+        service.saveQuestion("alice", "Two Sum", "CODING", "EASY");
+        service.recordSubmission("alice", "Two Sum", "int x;", "java", null, null);
+
+        runOnFxThreadAndWait(() -> {
+            SavedQuestionsController controller = createController(service);
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            controller.onSceneShown();
+            assertTrue(controller.buttonDeleteAnswer.isDisabled());
+
+            controller.listQuestions.getSelectionModel().select(0);
+            assertTrue(controller.buttonDeleteAnswer.isDisabled());
+
+            controller.listSubmissions.getSelectionModel().select(0);
+            assertFalse(controller.buttonDeleteAnswer.isDisabled());
+        });
+    }
+
+    @Test
+    void removeAnswerDeletesOnlyTheSelectedAnswerAndKeepsTheQuestion() throws Exception {
+        SavedContentService service = serviceWithAlice();
+        service.saveQuestion("alice", "Two Sum", "CODING", "EASY");
+        service.recordSubmission("alice", "Two Sum", "first", "java", null, null);
+        service.recordSubmission("alice", "Two Sum", "second", "java", null, null);
+
+        runOnFxThreadAndWait(() -> {
+            SavedQuestionsController controller = createController(service);
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            controller.onSceneShown();
+            controller.listQuestions.getSelectionModel().select(0);
+            controller.listSubmissions.getSelectionModel().select(
+                    controller.listSubmissions.getItems().stream()
+                            .filter(s -> s.code().equals("first")).findFirst().orElseThrow());
+
+            controller.onDeleteAnswer();
+
+            assertEquals(1, controller.listSubmissions.getItems().size());
+            assertEquals("second", controller.listSubmissions.getItems().get(0).code());
+            assertEquals(1, service.listSavedQuestions("alice").size());
+            assertEquals("", controller.textSubmission.getText());
+            assertTrue(controller.buttonDeleteAnswer.isDisabled());
+            assertFalse(controller.buttonDelete.isDisabled());
+            assertEquals(SavedQuestionsController.REMOVED_ANSWER_MESSAGE, controller.labelStatus.getText());
+        });
+    }
+
+    @Test
+    void removeAnswerWithNothingSelectedDoesNothing() throws Exception {
+        SavedContentService service = serviceWithAlice();
+        service.saveQuestion("alice", "Two Sum", "CODING", "EASY");
+        service.recordSubmission("alice", "Two Sum", "int x;", "java", null, null);
+
+        runOnFxThreadAndWait(() -> {
+            SavedQuestionsController controller = createController(service);
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            controller.onSceneShown();
+            controller.listQuestions.getSelectionModel().select(0);
+
+            controller.onDeleteAnswer();
+
+            assertEquals(1, service.listSubmissions("alice").size());
+        });
+    }
+
+    @Test
+    void removeAnswerDisablesTheButtonUntilTheBackgroundWorkCompletes() throws Exception {
+        SavedContentService service = serviceWithAlice();
+        service.saveQuestion("alice", "Two Sum", "CODING", "EASY");
+        service.recordSubmission("alice", "Two Sum", "int x;", "java", null, null);
+        TestBackgrounds.Deferred deferred = new TestBackgrounds.Deferred();
+
+        runOnFxThreadAndWait(() -> {
+            SavedQuestionsController controller = createController(service);
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            controller.onSceneShown();
+            controller.listQuestions.getSelectionModel().select(0);
+            controller.listSubmissions.getSelectionModel().select(0);
+            setBackground(controller, deferred);
+
+            controller.onDeleteAnswer();
+
+            assertTrue(controller.buttonDeleteAnswer.isDisabled());
+            assertEquals(1, service.listSubmissions("alice").size());
+        });
+    }
+
+    @Test
+    void removeAnswerFailureShowsMessageAndReenablesTheButton() throws Exception {
+        SavedContentService working = serviceWithAlice();
+        working.saveQuestion("alice", "Two Sum", "CODING", "EASY");
+        working.recordSubmission("alice", "Two Sum", "int x;", "java", null, null);
+        ConnectionFactory broken = TestDatabase.failing();
+        SavedContentService failing = serviceOn(broken);
+
+        runOnFxThreadAndWait(() -> {
+            SavedQuestionsController controller = createController(working);
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            controller.onSceneShown();
+            controller.listQuestions.getSelectionModel().select(0);
+            controller.listSubmissions.getSelectionModel().select(0);
+            try {
+                Field field = SavedQuestionsController.class.getDeclaredField("savedContentService");
+                field.setAccessible(true);
+                field.set(controller, failing);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
+
+            controller.onDeleteAnswer();
+
+            assertFalse(controller.buttonDeleteAnswer.isDisabled());
+            assertEquals("Application data could not be loaded or saved.", controller.labelStatus.getText());
+        });
+    }
+
+    @Test
     void emptyListShowsMessage() throws Exception {
         SavedContentService service = serviceWithAlice();
 
@@ -372,6 +500,7 @@ class SavedQuestionsControllerTest {
                 assertNotNull(controller.listSubmissions);
                 assertNotNull(controller.textSubmission);
                 assertNotNull(controller.buttonDelete);
+                assertNotNull(controller.buttonDeleteAnswer);
                 assertNotNull(controller.labelStatus);
             } catch (java.io.IOException e) {
                 throw new RuntimeException(e);

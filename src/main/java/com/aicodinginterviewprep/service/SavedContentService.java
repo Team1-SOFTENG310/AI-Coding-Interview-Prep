@@ -70,6 +70,10 @@ public class SavedContentService {
         return submissions.save(userId, savedQuestionId, questionText.strip(), code, language, feedback, correct);
     }
 
+    public boolean removeSubmission(String username, long submissionId) {
+        return submissions.delete(resolveUserId(username), submissionId);
+    }
+
     public List<CodeSubmission> listSubmissions(String username) {
         return submissions.findByUser(resolveUserId(username));
     }

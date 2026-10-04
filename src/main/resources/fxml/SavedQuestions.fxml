@@ -53,6 +53,7 @@
             <Insets left="8" right="8" top="12" />
          </padding>
          <Button fx:id="buttonDelete" disable="true" mnemonicParsing="false" onAction="#onDelete" text="Remove question" />
+         <Button fx:id="buttonDeleteAnswer" disable="true" mnemonicParsing="false" onAction="#onDeleteAnswer" text="Remove answer" />
          <Label fx:id="labelStatus" styleClass="muted-label" />
       </HBox>
    </bottom>

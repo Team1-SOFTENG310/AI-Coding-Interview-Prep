@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 public class SavedQuestionsController implements SceneAware {
     static final String EMPTY_MESSAGE = "No saved questions yet.";
     static final String REMOVED_MESSAGE = "Removed from saved questions.";
+    static final String REMOVED_ANSWER_MESSAGE = "Answer removed.";
     static final String LOADING_MESSAGE = "Loading saved questions...";
     private static final int PREVIEW_LENGTH = 60;
     private static final DateTimeFormatter TIME_FORMAT =
@@ -37,6 +38,7 @@ public class SavedQuestionsController implements SceneAware {
     @FXML public ListView<CodeSubmission> listSubmissions;
     @FXML public TextArea textSubmission;
     @FXML public Button buttonDelete;
+    @FXML public Button buttonDeleteAnswer;
     @FXML public Label labelStatus;
 
     @Override
@@ -59,9 +61,12 @@ public class SavedQuestionsController implements SceneAware {
         listQuestions.getSelectionModel().selectedItemProperty()
                 .addListener((observable, oldQuestion, newQuestion) -> showQuestion(newQuestion));
         listSubmissions.getSelectionModel().selectedItemProperty()
-                .addListener((observable, oldSubmission, newSubmission) ->
-                        textSubmission.setText(newSubmission == null ? "" : detail(newSubmission)));
+                .addListener((observable, oldSubmission, newSubmission) -> {
+                    textSubmission.setText(newSubmission == null ? "" : detail(newSubmission));
+                    buttonDeleteAnswer.setDisable(newSubmission == null);
+                });
         buttonDelete.setDisable(true);
+        buttonDeleteAnswer.setDisable(true);
     }
 
     @Override
@@ -96,6 +101,26 @@ public class SavedQuestionsController implements SceneAware {
                 });
     }
 
+    @FXML
+    public void onDeleteAnswer() {
+        CodeSubmission selected = listSubmissions.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return;
+        }
+        SavedContentService savedContent = savedContentService;
+        String user = sceneManager.getCurrentUsername();
+        buttonDeleteAnswer.setDisable(true);
+        background.run(() -> savedContent.removeSubmission(user, selected.id()),
+                removed -> {
+                    showQuestion(listQuestions.getSelectionModel().getSelectedItem());
+                    labelStatus.setText(REMOVED_ANSWER_MESSAGE);
+                },
+                error -> {
+                    buttonDeleteAnswer.setDisable(listSubmissions.getSelectionModel().getSelectedItem() == null);
+                    AppErrorHandler.report(error, "Removing saved answer", labelStatus::setText);
+                });
+    }
+
     private void refresh(String statusWhenLoaded) {
         int load = ++questionsLoad;
         listQuestions.getItems().clear();
@@ -119,6 +144,7 @@ public class SavedQuestionsController implements SceneAware {
     private void showQuestion(SavedQuestion question) {
         int load = ++submissionsLoad;
         buttonDelete.setDisable(question == null);
+        buttonDeleteAnswer.setDisable(true);
         textSubmission.clear();
         listSubmissions.getItems().clear();
         if (question == null) {

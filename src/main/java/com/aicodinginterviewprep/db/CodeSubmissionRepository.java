@@ -82,6 +82,19 @@ public class CodeSubmissionRepository {
                 + "ORDER BY submitted_at DESC, id DESC", userId, savedQuestionId);
     }
 
+    /** Deletes only if the submission belongs to the given user. */
+    public boolean delete(long userId, long id) {
+        String sql = "DELETE FROM code_submission WHERE id = ? AND user_id = ?";
+        try (Connection connection = connections.open();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, id);
+            statement.setLong(2, userId);
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed to delete code submission", e);
+        }
+    }
+
     private List<CodeSubmission> query(String sql, Object... params) {
         try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
