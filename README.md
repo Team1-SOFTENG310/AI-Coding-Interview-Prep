@@ -123,7 +123,7 @@ On macOS/Linux:
 ## Wiki
 
 Contributions, meeting minutes, workflow notes and AI-use disclosures are on the
-[project wiki](../../wiki). The pages live in `wiki/` and are published automatically
+[project wiki](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/wiki). The pages live in `wiki/` and are published automatically
 on merge to `main`, so edit them through a PR.
 
 ## Voice input (Practice tab)
