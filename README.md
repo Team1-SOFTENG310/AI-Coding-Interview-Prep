@@ -1,10 +1,13 @@
 # AI Coding Interview Preparation
 
-**Team Name:** Team 1
-**Team Members:** Scott Wallace, Gabriel Liu, Dylan Liddle, Neia Tererei, Kenny Geng, Dandan Wu, Shenol Peiris
+**Assignment 1:** Group 1 (Team 1) - Scott Wallace, Gabriel Liu, Dylan Liddle, Neia Tererei, Kenny Geng, Dandan Wu, Shenol Peiris
+
+**Assignment 2:** Group 2 - Aditeya Anand, Louis Cao, Johan Eger, Jason Huang, Suah Kim, Adrian Rohrbach, Jago Sutherland
 
 This project is associated with the University of Auckland course SOFTENG 310
 (Software Evolution and Maintenance).
+
+## Project Overview
 
 AI Coding Interview Preparation is a JavaFX desktop app that helps software
 engineering students practice for technical interviews: it generates
@@ -116,6 +119,12 @@ On macOS/Linux:
 ```bash
 ./mvnw test
 ```
+
+## Wiki
+
+Contributions, meeting minutes, workflow notes and AI-use disclosures are on the
+[project wiki](../../wiki). The pages live in `wiki/` and are published automatically
+on merge to `main`, so edit them through a PR.
 
 ## Voice input (Practice tab)
 
