@@ -12,24 +12,24 @@ Course: University of Auckland SOFTENG 310
 
 - Team Name: Team 1
 - Members: Scott Wallace, Gabriel Liu, Dylan Liddle, Neia Tererei, Kenny Geng, Dandan Wu, Shenol Peiris
-- Contributions: [Contributions - Assignment 1](Contributions-A1.md)
+- Contributions: [Contributions - Assignment 1](Contributions-A1)
 
 ### Assignment 2 - Group 2
 
 - Team Name: Team 2
 - Members: Aditeya Anand, Louis Cao, Johan Eger, Jason Huang, Suah Kim, Adrian Rohrbach, Jago Sutherland
-- Contributions: [Contributions - Assignment 2](Contributions-A2.md)
+- Contributions: [Contributions - Assignment 2](Contributions-A2)
 
 ## Wiki Pages
 
 Use the sidebar to navigate:
 
-- [Contributions - Assignment 1](Contributions-A1.md) - contributions made during A1
-- [Contributions - Assignment 2](Contributions-A2.md) - contributions made during A2
-- [Workflow Notes](Workflow-notes.md) - our workflow and the mistakes we learned from
-- [Quality Tools](Quality-tools.md) - SonarLint, SonarCloud and Snyk
-- [Meeting Minutes](Meeting-minutes.md) - notes from every team meeting
-- [Generative AI Use](Generative-ai-use.md) - each member's disclosure of AI tool use
+- [Contributions - Assignment 1](Contributions-A1) - contributions made during A1
+- [Contributions - Assignment 2](Contributions-A2) - contributions made during A2
+- [Workflow Notes](Workflow-notes) - our workflow and the mistakes we learned from
+- [Quality Tools](Quality-tools) - SonarLint, SonarCloud and Snyk
+- [Meeting Minutes](Meeting-minutes) - notes from every team meeting
+- [Generative AI Use](Generative-ai-use) - each member's disclosure of AI tool use
 ## Documentation
 
 - [README](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/blob/main/README.md): project overview and setup instructions
