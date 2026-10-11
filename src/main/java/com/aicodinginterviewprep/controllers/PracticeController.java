@@ -54,6 +54,7 @@ public class PracticeController implements SceneAware {
     @FXML public ComboBox<QuestionType> comboQuestionType;
     @FXML public ComboBox<String> comboTopic;
     @FXML public ComboBox<Difficulty> comboDifficulty;
+    @FXML public Button buttonHistory;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
@@ -161,6 +162,14 @@ public class PracticeController implements SceneAware {
     @FXML
     public void onSave() {
         saveContent.save();
+    }
+
+    @FXML 
+    public void onHistory() {
+        sceneManager.switchToScene("History");
+        if (sceneManager.getController("History") instanceof HistoryController historyController) {
+            historyController.setSceneManager(sceneManager);
+        }
     }
 
 

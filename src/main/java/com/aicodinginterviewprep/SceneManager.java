@@ -32,6 +32,7 @@ public class SceneManager {
         sceneMap.put("coding", "/fxml/Coding.fxml");
         sceneMap.put("feedback", "/fxml/Feedback.fxml");
         sceneMap.put("saved", "/fxml/SavedQuestions.fxml");
+        sceneMap.put("History", "/fxml/History.fxml");
     }
 
     public void switchToScene(String sceneName) {
