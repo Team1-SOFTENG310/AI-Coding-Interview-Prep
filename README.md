@@ -14,12 +14,16 @@ typing.
 
 ## Features
 
-- **Authentication** - sign up and log in, with account details persisted
-  between sessions
+- **Authentication** - sign up and log in; accounts are stored in the
+  database with PBKDF2-hashed passwords
 - **Behavioural / Theory practice** - AI-generated interview questions with a
   free-text answer box, evaluated against a grading rubric
 - **Coding practice** - LeetCode-style coding questions with a syntax-highlighted
   code editor
+- **Saved questions and answers** - a **Save** button on each practice page
+  bookmarks the current question and stores your current answer with it; the
+  **Saved Questions** page lists your bookmarks and saved answers and lets you
+  remove a question (see "Saving questions and answers" below)
 - **AI question generation and evaluation** - OpenAI generates the questions
   and grades submitted answers, with a rating out of 10 and written feedback
 - **Voice input** - a "Record Answer" button transcribes speech into the
@@ -80,9 +84,31 @@ docker exec -it interviewprep-mysql mysql -u appuser -p appdb
 
 Replace `appuser` and `appdb` with your own `DB_USER` and `DB_NAME` from `.env`.
 Enter your `DB_PASSWORD` when prompted (the input stays hidden), then run
-`SHOW TABLES;`. You should see `user_account` and `flyway_schema_history`.
+`SHOW TABLES;`. You should see `user_account`, `saved_question`,
+`code_submission` and `flyway_schema_history`.
 
-You should see `user_account` and `flyway_schema_history`.
+The database is required to sign up, log in and use saved questions: accounts,
+bookmarks and saved answers are all stored in it.
+
+## Saving questions and answers
+
+Questions are never saved automatically - saving is opt-in.
+
+- Generate a question on the Behavioural / Theory or Coding page, then click
+  **Save**. The question is bookmarked (with its type and difficulty) and, if
+  the answer box or code editor has content, that answer is stored with it.
+- Clicking **Save** again with the same answer says "Already saved."; changing
+  the answer and clicking **Save** stores a new saved answer for the question.
+- Click **Saved Questions** (top right of either practice page) to browse your
+  bookmarks. Selecting one shows the question and its saved answers; **Back**
+  returns to the page you came from.
+- **Remove question** deletes the bookmark **and all answers saved with it**.
+  **Remove answer** deletes just the selected saved answer and keeps the
+  question.
+- Saved data is per user, and database access runs in the background so the
+  window stays responsive while saving or loading.
+
+AI evaluation results are not stored.
 
 ## Run the application
 
@@ -102,8 +128,8 @@ On macOS/Linux:
 
 ## Run tests
 
-Database tests use Testcontainers, which starts a temporary MySQL container.
-Docker must be running when you execute the tests.
+Database tests run against an in-memory H2 database with the real Flyway
+migrations applied, so Docker is not needed to run the tests.
 
 On Windows:
 
@@ -139,9 +165,9 @@ https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip
   data) - if `models/vosk-model-en-us-0.22-lgraph/` is missing locally, voice
   input will show a clear error telling you to download it; every other
   feature works without it.
-- **Account data is stored as plaintext JSON** in
-  `src/main/resources/authorisation/accounts.json` - this is fine for local
-  development and demos, but isn't representative of how a real production
-  auth system would store credentials.
+- **Accounts are stored in the database** (`user_account` table) with PBKDF2-hashed
+  passwords; the app needs the MySQL connection settings described above.
+  Accounts from the earlier `accounts.json` file were not migrated, so those
+  users need to sign up again.
 - **Java Version 25** will lead to failing tests. The project itself compiles and runs but the test will fail.
   To resolve it, a lower version is necessary. Either Java 17 or 21

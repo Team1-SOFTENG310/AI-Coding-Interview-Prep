@@ -87,9 +87,12 @@ AI Coding Interview Prep is an AI-supported interview preparation tool that help
    - macOS/Linux: `./mvnw`
 3. Copy `.env.example` to `.env` and set `OPENAI_API_KEY` - required for
    question generation and AI answer evaluation (voice input runs offline
-   and doesn't need this).
-4. Run the app with `./mvnw javafx:run`.
-5. Run tests with `./mvnw test`.
+   and doesn't need this). Also set the `DB_*` values.
+4. Start the MySQL database with `docker compose up -d` - required for
+   sign up, log in and saved questions (see the README "Database setup").
+5. Run the app with `./mvnw javafx:run`.
+6. Run tests with `./mvnw test` (database tests use in-memory H2, no Docker
+   needed).
 
 ## Quality Tools
 

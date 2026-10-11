@@ -14,7 +14,13 @@ import org.junit.jupiter.api.Test;
 import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.SceneManager;
+import com.aicodinginterviewprep.db.CodeSubmissionRepository;
+import com.aicodinginterviewprep.db.ConnectionFactory;
+import com.aicodinginterviewprep.db.SavedQuestionRepository;
+import com.aicodinginterviewprep.db.TestDatabase;
+import com.aicodinginterviewprep.db.UserRepository;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
+import com.aicodinginterviewprep.service.SavedContentService;
 
 import javafx.application.Platform;
 import javafx.scene.control.Button;
@@ -110,8 +116,136 @@ class CodingControllerTest {
         controller.buttonLogOut = new Button();
         controller.comboTopic = new ComboBox<>();
         controller.comboDifficulty = new ComboBox<>();
+        controller.buttonSave = new Button();
+        controller.labelSaveStatus = new Label();
 
         return controller;
+    }
+
+    private SavedContentService useTestSavedContentService(CodingController controller) {
+        ConnectionFactory connections = new TestDatabase().connections();
+        new UserRepository(connections).create("alice", "h");
+        SavedContentService service = new SavedContentService(new UserRepository(connections),
+                new SavedQuestionRepository(connections), new CodeSubmissionRepository(connections));
+        try {
+            Field field = CodingController.class.getDeclaredField("savedContentService");
+            field.setAccessible(true);
+            field.set(controller, service);
+            Field background = CodingController.class.getDeclaredField("background");
+            background.setAccessible(true);
+            background.set(controller, TestBackgrounds.IMMEDIATE);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+        return service;
+    }
+
+    @Test
+    void saveButtonIsDisabledUntilAQuestionIsGenerated() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            CodingController controller = createController();
+            controller.setSceneManager(new FakeSceneManager());
+
+            assertTrue(controller.buttonSave.isDisabled());
+        });
+    }
+
+    @Test
+    void generatedQuestionCanBeSavedAsCodingWithSelectedDifficulty() throws Exception {
+        CodingController[] holder = new CodingController[1];
+        SavedContentService[] serviceHolder = new SavedContentService[1];
+        CountDownLatch completed = new CountDownLatch(1);
+
+        runOnFxThreadAndWait(() -> {
+            CodingController controller = createController();
+            holder[0] = controller;
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            setQuestionService(controller, new FakeQuestionService("Reverse a list"));
+            serviceHolder[0] = useTestSavedContentService(controller);
+            controller.comboDifficulty.setValue(Difficulty.EASY);
+            controller.questionOutput.textProperty().addListener((o, oldValue, newValue) -> {
+                if ("Reverse a list".equals(newValue)) {
+                    completed.countDown();
+                }
+            });
+            controller.onGenerateQuestion();
+        });
+        assertTrue(completed.await(5, TimeUnit.SECONDS));
+
+        runOnFxThreadAndWait(() -> {
+            assertFalse(holder[0].buttonSave.isDisabled());
+
+            holder[0].onSave();
+
+            var saved = serviceHolder[0].listSavedQuestions("alice");
+            assertEquals(1, saved.size());
+            assertEquals("Reverse a list", saved.get(0).questionText());
+            assertEquals("CODING", saved.get(0).questionType());
+            assertEquals("EASY", saved.get(0).difficulty());
+        });
+    }
+
+    @Test
+    void saveButtonAlsoStoresTheCodeFromTheEditor() throws Exception {
+        CodingController[] holder = new CodingController[1];
+        SavedContentService[] serviceHolder = new SavedContentService[1];
+        CountDownLatch completed = new CountDownLatch(1);
+
+        runOnFxThreadAndWait(() -> {
+            CodingController controller = createController();
+            holder[0] = controller;
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            setQuestionService(controller, new FakeQuestionService("Reverse a list"));
+            serviceHolder[0] = useTestSavedContentService(controller);
+            controller.questionOutput.textProperty().addListener((o, oldValue, newValue) -> {
+                if ("Reverse a list".equals(newValue)) {
+                    completed.countDown();
+                }
+            });
+            controller.onGenerateQuestion();
+        });
+        assertTrue(completed.await(5, TimeUnit.SECONDS));
+
+        runOnFxThreadAndWait(() -> {
+            holder[0].codeEditor.replaceText("int x = 1;");
+
+            holder[0].onSave();
+
+            var submissions = serviceHolder[0].listSubmissions("alice");
+            assertEquals(1, submissions.size());
+            assertEquals("int x = 1;", submissions.get(0).code());
+            assertEquals("java", submissions.get(0).language());
+        });
+    }
+
+    @Test
+    void onSavedQuestions_switchesToSavedScene() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            CodingController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            controller.onSavedQuestions();
+
+            assertEquals("saved", sceneManager.lastScene);
+        });
+    }
+
+    @Test
+    void submittingAnAnswerResetsTheSaveButton() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            CodingController controller = createController();
+            controller.setSceneManager(new FakeSceneManager(new FakeFeedbackController()));
+            controller.buttonSave.setDisable(false);
+
+            controller.runEvaluation();
+
+            assertTrue(controller.buttonSave.isDisabled());
+        });
     }
 
     @Test
