@@ -12,10 +12,7 @@ public class HistoryController implements SceneAware {
 
     @FXML
     public ListView<?> listQuestions;
-    @FXML
-    public ListView<?> listSubmissions1;
-    @FXML
-    public ListView<?> listSubmissions;
+
     @FXML
     public Button buttonBack;
 
