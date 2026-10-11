@@ -40,9 +40,9 @@
             <Insets bottom="8" left="8" right="8" top="8" />
          </padding>
          <Label styleClass="section-label" text="Topics" />
-         <TextFlow prefHeight="307.0" prefWidth="716.0" />
+         <TextFlow fx:id="textFlowTopics" prefHeight="307.0" prefWidth="716.0" />
          <Label styleClass="section-label" text="Scores" />
-         <TextFlow layoutX="18.0" layoutY="52.0" prefHeight="365.0" prefWidth="716.0" />
+         <TextFlow fx:id="textFlowScores" layoutX="18.0" layoutY="52.0" prefHeight="365.0" prefWidth="716.0" />
       </VBox>
    </center>
 
