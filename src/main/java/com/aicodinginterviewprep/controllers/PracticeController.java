@@ -28,6 +28,7 @@ public class PracticeController implements SceneAware {
     private static final String VOICE_TRANSCRIBING_TEXT = "Transcribing...";
     private static final String RECORDING_STYLE_CLASS = "recording";
     private static final String RANDOM_TOPIC = "Random topic";
+    private static final String FEEDBACK_SCENE = "feedback";
 
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
     private final MicrophoneRecorder microphoneRecorder = new MicrophoneRecorder();
@@ -97,9 +98,17 @@ public class PracticeController implements SceneAware {
 
     public void onLogOut() {
         cancelRecordingIfActive();
+        saveEvaluationRecords();
         clearQuestionAndAnswer();
         sceneManager.setCurrentUsername(null);
         sceneManager.switchToScene("home");
+    }
+
+    private void saveEvaluationRecords() {
+        Object controller = sceneManager.getController(FEEDBACK_SCENE);
+        if (controller instanceof FeedbackController feedbackController) {
+            feedbackController.saveEvaluationRecords();
+        }
     }
 
     @FXML
@@ -292,13 +301,20 @@ public class PracticeController implements SceneAware {
     }
 
     public void runEvaluation() {
-        sceneManager.switchToScene("feedback");
-        Object controller = sceneManager.getController("feedback");
+        sceneManager.switchToScene(FEEDBACK_SCENE);
+        Object controller = sceneManager.getController(FEEDBACK_SCENE);
         if (!(controller instanceof FeedbackController feedbackController)) {
             return;
         }
-        feedbackController.setAnswerControls(questionOutput.getText(), "", answerInput.getText(), "practice");
+        feedbackController.setAnswerControls(
+                questionOutput.getText(), "", answerInput.getText(), "practice");
+        feedbackController.setTopic(currentTopic());
         clearQuestionAndAnswer();
         feedbackController.runEvaluation();
+    }
+
+    private String currentTopic() {
+        String topic = questionService.getCurrentTopic();
+        return topic == null ? "" : topic;
     }
 }

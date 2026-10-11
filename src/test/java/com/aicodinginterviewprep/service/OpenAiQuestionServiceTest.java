@@ -158,6 +158,7 @@ class OpenAiQuestionServiceTest {
 
         assertTrue(prompt.contains("Databases / SQL - SQL queries, joins"));
         assertTrue(prompt.contains("at exactly Hard difficulty"));
+        assertTrue(service.getCurrentTopic().startsWith("Databases / SQL - SQL queries, joins"));
     }
 
     @Test

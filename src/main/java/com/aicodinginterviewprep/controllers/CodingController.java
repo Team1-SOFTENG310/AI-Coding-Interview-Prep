@@ -27,6 +27,7 @@ public class CodingController implements SceneAware {
     private static final String PLACEHOLDER_TEXT = "// Write your code here";
     private static final String GENERATE_FIRST_TEXT = "Generate a question first to start coding.";
     private static final String RANDOM_TOPIC = "Random topic";
+    private static final String FEEDBACK_SCENE = "feedback";
 
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
     private SavedContentService savedContentService = new SavedContentService();
@@ -81,9 +82,17 @@ public class CodingController implements SceneAware {
     }
 
     public void onLogOut() {
+        saveEvaluationRecords();
         clearQuestionAndCode();
         sceneManager.setCurrentUsername(null);
         sceneManager.switchToScene("home");
+    }
+
+    private void saveEvaluationRecords() {
+        Object controller = sceneManager.getController(FEEDBACK_SCENE);
+        if (controller instanceof FeedbackController feedbackController) {
+            feedbackController.saveEvaluationRecords();
+        }
     }
 
     private void setUpCodeEditor() {
@@ -184,13 +193,20 @@ public class CodingController implements SceneAware {
         saveContent.reset();
     }
     public void runEvaluation() {
-        sceneManager.switchToScene("feedback");
-        Object controller = sceneManager.getController("feedback");
+        sceneManager.switchToScene(FEEDBACK_SCENE);
+        Object controller = sceneManager.getController(FEEDBACK_SCENE);
         if (!(controller instanceof FeedbackController feedbackController)) {
             return;
         }
-        feedbackController.setAnswerControls(questionOutput.getText(), codeEditor.getText(), "", "coding");
+        feedbackController.setAnswerControls(
+                questionOutput.getText(), codeEditor.getText(), "", "coding");
+        feedbackController.setTopic(currentTopic());
         clearQuestionAndCode();
         feedbackController.runEvaluation();
+    }
+
+    private String currentTopic() {
+        String topic = questionService.getCurrentTopic();
+        return topic == null ? "" : topic;
     }
 }
