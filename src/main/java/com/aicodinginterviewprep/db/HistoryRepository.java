@@ -1,6 +1,7 @@
 package com.aicodinginterviewprep.db;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
@@ -10,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,12 +64,53 @@ public class HistoryRepository {
             throw new DataAccessException("Failed to save history", e);
         }
     }
+
+    public List<History> findByUser(long userId) {
+        String sql = "SELECT id, user_id, topics, history_date, correctness_score, "
+                + "efficiency_score, communication_score, code_quality_score, average_score "
+                + "FROM history WHERE user_id = ? ORDER BY history_date DESC, id DESC";
+        try (Connection connection = connections.open();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+            try (java.sql.ResultSet result = statement.executeQuery()) {
+                List<History> histories = new ArrayList<>();
+                while (result.next()) {
+                    histories.add(new History(
+                            result.getLong("id"),
+                            result.getLong("user_id"),
+                            deserializeTopics(result.getString("topics")),
+                            result.getTimestamp("history_date").toInstant(),
+                            result.getBigDecimal("correctness_score"),
+                            result.getBigDecimal("efficiency_score"),
+                            result.getBigDecimal("communication_score"),
+                            result.getBigDecimal("code_quality_score"),
+                            result.getBigDecimal("average_score")));
+                }
+                return histories;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed to load history", e);
+        }
+    }
     //needed to convert the list of topics into a JSON string to store in the database
     private String serializeTopics(List<String> topics) {
         try {
             return objectMapper.writeValueAsString(topics);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException("History topics could not be serialized", e);
+        }
+    }
+
+    private List<String> deserializeTopics(String topicsJson) {
+        try {
+            JsonNode topics = objectMapper.readTree(topicsJson);
+            if (topics.isTextual()) {
+                topicsJson = topics.textValue();
+            }
+            return objectMapper.readValue(topicsJson,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
+        } catch (JsonProcessingException e) {
+            throw new DataAccessException("History topics could not be deserialized", e);
         }
     }
 

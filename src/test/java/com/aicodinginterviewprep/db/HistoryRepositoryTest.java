@@ -67,6 +67,29 @@ class HistoryRepositoryTest {
     }
 
     @Test
+    void findByUserReturnsHistoryDatesInDescendingOrder() {
+        ConnectionFactory connections = new TestDatabase().connections();
+        UserRepository users = new UserRepository(connections);
+        long userId = users.create("alice", "h").id();
+        long otherUserId = users.create("bob", "h").id();
+        HistoryRepository history = new HistoryRepository(connections);
+
+        history.save(userId, List.of("Arrays"), Instant.parse("2026-10-12T00:00:00Z"),
+                new BigDecimal("8"), null, null, null);
+        history.save(userId, List.of("Graphs"), Instant.parse("2026-10-13T00:00:00Z"),
+                new BigDecimal("9"), null, null, null);
+        history.save(otherUserId, List.of("Trees"), Instant.parse("2026-10-14T00:00:00Z"),
+                new BigDecimal("10"), null, null, null);
+
+        List<History> histories = history.findByUser(userId);
+
+        assertEquals(2, histories.size());
+        assertEquals(Instant.parse("2026-10-13T00:00:00Z"), histories.get(0).historyDate());
+        assertEquals(List.of("Graphs"), histories.get(0).topics());
+        assertEquals(Instant.parse("2026-10-12T00:00:00Z"), histories.get(1).historyDate());
+    }
+
+    @Test
     void saveRejectsEmptyTopics() {
         ConnectionFactory connections = new TestDatabase().connections();
         long userId = new UserRepository(connections).create("alice", "h").id();
