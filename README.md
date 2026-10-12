@@ -169,7 +169,7 @@ https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip
   except for voice input.
 - **Voice input accuracy is limited** by the offline speech model - it can
   come back empty on unclear audio, and background noise is filtered out
-  rather than transcribed as junk text (see "Voice input" below).
+  rather than transcribed as junk text (see "Voice input" above).
 - **The Vosk model is not tracked in git** on purpose (it's ~200MB of binary
   data) - if `models/vosk-model-en-us-0.22-lgraph/` is missing locally, voice
   input will show a clear error telling you to download it; every other
