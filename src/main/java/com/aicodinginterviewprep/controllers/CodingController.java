@@ -6,6 +6,7 @@ import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
 import com.aicodinginterviewprep.errors.AppErrorHandler;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
+import com.aicodinginterviewprep.service.SavedContentService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -28,6 +29,9 @@ public class CodingController implements SceneAware {
     private static final String RANDOM_TOPIC = "Random topic";
 
     private final OpenAiQuestionService questionService = new OpenAiQuestionService();
+    private SavedContentService savedContentService = new SavedContentService();
+    private Background background = Background.THREAD;
+    private SaveContentButton saveContent;
     private SceneManager sceneManager;
 
     public BorderPane codingRoot;
@@ -42,12 +46,17 @@ public class CodingController implements SceneAware {
     @FXML public Button buttonPractice;
     @FXML public Label labelLoggedInAs;
     @FXML public Button buttonLogOut;
+    @FXML public Button buttonSave;
+    @FXML public Label labelSaveStatus;
     @FXML public ComboBox<String> comboTopic;
     @FXML public ComboBox<Difficulty> comboDifficulty;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
+        saveContent = new SaveContentButton(buttonSave, labelSaveStatus, () -> savedContentService,
+            () -> background,
+            () -> this.sceneManager.getCurrentUsername(), () -> codeEditor.getText(), "java");
         comboTopic.getItems().setAll(RANDOM_TOPIC);
         comboTopic.getItems().addAll(questionService.getAvailableTopics(QuestionType.CODING));
         comboTopic.setValue(RANDOM_TOPIC);
@@ -113,6 +122,7 @@ public class CodingController implements SceneAware {
         String selectedTopic = comboTopic.getValue();
         String topic = RANDOM_TOPIC.equals(selectedTopic) ? null : selectedTopic;
         buttonGenerateQuestion.setDisable(true);
+        saveContent.reset();
         questionOutput.setText("Generating question...");
         codeEditor.clear();
         codeEditor.setDisable(true);
@@ -131,6 +141,7 @@ public class CodingController implements SceneAware {
             buttonGenerateQuestion.setDisable(false);
             codeEditor.setDisable(false);
             codePlaceholder.setText(PLACEHOLDER_TEXT);
+            saveContent.offer(task.getValue(), QuestionType.CODING, difficulty);
         });
 
         task.setOnFailed(event -> {
@@ -148,15 +159,29 @@ public class CodingController implements SceneAware {
         runEvaluation();
     }
 
+    @FXML
+    public void onSave() {
+        saveContent.save();
+    }
+
 
     public void onPractice() {
         sceneManager.switchToScene("practice");
+    }
+
+    @FXML
+    public void onSavedQuestions() {
+        sceneManager.switchToScene("saved");
+        if (sceneManager.getController("saved") instanceof SavedQuestionsController savedQuestions) {
+            savedQuestions.setReturnScene("coding");
+        }
     }
 
     private void clearQuestionAndCode() {
         questionOutput.clear();
         questionOutput.setMouseTransparent(true);
         codeEditor.clear();
+        saveContent.reset();
     }
     public void runEvaluation() {
         sceneManager.switchToScene("feedback");

@@ -5,22 +5,18 @@ import com.aicodinginterviewprep.errors.NetworkException;
 import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.config.EnvConfig;
-import com.aicodinginterviewprep.config.KeyValueFile;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -28,7 +24,7 @@ import java.util.Random;
 public class OpenAiQuestionService {
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
     private static final String DEFAULT_MODEL = "gpt-5-nano";
-    private static final String PROMPTS_RESOURCE = "/prompts/promptengineering.txt";
+    private static final String PROMPTS_RESOURCE = "/prompts/promptengineering.json";
     private static final int MAX_COMPLETION_TOKENS = 100;
     private static final int MAX_COMPLETION_TOKENS_CODING = 450;
     private static final String CONTENT_FIELD = "content";
@@ -40,7 +36,7 @@ public class OpenAiQuestionService {
     private final HttpClient httpClient;
     private final String apiKey;
     private final String model;
-    private final Map<String, String> prompts;
+    private final JSONObject prompts;
     private final Map<QuestionType, List<String>> topicsByType;
     private final Random random;
     // Medium keeps the existing experience as the default while allowing each screen to override it.
@@ -59,9 +55,9 @@ public class OpenAiQuestionService {
         this.model = model;
         this.prompts = loadPrompts();
         this.topicsByType = Map.of(
-                QuestionType.BEHAVIOURAL, extractTopics(prompts, "BEHAVIOURAL_TOPIC_"),
-                QuestionType.THEORY, extractTopics(prompts, "THEORY_TOPIC_"),
-                QuestionType.CODING, extractTopics(prompts, "CODING_TOPIC_"));
+                QuestionType.BEHAVIOURAL, extractTopics("BEHAVIOURAL_TOPICS"),
+                QuestionType.THEORY, extractTopics("THEORY_TOPICS"),
+                QuestionType.CODING, extractTopics("CODING_TOPICS"));
         this.random = new Random();
     }
 
@@ -158,13 +154,18 @@ public class OpenAiQuestionService {
     }
 
     String systemPromptFor(QuestionType type) {
-        return prompts.getOrDefault(type.name() + "_SYSTEM", prompts.get("SYSTEM"));
-    }
+    return prompts.optString(
+            type.name() + "_SYSTEM",
+            prompts.getString("SYSTEM"));
+}
 
     String systemPromptFor(QuestionType type, Difficulty difficulty) {
-        return systemPromptFor(type) + " The requested difficulty is " + difficulty
-                + "; enforce its expected depth and complexity strictly.";
-    }
+    String difficultyInstruction = prompts
+            .getString("DIFFICULTY_INSTRUCTION")
+            .replace("{difficulty}", difficulty.toString());
+
+    return systemPromptFor(type) + " " + difficultyInstruction;
+}
 
     int maxCompletionTokensFor(QuestionType type) {
         return type == QuestionType.CODING ? MAX_COMPLETION_TOKENS_CODING : MAX_COMPLETION_TOKENS;
@@ -178,7 +179,7 @@ public class OpenAiQuestionService {
 
         List<String> topics = topicsByType.get(type);
         String topic = topics.get(random.nextInt(topics.size()));
-        String template = prompts.get(type.name() + "_TEMPLATE").replace("{topic}", topic);
+        String template = prompts.getString(type.name() + "_TEMPLATE").replace("{topic}", topic);
 
         if (type == QuestionType.CODING) {
             String difficulty = CODING_DIFFICULTIES.get(random.nextInt(CODING_DIFFICULTIES.size()));
@@ -194,7 +195,7 @@ public class OpenAiQuestionService {
 
     String buildUserPrompt(QuestionType type, Difficulty difficulty, String topic) {
         String promptTopic = resolveTopic(type, topic);
-        String template = prompts.get(type.name() + "_TEMPLATE")
+        String template = prompts.getString(type.name() + "_TEMPLATE")
                 .replace("{topic}", promptTopic)
                 .replace("{difficulty}", difficulty.toString());
         return template;
@@ -226,24 +227,36 @@ public class OpenAiQuestionService {
         return separatorIndex < 0 ? topic : topic.substring(0, separatorIndex);
     }
 
-    private static List<String> extractTopics(Map<String, String> prompts, String prefix) {
-        return prompts.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(prefix))
-                .sorted(Comparator.comparingInt(entry -> Integer.parseInt(entry.getKey().substring(prefix.length()))))
-                .map(Map.Entry::getValue)
-                .toList();
-    }
+    private List<String> extractTopics(String key) {
+        JSONArray array = prompts.getJSONArray(key);
 
-    private static Map<String, String> loadPrompts() {
-        try (InputStream in = OpenAiQuestionService.class.getResourceAsStream(PROMPTS_RESOURCE)) {
-            if (in == null) {
-                throw new ConfigurationException("Missing prompts resource: " + PROMPTS_RESOURCE);
-            }
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-                return KeyValueFile.parse(reader.lines());
-            }
-        } catch (IOException e) {
-            throw new ConfigurationException("Failed to read prompts resource: " + PROMPTS_RESOURCE, e);
+        List<String> topics = new java.util.ArrayList<>();
+
+        for (int i = 0; i < array.length(); i++) {
+            topics.add(array.getString(i));
         }
+
+    return topics;
+}
+
+    private static JSONObject loadPrompts() {
+    try (InputStream in =
+            OpenAiQuestionService.class.getResourceAsStream(PROMPTS_RESOURCE)) {
+
+        if (in == null) {
+            throw new ConfigurationException(
+                    "Missing prompts resource: " + PROMPTS_RESOURCE);
+        }
+
+        String json = new String(
+                in.readAllBytes(),
+                StandardCharsets.UTF_8);
+
+        return new JSONObject(json);
+
+    } catch (IOException | JSONException e) {
+        throw new ConfigurationException(
+                "Failed to read prompts resource: " + PROMPTS_RESOURCE, e);
     }
+}
 }

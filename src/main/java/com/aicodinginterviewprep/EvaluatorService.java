@@ -1,5 +1,6 @@
 package com.aicodinginterviewprep;
 
+import com.aicodinginterviewprep.errors.ConfigurationException;
 import com.aicodinginterviewprep.openai.EvaluationResult;
 import com.aicodinginterviewprep.openai.OpenAiApiClient;
 import com.aicodinginterviewprep.openai.OpenAiApiException;
@@ -9,12 +10,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
 public class EvaluatorService {
 
   private final OpenAiApiClient apiClient;
   private final ObjectMapper objectMapper;
+  private final String evaluationPrompt;
 
   public EvaluatorService() {
     this(new OpenAiApiClient(), new ObjectMapper());
@@ -23,6 +28,7 @@ public class EvaluatorService {
   public EvaluatorService(OpenAiApiClient apiClient, ObjectMapper objectMapper) {
     this.apiClient = apiClient;
     this.objectMapper = objectMapper;
+    this.evaluationPrompt = loadEvaluationPrompt();
   }
 
   /** Sends user answer and interview question for evaluation. */
@@ -55,70 +61,7 @@ public class EvaluatorService {
 
     ObjectNode systemMessage = messages.addObject();
     systemMessage.put("role", "system");
-    systemMessage.put(
-        "content",
-        """
-        You are an expert software engineering interviewer grading a candidate's interview response. \
-        Respond strictly in JSON format. The JSON object MUST contain the following fields:
-        - "correctness": an object containing:
-            - "rating": an integer from 0 to 10, or null if there isn't enough information to evaluate it.
-            - "feedback": concise feedback explaining the score, or "Not applicable: insufficient information to evaluate this category."
-
-        - "efficiency": an object containing:
-            - "rating": an integer from 0 to 10, or null if there isn't enough information to evaluate it.
-            - "feedback": concise feedback explaining the score, or "Not applicable: insufficient information to evaluate this category."
-
-        - "communication": an object containing:
-            - "rating": an integer from 0 to 10, or null if there isn't enough information to evaluate it.
-            - "feedback": concise feedback explaining the score, or "Not applicable: insufficient information to evaluate this category."
-
-        - "code_quality": an object containing:
-            - "rating": an integer from 0 to 10, or null if there isn't enough information to evaluate it.
-            - "feedback": concise feedback explaining the score, or "Not applicable: insufficient information to evaluate this category."
-
-        Grading rubric:
-            CORRECTNESS
-                - 0-1: The answer is blank, irrelevant, or fundamentally incorrect.
-                - 2-4: Shows some understanding but contains major technical errors or misunderstandings.
-                - 5-6: Generally correct but contains notable errors, omissions, or misunderstandings.
-                - 7-8: Correct and relevant with only minor inaccuracies or missing details.
-                - 9-10: Accurate, complete, and technically precise.
-
-            EFFICIENCY
-                Evaluate whether the candidate's proposed solution uses appropriate time and space complexity and avoids unnecessary work.
-                - 0-1: No valid solution or extremely inefficient approach.
-                - 2-4: Major inefficiencies or inappropriate algorithm/data structure choices.
-                - 5-6: Reasonable approach but has notable unnecessary work or complexity issues.
-                - 7-8: Efficient approach with minor opportunities for improvement.
-                - 9-10: Highly efficient and uses appropriate algorithms and data structures.
-
-            COMMUNICATION
-                Evaluate how clearly and logically the candidate explains their reasoning.
-                - 0-1: No explanation, incoherent, or impossible to follow.
-                - 2-4: Difficult to follow and lacks clear reasoning.
-                - 5-6: Understandable but vague, incomplete, or poorly structured.
-                - 7-8: Clear and logically structured with minor gaps.
-                - 9-10: Clear, concise, well-structured, and demonstrates strong technical reasoning.
-
-            CODE QUALITY
-                If the candidate provides code:
-                - Evaluate readability, naming, structure, maintainability, and appropriate use of language features.
-                - 0-1: Code is fundamentally unusable.
-                - 2-4: Code has major readability, structure, or maintainability problems.
-                - 5-6: Code is functional but has noticeable quality issues.
-                - 7-8: Code is clean and maintainable with minor issues.
-                - 9-10: Code is clean, well-structured, readable, maintainable, and follows good software engineering practices.
-
-        IMPORTANT:
-        - Judge each category independently.
-        - Do not give credit simply because the candidate wrote a long answer.
-        - Base scores only on evidence present in the candidate's response.
-        - Do not invent information that the candidate did not provide.
-        - Provide specific, constructive feedback for each category.
-        - If a category is not applicable to the candidate's response, set its "rating" to null and its "feedback" to "Not applicable: insufficient information to evaluate this category."
-        - Do not assign a score of 0 simply because a category is not applicable.
-        - Only assign a rating from 0 to 10 when there is sufficient evidence to evaluate that category.
-        """);
+    systemMessage.put("content", evaluationPrompt);
 
     // User payload combining question and response
     ObjectNode userMessage = messages.addObject();
@@ -171,4 +114,28 @@ public class EvaluatorService {
     // Preserve an explicit JSON null instead of converting it to the primitive value 0.
     return node.isNull() || node.isMissingNode() ? null : node.asInt();
   }
+
+  private String loadEvaluationPrompt() {
+    try (InputStream inputStream =
+            getClass().getResourceAsStream("/prompts/evaluation.json")) {
+
+        if (inputStream == null) {
+            throw new ConfigurationException("evaluation.json not found");
+        }
+
+        JsonNode root = objectMapper.readTree(inputStream);
+        ArrayNode lines = (ArrayNode) root.get("EVALUATION_SYSTEM");
+
+        StringBuilder prompt = new StringBuilder();
+
+        for (JsonNode line : lines) {
+            prompt.append(line.asText()).append("\n");
+        }
+
+        return prompt.toString();
+
+    } catch (IOException e) {
+        throw new ConfigurationException("Failed to load evaluation.json", e);
+    }
+}
 }

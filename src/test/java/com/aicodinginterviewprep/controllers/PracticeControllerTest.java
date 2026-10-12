@@ -15,7 +15,13 @@ import com.aicodinginterviewprep.MicrophoneRecorder;
 import com.aicodinginterviewprep.Difficulty;
 import com.aicodinginterviewprep.QuestionType;
 import com.aicodinginterviewprep.SceneManager;
+import com.aicodinginterviewprep.db.CodeSubmissionRepository;
+import com.aicodinginterviewprep.db.ConnectionFactory;
+import com.aicodinginterviewprep.db.SavedQuestionRepository;
+import com.aicodinginterviewprep.db.TestDatabase;
+import com.aicodinginterviewprep.db.UserRepository;
 import com.aicodinginterviewprep.service.OpenAiQuestionService;
+import com.aicodinginterviewprep.service.SavedContentService;
 import com.aicodinginterviewprep.service.SpeechToTextService;
 
 import javafx.application.Platform;
@@ -326,8 +332,137 @@ class PracticeControllerTest {
         controller.labelVoiceStatus = new Label();
         controller.labelLoggedInAs = new Label();
         controller.buttonLogOut = new Button();
+        controller.buttonSave = new Button();
+        controller.labelSaveStatus = new Label();
 
         return controller;
+    }
+
+    private SavedContentService useTestSavedContentService(PracticeController controller) {
+        ConnectionFactory connections = new TestDatabase().connections();
+        new UserRepository(connections).create("alice", "h");
+        SavedContentService service = new SavedContentService(new UserRepository(connections),
+                new SavedQuestionRepository(connections), new CodeSubmissionRepository(connections));
+        try {
+            Field field = PracticeController.class.getDeclaredField("savedContentService");
+            field.setAccessible(true);
+            field.set(controller, service);
+            Field background = PracticeController.class.getDeclaredField("background");
+            background.setAccessible(true);
+            background.set(controller, TestBackgrounds.IMMEDIATE);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+        return service;
+    }
+
+    @Test
+    void saveButtonIsDisabledUntilAQuestionIsGenerated() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            controller.setSceneManager(new FakeSceneManager());
+
+            assertTrue(controller.buttonSave.isDisabled());
+        });
+    }
+
+    @Test
+    void generatedQuestionCanBeSavedWithSelectedTypeAndDifficulty() throws Exception {
+        PracticeController[] holder = new PracticeController[1];
+        SavedContentService[] serviceHolder = new SavedContentService[1];
+        CountDownLatch completed = new CountDownLatch(1);
+
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            holder[0] = controller;
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            setQuestionService(controller, new FakeQuestionService("Explain ACID"));
+            serviceHolder[0] = useTestSavedContentService(controller);
+            controller.comboQuestionType.setValue(QuestionType.THEORY);
+            controller.comboDifficulty.setValue(Difficulty.HARD);
+            controller.questionOutput.textProperty().addListener((o, oldValue, newValue) -> {
+                if ("Explain ACID".equals(newValue)) {
+                    completed.countDown();
+                }
+            });
+            controller.onGenerateQuestion();
+        });
+        assertTrue(completed.await(5, TimeUnit.SECONDS));
+
+        runOnFxThreadAndWait(() -> {
+            assertFalse(holder[0].buttonSave.isDisabled());
+
+            holder[0].onSave();
+
+            var saved = serviceHolder[0].listSavedQuestions("alice");
+            assertEquals(1, saved.size());
+            assertEquals("Explain ACID", saved.get(0).questionText());
+            assertEquals("THEORY", saved.get(0).questionType());
+            assertEquals("HARD", saved.get(0).difficulty());
+        });
+    }
+
+    @Test
+    void saveButtonAlsoStoresTheTypedExplanation() throws Exception {
+        PracticeController[] holder = new PracticeController[1];
+        SavedContentService[] serviceHolder = new SavedContentService[1];
+        CountDownLatch completed = new CountDownLatch(1);
+
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            holder[0] = controller;
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            sceneManager.setCurrentUsername("alice");
+            controller.setSceneManager(sceneManager);
+            setQuestionService(controller, new FakeQuestionService("Explain ACID"));
+            serviceHolder[0] = useTestSavedContentService(controller);
+            controller.questionOutput.textProperty().addListener((o, oldValue, newValue) -> {
+                if ("Explain ACID".equals(newValue)) {
+                    completed.countDown();
+                }
+            });
+            controller.onGenerateQuestion();
+        });
+        assertTrue(completed.await(5, TimeUnit.SECONDS));
+
+        runOnFxThreadAndWait(() -> {
+            holder[0].answerInput.setText("Atomicity, consistency, isolation, durability");
+
+            holder[0].onSave();
+
+            var submissions = serviceHolder[0].listSubmissions("alice");
+            assertEquals(1, submissions.size());
+            assertEquals("Atomicity, consistency, isolation, durability", submissions.get(0).code());
+            assertEquals("text", submissions.get(0).language());
+        });
+    }
+
+    @Test
+    void onSavedQuestions_switchesToSavedScene() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            FakeSceneManager sceneManager = new FakeSceneManager();
+            controller.setSceneManager(sceneManager);
+
+            controller.onSavedQuestions();
+
+            assertEquals("saved", sceneManager.lastScene);
+        });
+    }
+
+    @Test
+    void submittingAnAnswerResetsTheSaveButton() throws Exception {
+        runOnFxThreadAndWait(() -> {
+            PracticeController controller = createController();
+            controller.setSceneManager(new FakeSceneManager(new FakeFeedbackController()));
+            controller.buttonSave.setDisable(false);
+
+            controller.runEvaluation();
+
+            assertTrue(controller.buttonSave.isDisabled());
+        });
     }
 
     private void setMicrophoneRecorder(PracticeController controller, MicrophoneRecorder recorder) {

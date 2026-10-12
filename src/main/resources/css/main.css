@@ -308,6 +308,31 @@
     -fx-background-radius: 14, 10;
 }
 
+/* ---------- List views ---------- */
+
+.list-view {
+    -fx-background-color: -color-bg-light;
+    -fx-control-inner-background: -color-bg-light;
+    -fx-border-color: #ded6cc;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text-grey;
+    -fx-padding: 8px 12px;
+}
+.list-view .list-cell:filled:hover {
+    -fx-background-color: rgba(178, 98, 45, 0.16);
+}
+.list-view .list-cell:filled:selected {
+    -fx-background-color: #b2622d;
+    -fx-text-fill: -color-text-white;
+}
+
 /* ---------- Dropdown popup ---------- */
 
 .combo-box-popup > .list-view {
