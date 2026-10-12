@@ -11,6 +11,8 @@ import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 
+import java.time.Instant;
+
 public class FeedbackController implements SceneAware {
     private SceneManager sceneManager;
     private final EvaluatorService evaluatorService = new EvaluatorService();
@@ -84,6 +86,7 @@ public class FeedbackController implements SceneAware {
         historyRepository.save(
                 userId,
                 summary.topics(),
+                Instant.now(),
                 summary.correctnessScore(),
                 summary.efficiencyScore(),
                 summary.communicationScore(),

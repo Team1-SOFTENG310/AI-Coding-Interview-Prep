@@ -82,6 +82,7 @@ public class EvaluatorService {
   public synchronized List<EvaluationRecord> getEvaluationRecords() {
     return Collections.unmodifiableList(new ArrayList<>(evaluationRecords));
   }
+  
   //aggregates all evluation records in order to store in history database table
   public synchronized EvaluationSummary summarizeEvaluationRecords() {
     if (evaluationRecords.isEmpty()) {

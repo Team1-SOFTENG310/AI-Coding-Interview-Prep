@@ -30,7 +30,7 @@
             <Insets bottom="8" left="8" right="8" top="8" />
          </padding>
          <Label styleClass="section-label" text="Session Dates" />
-         <ListView fx:id="listQuestions" prefWidth="420.0" VBox.vgrow="ALWAYS" />
+         <ListView fx:id="listDates" prefWidth="420.0" VBox.vgrow="ALWAYS" />
       </VBox>
    </left>
 

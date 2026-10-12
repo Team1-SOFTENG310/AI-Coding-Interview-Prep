@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +22,7 @@ class HistoryRepositoryTest {
         history.save(
                 userId,
                 List.of("Arrays", "Graphs"),
+                Instant.parse("2026-10-13T00:33:55Z"),
                 new BigDecimal("8"),
                 null,
                 new BigDecimal("9"),
@@ -42,12 +44,35 @@ class HistoryRepositoryTest {
     }
 
     @Test
+    void savePersistsProvidedHistoryDate() {
+        ConnectionFactory connections = new TestDatabase().connections();
+        long userId = new UserRepository(connections).create("alice", "h").id();
+        HistoryRepository history = new HistoryRepository(connections);
+        Instant historyDate = Instant.parse("2026-10-13T00:33:55Z");
+
+        history.save(userId, List.of("Arrays"), historyDate,
+                new BigDecimal("8"), null, null, null);
+
+        try (Connection connection = connections.open();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT history_date FROM history WHERE user_id = ?")) {
+            statement.setLong(1, userId);
+            try (ResultSet result = statement.executeQuery()) {
+                assertTrue(result.next());
+                assertEquals(historyDate, result.getTimestamp("history_date").toInstant());
+            }
+        } catch (Exception e) {
+            fail("Could not verify saved history date", e);
+        }
+    }
+
+    @Test
     void saveRejectsEmptyTopics() {
         ConnectionFactory connections = new TestDatabase().connections();
         long userId = new UserRepository(connections).create("alice", "h").id();
         HistoryRepository history = new HistoryRepository(connections);
 
         assertThrows(IllegalArgumentException.class,
-                () -> history.save(userId, List.of(), null, null, null, null));
+                () -> history.save(userId, List.of(), Instant.now(), null, null, null, null));
     }
 }

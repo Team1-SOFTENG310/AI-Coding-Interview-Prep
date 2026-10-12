@@ -12,7 +12,7 @@ public class HistoryController implements SceneAware {
     private SceneManager sceneManager;
 
     @FXML
-    public ListView<?> listQuestions;
+    public ListView<?> listDates;
     @FXML 
     public TextFlow textFlowTopics;
 
