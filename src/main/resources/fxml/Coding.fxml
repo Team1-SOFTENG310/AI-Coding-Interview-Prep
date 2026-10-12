@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="codingRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.CodingController">
+<BorderPane fx:id="codingRoot" prefHeight="760" prefWidth="1200" stylesheets="@../css/main.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aicodinginterviewprep.controllers.CodingController">
 
    <padding>
       <Insets bottom="16" left="16" right="16" top="16" />
@@ -23,6 +23,7 @@
          <Label fx:id="labelLoggedInAs" styleClass="muted-label" />
          <Region HBox.hgrow="ALWAYS" />
          <Label fx:id="labelSaveStatus" styleClass="muted-label" />
+         <Button fx:id="buttonHistory" mnemonicParsing="false" onAction="#onHistory" text="History" />
          <Button fx:id="buttonSave" disable="true" onAction="#onSave" text="Save" />
          <Button mnemonicParsing="false" onAction="#onSavedQuestions" text="Saved Questions" />
       </HBox>

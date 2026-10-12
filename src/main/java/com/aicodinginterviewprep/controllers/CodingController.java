@@ -51,6 +51,7 @@ public class CodingController implements SceneAware {
     @FXML public Label labelSaveStatus;
     @FXML public ComboBox<String> comboTopic;
     @FXML public ComboBox<Difficulty> comboDifficulty;
+    @FXML public Button buttonHistory;
 
     @Override
     public void setSceneManager(SceneManager sceneManager) {
@@ -171,6 +172,14 @@ public class CodingController implements SceneAware {
     @FXML
     public void onSave() {
         saveContent.save();
+    }
+    @FXML 
+    public void onHistory() {
+        sceneManager.switchToScene("history");
+        if (sceneManager.getController("history") instanceof HistoryController historyController) {
+            historyController.setSceneManager(sceneManager);
+        }
+        
     }
 
 

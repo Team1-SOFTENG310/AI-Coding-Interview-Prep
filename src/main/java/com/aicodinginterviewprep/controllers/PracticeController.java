@@ -175,8 +175,8 @@ public class PracticeController implements SceneAware {
 
     @FXML 
     public void onHistory() {
-        sceneManager.switchToScene("History");
-        if (sceneManager.getController("History") instanceof HistoryController historyController) {
+        sceneManager.switchToScene("history");
+        if (sceneManager.getController("history") instanceof HistoryController historyController) {
             historyController.setSceneManager(sceneManager);
         }
     }
