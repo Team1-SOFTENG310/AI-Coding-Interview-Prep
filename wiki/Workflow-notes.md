@@ -42,7 +42,7 @@ The following pull requests were merged under the old setup, from personal forks
 | #91 | feature: Refined layout                                                        | `Jago-Sutherland/AI-Coding-Interview-Prep/tree/feature/Update-UI`              | #40   |                 |
 | #92 | refactor: centralize error handling with custom exceptions                     | `AdRo-Coder/AI-Coding-Interview-Prep/tree/refactor/centralised-error-handling` | #87   |                 |
 | #93 | feat: add topic selection for practice questions                               | `yd35/AI-Coding-Interview-Prep/tree/feat/36-topic-selection`                   | #36   |                 |
-| #94 | fix: upgrade Jackson for Snyk scan                                             | `JohanEger/AI-Coding-Interview-Prep/tree/feat/testcontainers-for-db-tests`     | #79   |                 |
+| #94 | fix: upgrade Jackson for Snyk scan                                             | `yd35/AI-Coding-Interview-Prep/tree/fix/79-snyk-ci`                            | #79   |                 |
 
 ## Assignment 1 history (Group 1)
 
