@@ -9,7 +9,7 @@ Group 2 works from a fork of the main repository:
   Steps for every contribution:
 
 1. Open or pick up an issue on `se310-fairshare/AI-Coding-Interview-Prep`.
-2. Create a new feature branch from the fork's `main` for that issue. 
+2. Create a new feature branch from the fork's `main` for that issue.
 3. Open a pull request from that branch into `Team1-SOFTENG310/AI-Coding-Interview-Prep:main`, referencing the issue.
 4. Get a review from another Group 2 member.
 5. Squash and merge.
@@ -18,7 +18,31 @@ Keep all development branches on the fork. Do not create feature branches in the
 
 ### A2 workflow mistakes
 
-**TODO**: Add the mistakes we've made.
+#### Work started before the organization fork was created
+
+Group 2 started on Assignment 2 before the organization fork (`se310-fairshare/AI-Coding-Interview-Prep`) had been created. In that period:
+
+- Issues were created in the upstream repository (`Team1-SOFTENG310/AI-Coding-Interview-Prep`) instead of on the fork.
+- Each member forked the upstream repository to their own personal account and created feature branches there.
+- Pull requests were opened from those personal forks into `Team1-SOFTENG310/AI-Coding-Interview-Prep:main`.
+
+Once the fork-based workflow was clarified, the remaining open issues were copied to the organization fork, and all new branches have since been created on the organization fork as described in the current workflow above.
+
+The following pull requests were merged under the old setup, from personal forks rather than the organization fork:
+
+| PR  | Title                                                                          | Source (personal fork)                                                         | Issue | Notes           |
+|-----|--------------------------------------------------------------------------------|--------------------------------------------------------------------------------|-------|-----------------|
+| #68 | updated readme after initial setup.                                            | `AdRo-Coder/AI-Coding-Interview-Prep/tree/updating-readme`                     | N/A   |                 |
+| #71 | Fixing the issue templates                                                     | `JohanEger/AI-Coding-Interview-Prep/tree/fix/template_workflow`                | #69   |                 |
+| #74 | Feat/set up persistence database                                               | `JohanEger/AI-Coding-Interview-Prep/tree/feat/set_up_persistence_database`     | #72   |                 |
+| #81 | feat: Added difficulty selection for questions                                 | `AdRo-Coder/AI-Coding-Interview-Prep/tree/feat/difficulty-selection`           | #35   |                 |
+| #83 | feat: Added testcontainers so DB tests run against throwaway MySQL contatiner. | `JohanEger/AI-Coding-Interview-Prep/tree/feat/testcontainers-for-db-tests`     | #73   |                 |
+| #84 | feat: Added scoring rubric for response                                        | `LouisCao1029/AI-Coding-Interview-Prep/tree/feat/feedback-rubric`              | #37   | Fork is deleted |
+| #85 | bug: logout and return bug                                                     | `Shio-y/AI-Coding-Interview-Prep/tree/bug/logout-and-return-bug`               | #76   | Fork is deleted |
+| #91 | feature: Refined layout                                                        | `Jago-Sutherland/AI-Coding-Interview-Prep/tree/feature/Update-UI`              | #40   |                 |
+| #92 | refactor: centralize error handling with custom exceptions                     | `AdRo-Coder/AI-Coding-Interview-Prep/tree/refactor/centralised-error-handling` | #87   |                 |
+| #93 | feat: add topic selection for practice questions                               | `yd35/AI-Coding-Interview-Prep/tree/feat/36-topic-selection`                   | #36   |                 |
+| #94 | fix: upgrade Jackson for Snyk scan                                             | `JohanEger/AI-Coding-Interview-Prep/tree/feat/testcontainers-for-db-tests`     | #79   |                 |
 
 ## Assignment 1 history (Group 1)
 

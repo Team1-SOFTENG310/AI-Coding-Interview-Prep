@@ -26,7 +26,7 @@ Add each item with the PR and issue it relates to, e.g. `Short description (PR #
 * **Code Contributions:**
     *
 * **Other Contributions:**
-    * 
+    *
 
 ### Name (@github-username)
 * **Code Contributions:**
