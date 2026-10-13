@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -72,6 +73,11 @@ class SceneManagerTest {
     @Test
     void getCurrentScene_beforeAnySceneLoaded_returnsNull() {
         assertNull(sceneManager.getCurrentScene());
+    }
+
+    @Test
+    void getCurrentSceneKey_beforeAnySceneLoaded_returnsNull() {
+        assertNull(sceneManager.getCurrentSceneKey());
     }
 
     @Test
@@ -147,6 +153,140 @@ class SceneManagerTest {
 
             assertSame(firstScene, secondScene);
 
+            stage.close();
+        });
+    }
+
+    @Test
+    void switchScene_tracksActiveSceneKey() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+            manager.registerScene("test", "/fxml/TestScene.fxml");
+
+            manager.switchScene("test");
+
+            assertEquals("test", manager.getCurrentSceneKey());
+            stage.close();
+        });
+    }
+
+    @Test
+    void pushSceneAndPopScene_returnToPreviousScene() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+            manager.registerScene("first", "/fxml/TestScene.fxml");
+            manager.registerScene("second", "/fxml/TestScene2.fxml");
+
+            manager.switchScene("first");
+            manager.pushScene("second");
+
+            assertEquals("second", manager.getCurrentSceneKey());
+            assertTrue(manager.popScene());
+            assertEquals("first", manager.getCurrentSceneKey());
+            assertFalse(manager.popScene());
+            stage.close();
+        });
+    }
+
+    @Test
+    void switchScene_clearsPushPopHistory() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+            manager.registerScene("home-test", "/fxml/TestScene.fxml");
+            manager.registerScene("saved-test", "/fxml/TestScene2.fxml");
+            manager.registerScene("practice-test", "/fxml/TestScene.fxml");
+
+            manager.switchScene("home-test");
+            manager.pushScene("saved-test");
+            manager.switchScene("practice-test");
+
+            assertFalse(manager.popScene());
+            assertEquals("practice-test", manager.getCurrentSceneKey());
+            stage.close();
+        });
+    }
+
+    @Test
+    void switchScene_updatesActiveStateBeforeLifecycleCallbacks() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+            manager.registerScene("first", "/fxml/TestSceneAware.fxml");
+            manager.registerScene("second", "/fxml/TestSceneAware.fxml");
+            manager.switchScene("first");
+            TestSceneController firstController = (TestSceneController) manager.getController("first");
+
+            manager.switchScene("second");
+
+            TestSceneController secondController = (TestSceneController) manager.getController("second");
+            assertEquals("second", firstController.getCurrentSceneKeyWhenHidden());
+            assertEquals("second", secondController.getCurrentSceneKeyWhenShown());
+            assertSame(manager.getCurrentScene(), stage.getScene());
+            stage.close();
+        });
+    }
+
+    @Test
+    void switchScene_navigationRequestedDuringLifecycleCallback_runsAfterCurrentTransition() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+            manager.registerScene("first", "/fxml/TestSceneAware.fxml");
+            manager.registerScene("second", "/fxml/TestSceneAware.fxml");
+            manager.registerScene("third", "/fxml/TestSceneAware.fxml");
+            manager.switchScene("first");
+            TestSceneController firstController = (TestSceneController) manager.getController("first");
+            firstController.setOnHiddenAction(() -> {
+                assertEquals("second", manager.getCurrentSceneKey());
+                assertSame(manager.getCurrentScene(), stage.getScene());
+                manager.switchScene("third");
+            });
+
+            manager.switchScene("second");
+
+            TestSceneController secondController = (TestSceneController) manager.getController("second");
+            assertEquals("third", manager.getCurrentSceneKey());
+            assertEquals(1, secondController.getSceneShownCount());
+            assertSame(manager.getCurrentScene(), stage.getScene());
+            stage.close();
+        });
+    }
+
+    @Test
+    void unloadScene_removesCachedSceneAndController() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+            manager.registerScene("first", "/fxml/TestSceneAware.fxml");
+            manager.registerScene("second", "/fxml/TestScene2.fxml");
+            manager.switchScene("first");
+            Scene firstScene = manager.getCurrentScene();
+            TestSceneController firstController = (TestSceneController) manager.getController("first");
+            manager.switchScene("second");
+
+            assertEquals(1, firstController.getSceneHiddenCount());
+            manager.unloadScene("first");
+            assertEquals(1, firstController.getSceneDisposedCount());
+            manager.switchScene("first");
+
+            assertNotSame(firstScene, manager.getCurrentScene());
+            assertNotSame(firstController, manager.getController("first"));
+            stage.close();
+        });
+    }
+
+    @Test
+    void unloadScene_activeScene_isRejected() {
+        runOnFxThread(() -> {
+            Stage stage = new Stage();
+            SceneManager manager = new SceneManager(stage);
+            manager.registerScene("active", "/fxml/TestScene.fxml");
+            manager.switchScene("active");
+
+            assertThrows(IllegalStateException.class, () -> manager.unloadScene("active"));
             stage.close();
         });
     }

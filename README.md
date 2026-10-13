@@ -37,6 +37,16 @@ typing.
 - Build Tool: Maven
 - Testing: JUnit
 
+## Scene navigation
+
+`SceneManager` is the single entry point for scene transitions. Use
+`switchScene(key)` for normal navigation, `pushScene(key)` and `popScene()` for
+temporary screens with a return path, and `unloadScene(key)` to release an
+inactive scene and its controller. Scenes are cached and reused until unloaded.
+Controllers implementing `SceneAware` can respond to `onSceneHidden()` and
+`onSceneDisposed()` to stop work or release resources; `onSceneShown()` runs
+whenever a scene becomes active.
+
 ## Prerequisites
 
 - Java 17 JDK installed

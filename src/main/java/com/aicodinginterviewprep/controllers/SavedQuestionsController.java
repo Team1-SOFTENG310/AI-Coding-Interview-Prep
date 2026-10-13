@@ -74,6 +74,18 @@ public class SavedQuestionsController implements SceneAware {
         refresh(null);
     }
 
+    @Override
+    public void onSceneHidden() {
+        questionsLoad++;
+        submissionsLoad++;
+    }
+
+    @Override
+    public void onSceneDisposed() {
+        questionsLoad++;
+        submissionsLoad++;
+    }
+
     /** Sets the scene that the Back button returns to. */
     public void setReturnScene(String sceneName) {
         this.returnScene = sceneName;

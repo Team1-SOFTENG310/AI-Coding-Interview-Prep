@@ -86,6 +86,11 @@ public class PracticeController implements SceneAware {
         updateLoggedInLabel();
     }
 
+    @Override
+    public void onSceneHidden() {
+        cancelRecordingIfActive();
+    }
+
     private void updateLoggedInLabel() {
         if (labelLoggedInAs == null) {
             return;
