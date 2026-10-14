@@ -10,6 +10,7 @@ import org.vosk.Recognizer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Logger;
 
 /**
  * Transcribes recorded audio to text entirely offline using Vosk, so this
@@ -19,6 +20,7 @@ import java.nio.file.Path;
  * even ones who never touch voice input.
  */
 public class SpeechToTextService {
+    private static final Logger LOGGER = Logger.getLogger(SpeechToTextService.class.getName());
     private static final float SAMPLE_RATE = 16000f;
     private static final Path DEFAULT_MODEL_PATH = Path.of("models", "vosk-model-en-us-0.22-lgraph");
 
@@ -49,7 +51,11 @@ public class SpeechToTextService {
         if (pcmAudio == null || pcmAudio.length == 0) {
             throw new SpeechRecognitionException("No audio was recorded.");
         }
-        if (isSilent(pcmAudio)) {
+        double rms = rms(pcmAudio);
+        LOGGER.info(String.format("Recorded %d bytes (%.2f s), RMS %.1f, peak %d, silence threshold %.1f",
+                pcmAudio.length, pcmAudio.length / 2 / SAMPLE_RATE, rms, peak(pcmAudio), SILENCE_RMS_THRESHOLD));
+        if (rms < SILENCE_RMS_THRESHOLD) {
+            LOGGER.info("Audio is below the silence threshold, skipping recognition.");
             return "";
         }
 
@@ -57,14 +63,20 @@ public class SpeechToTextService {
 
         try (Recognizer recognizer = new Recognizer(model, SAMPLE_RATE)) {
             recognizer.acceptWaveForm(pcmAudio, pcmAudio.length);
-            return new JSONObject(recognizer.getFinalResult()).getString("text").trim();
+            String result = recognizer.getFinalResult();
+            LOGGER.info("Vosk result: " + result);
+            return new JSONObject(result).getString("text").trim();
         }
     }
 
     static boolean isSilent(byte[] pcmAudio) {
+        return rms(pcmAudio) < SILENCE_RMS_THRESHOLD;
+    }
+
+    private static double rms(byte[] pcmAudio) {
         int sampleCount = pcmAudio.length / 2;
         if (sampleCount == 0) {
-            return true;
+            return 0;
         }
 
         long sumSquares = 0;
@@ -73,8 +85,16 @@ public class SpeechToTextService {
             sumSquares += (long) sample * sample;
         }
 
-        double rms = Math.sqrt((double) sumSquares / sampleCount);
-        return rms < SILENCE_RMS_THRESHOLD;
+        return Math.sqrt((double) sumSquares / sampleCount);
+    }
+
+    private static int peak(byte[] pcmAudio) {
+        int peak = 0;
+        for (int i = 0; i + 1 < pcmAudio.length; i += 2) {
+            short sample = (short) ((pcmAudio[i + 1] << 8) | (pcmAudio[i] & 0xFF));
+            peak = Math.max(peak, Math.abs(sample));
+        }
+        return peak;
     }
 
     private void ensureModelLoaded() throws IOException {
@@ -87,7 +107,9 @@ public class SpeechToTextService {
                             + ". See README for setup instructions.");
         }
 
+        LOGGER.info("Loading speech model from " + modelPath.toAbsolutePath());
         LibVosk.setLogLevel(LogLevel.WARNINGS);
         model = new Model(modelPath.toAbsolutePath().toString());
+        LOGGER.info("Speech model loaded.");
     }
 }
