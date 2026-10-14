@@ -5,4 +5,10 @@ public interface SceneAware {
 
     default void onSceneShown() {
     }
+
+    default void onSceneHidden() {
+    }
+
+    default void onSceneDisposed() {
+    }
 }

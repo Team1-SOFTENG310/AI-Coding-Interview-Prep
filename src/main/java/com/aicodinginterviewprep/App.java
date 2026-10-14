@@ -18,7 +18,7 @@ public class App extends Application {
         stage.setMinHeight(650);
 
         SceneManager sceneManager = new SceneManager(stage);
-        sceneManager.switchToScene("home");
+        sceneManager.switchScene("home");
         stage.show();
     }
 
