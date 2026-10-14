@@ -27,7 +27,7 @@ public class SpeechToTextService {
     // is a basic RMS-energy gate: audio quieter than this (16-bit PCM, so the
     // scale is 0-32767) is treated as "nothing said" before it ever reaches the
     // recognizer, rather than letting it guess at noise.
-    private static final double SILENCE_RMS_THRESHOLD = 400.0;
+    private static final double SILENCE_RMS_THRESHOLD = 200.0;
 
     private final Path modelPath;
     private Model model;
