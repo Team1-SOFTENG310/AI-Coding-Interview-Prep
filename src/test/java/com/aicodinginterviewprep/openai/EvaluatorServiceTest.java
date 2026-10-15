@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 
 import com.aicodinginterviewprep.EvaluatorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -139,6 +141,28 @@ class EvaluatorServiceTest {
     ExecutionException exception = assertThrows(ExecutionException.class, future::get);
     assertTrue(exception.getCause() instanceof OpenAiApiException);
     assertTrue(exception.getCause().getMessage().contains("HTTP 500 Internal Server Error"));
+  }
+
+  @Test
+  void summarizeEvaluationRecordsCombinesTopicsAndAveragesScores() {
+    evaluatorService.storeEvaluation(
+        "Arrays",
+        new EvaluationResult(8, 6, 10, null, "", "", "", ""));
+    evaluatorService.storeEvaluation(
+        "Graphs",
+        new EvaluationResult(6, 8, null, 7, "", "", "", ""));
+    evaluatorService.storeEvaluation(
+        "Arrays",
+        new EvaluationResult(10, null, 8, 9, "", "", "", ""));
+
+    EvaluatorService.EvaluationSummary summary =
+        evaluatorService.summarizeEvaluationRecords();
+
+    assertEquals(List.of("Arrays", "Graphs"), summary.topics());
+    assertEquals(new BigDecimal("8.00"), summary.correctnessScore());
+    assertEquals(new BigDecimal("7.00"), summary.efficiencyScore());
+    assertEquals(new BigDecimal("9.00"), summary.communicationScore());
+    assertEquals(new BigDecimal("8.00"), summary.codeQualityScore());
   }
 
   @Test

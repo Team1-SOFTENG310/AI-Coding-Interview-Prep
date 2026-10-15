@@ -13,13 +13,39 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.concurrent.CompletableFuture;
 
 public class EvaluatorService {
+  //represents a single answered question 
+  public record EvaluationRecord(String topic, List<Integer> scores) {
+    public EvaluationRecord {
+      scores = Collections.unmodifiableList(new ArrayList<>(scores));
+    }
+  }
+  //summary of entire session of answered questions
+  public record EvaluationSummary(
+      List<String> topics,
+      BigDecimal correctnessScore,
+      BigDecimal efficiencyScore,
+      BigDecimal communicationScore,
+      BigDecimal codeQualityScore) {
+    public EvaluationSummary {
+      topics = List.copyOf(topics);
+    }
+  }
 
   private final OpenAiApiClient apiClient;
   private final ObjectMapper objectMapper;
   private final String evaluationPrompt;
+  private final List<EvaluationRecord> evaluationRecords = new ArrayList<>();
 
   public EvaluatorService() {
     this(new OpenAiApiClient(), new ObjectMapper());
@@ -43,6 +69,65 @@ public class EvaluatorService {
     } catch (Exception e) {
       return CompletableFuture.failedFuture(e);
     }
+  }
+
+  public synchronized void storeEvaluation(String topic, EvaluationResult result) {
+    evaluationRecords.add(new EvaluationRecord(topic, Arrays.asList(
+        result.getCorrectnessRating(),
+        result.getEfficiencyRating(),
+        result.getCommunicationRating(),
+        result.getCodeQualityRating())));
+  }
+
+  public synchronized List<EvaluationRecord> getEvaluationRecords() {
+    return Collections.unmodifiableList(new ArrayList<>(evaluationRecords));
+  }
+  
+  //aggregates all evluation records in order to store in history database table
+  public synchronized EvaluationSummary summarizeEvaluationRecords() {
+    if (evaluationRecords.isEmpty()) {
+      throw new IllegalStateException("Cannot summarize empty evaluation records");
+    }
+
+    Set<String> topics = new LinkedHashSet<>();
+    BigDecimal[] totals = new BigDecimal[4];
+    int[] counts = new int[4];
+    Arrays.fill(totals, BigDecimal.ZERO);
+
+    for (EvaluationRecord evaluationRecord : evaluationRecords) {
+      if (evaluationRecord.topic() == null || evaluationRecord.topic().isBlank()) {
+        throw new IllegalStateException("Cannot summarize evaluation without a topic");
+      }
+      if (evaluationRecord.scores().size() != 4) {
+        throw new IllegalStateException("Evaluation record must contain four scores");
+      }
+
+      topics.add(evaluationRecord.topic());
+      for (int index = 0; index < 4; index++) {
+        Integer score = evaluationRecord.scores().get(index);
+        if (score != null) {
+          totals[index] = totals[index].add(BigDecimal.valueOf(score));
+          counts[index]++;
+        }
+      }
+    }
+
+    return new EvaluationSummary(
+        List.copyOf(topics),
+        average(totals[0], counts[0]),
+        average(totals[1], counts[1]),
+        average(totals[2], counts[2]),
+        average(totals[3], counts[3]));
+  }
+
+  public synchronized void clearEvaluationRecords() {
+    evaluationRecords.clear();
+  }
+
+  private static BigDecimal average(BigDecimal total, int count) {
+    return count == 0
+        ? null
+        : total.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP);
   }
 
   private String buildRequestBody(String question, String userAnswer)

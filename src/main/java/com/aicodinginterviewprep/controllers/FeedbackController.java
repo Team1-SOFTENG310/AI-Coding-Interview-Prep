@@ -3,15 +3,21 @@ package com.aicodinginterviewprep.controllers;
 import com.aicodinginterviewprep.EvaluatorService;
 import com.aicodinginterviewprep.SceneAware;
 import com.aicodinginterviewprep.SceneManager;
+import com.aicodinginterviewprep.db.HistoryRepository;
+import com.aicodinginterviewprep.db.UserRepository;
 import com.aicodinginterviewprep.errors.AppErrorHandler;
 import com.aicodinginterviewprep.openai.EvaluationResult;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 
+import java.time.Instant;
+
 public class FeedbackController implements SceneAware {
     private SceneManager sceneManager;
     private final EvaluatorService evaluatorService = new EvaluatorService();
+    private final HistoryRepository historyRepository = new HistoryRepository();
+    private final UserRepository userRepository = new UserRepository();
 
     public TextArea correctnessTextArea;
     public TextArea efficiencyTextArea;
@@ -25,6 +31,7 @@ public class FeedbackController implements SceneAware {
     private String question = "";
     private String code = "";
     private String explanation = "";
+    private String topic;
     private String returnScene = "practice";
 
     @Override
@@ -37,10 +44,20 @@ public class FeedbackController implements SceneAware {
     }
 
     public void setAnswerControls(String question, String code, String explanation, String returnScene) {
+        setAnswerControls(question, code, explanation, returnScene, null);
+    }
+
+    public void setAnswerControls(
+            String question, String code, String explanation, String returnScene, String topic) {
         this.question = question == null ? "" : question;
         this.code = code == null ? "" : code;
         this.explanation = explanation == null ? "" : explanation;
         this.returnScene = returnScene;
+        this.topic = topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 
     public void onTryAgain() {
@@ -48,7 +65,33 @@ public class FeedbackController implements SceneAware {
     }
 
     public void onQuit() {
+        saveEvaluationRecords();
         sceneManager.switchToScene("home");
+    }
+    //saves summarised evaluation records to history database table for logged-in user
+    public void saveEvaluationRecords() {
+        String username = sceneManager.getCurrentUsername();
+        if (username == null || username.isBlank()) {
+            return;
+        }
+
+        if (evaluatorService.getEvaluationRecords().isEmpty()) {
+            return;
+        }
+
+        long userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Logged-in user was not found: " + username))
+                .id();
+        EvaluatorService.EvaluationSummary summary = evaluatorService.summarizeEvaluationRecords();
+        historyRepository.save(
+                userId,
+                summary.topics(),
+                Instant.now(),
+                summary.correctnessScore(),
+                summary.efficiencyScore(),
+                summary.communicationScore(),
+                summary.codeQualityScore());
+        evaluatorService.clearEvaluationRecords();
     }
 
     public void runEvaluation() {
@@ -133,6 +176,7 @@ public class FeedbackController implements SceneAware {
     }
 
     private void handleEvaluationSuccess(EvaluationResult result) {
+    evaluatorService.storeEvaluation(topic, result);
 
     showCategoryFeedback(
             correctnessTextArea,

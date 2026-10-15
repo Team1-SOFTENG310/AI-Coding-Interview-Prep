@@ -39,6 +39,7 @@ public class OpenAiQuestionService {
     private final JSONObject prompts;
     private final Map<QuestionType, List<String>> topicsByType;
     private final Random random;
+    private volatile String currentTopic;
     // Medium keeps the existing experience as the default while allowing each screen to override it.
     private volatile Difficulty selectedDifficulty = Difficulty.MEDIUM;
 
@@ -53,6 +54,7 @@ public class OpenAiQuestionService {
         this.httpClient = httpClient;
         this.apiKey = apiKey;
         this.model = model;
+        this.currentTopic = null;
         this.prompts = loadPrompts();
         this.topicsByType = Map.of(
                 QuestionType.BEHAVIOURAL, extractTopics("BEHAVIOURAL_TOPICS"),
@@ -107,6 +109,10 @@ public class OpenAiQuestionService {
 
     public void setDifficulty(Difficulty difficulty) {
         this.selectedDifficulty = difficulty;
+    }
+
+    public String getCurrentTopic() {
+        return currentTopic;
     }
 
     public List<String> getAvailableTopics(QuestionType type) {
@@ -195,6 +201,7 @@ public class OpenAiQuestionService {
 
     String buildUserPrompt(QuestionType type, Difficulty difficulty, String topic) {
         String promptTopic = resolveTopic(type, topic);
+
         String template = prompts.getString(type.name() + "_TEMPLATE")
                 .replace("{topic}", promptTopic)
                 .replace("{difficulty}", difficulty.toString());
@@ -203,15 +210,19 @@ public class OpenAiQuestionService {
 
     private String resolveTopic(QuestionType type, String topic) {
         List<String> topics = topicsFor(type);
+        String resolvedTopic;
         if (topic == null) {
-            return topics.get(random.nextInt(topics.size()));
+            resolvedTopic = topics.get(random.nextInt(topics.size()));
+        } else {
+            resolvedTopic = topics.stream()
+                .filter(configuredTopic -> topicName(configuredTopic).equals(topic))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Unknown " + type.toString().toLowerCase() + " topic: " + topic));
         }
 
-        return topics.stream()
-            .filter(configuredTopic -> topicName(configuredTopic).equals(topic))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Unknown " + type.toString().toLowerCase() + " topic: " + topic));
+        currentTopic = resolvedTopic;
+        return resolvedTopic;
     }
 
     private List<String> topicsFor(QuestionType type) {

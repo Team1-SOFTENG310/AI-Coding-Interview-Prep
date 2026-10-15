@@ -20,7 +20,8 @@ class SchemaMigrationTest {
             while (rs.next()) {
                 names.add(rs.getString("TABLE_NAME").toLowerCase());
             }
-            assertTrue(names.containsAll(java.util.Set.of("user_account", "saved_question", "code_submission")));
+            assertTrue(names.containsAll(java.util.Set.of(
+                    "user_account", "saved_question", "code_submission", "history")));
         }
     }
 
