@@ -1,11 +1,16 @@
 package com.aicodinginterviewprep.service;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+import org.vosk.LibVosk;
+import org.vosk.LogLevel;
 import org.vosk.Model;
 import org.vosk.Recognizer;
 
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,6 +24,12 @@ import static org.mockito.Mockito.when;
 class SpeechToTextServiceTest {
 
     private static final byte[] SOME_AUDIO = {1, 2, 3, 4};
+
+    @Test
+    @EnabledOnOs(OS.MAC)
+    void bundledNativeLibraryLoadsOnMac() {
+        assertDoesNotThrow(() -> LibVosk.setLogLevel(LogLevel.WARNINGS));
+    }
 
     @Test
     void transcribeReturnsTrimmedTextFromRecognizerResult() throws Exception {

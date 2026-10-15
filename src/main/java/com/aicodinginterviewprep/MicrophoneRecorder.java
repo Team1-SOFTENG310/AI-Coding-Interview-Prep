@@ -6,8 +6,10 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
 import javax.sound.sampled.TargetDataLine;
 import java.io.ByteArrayOutputStream;
+import java.util.logging.Logger;
 
 /**
  * Captures audio from the system microphone on a background thread and hands
@@ -15,6 +17,7 @@ import java.io.ByteArrayOutputStream;
  * speech recognizer such as Vosk.
  */
 public class MicrophoneRecorder {
+    private static final Logger LOGGER = Logger.getLogger(MicrophoneRecorder.class.getName());
     private static final AudioFormat AUDIO_FORMAT = new AudioFormat(16000f, 16, 1, true, false);
     private static final int BUFFER_SIZE = 4096;
 
@@ -35,6 +38,7 @@ public class MicrophoneRecorder {
         this.line = line;
         line.open(AUDIO_FORMAT);
         line.start();
+        LOGGER.info("Recording started with line " + line.getLineInfo() + ", format " + line.getFormat());
         capturedAudio = new ByteArrayOutputStream();
         recording = true;
 
@@ -52,6 +56,7 @@ public class MicrophoneRecorder {
         line.stop();
         captureThread.join();
         line.close();
+        LOGGER.info("Recording stopped, captured " + capturedAudio.size() + " bytes.");
 
         return capturedAudio.toByteArray();
     }
@@ -74,6 +79,11 @@ public class MicrophoneRecorder {
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, AUDIO_FORMAT);
         if (!AudioSystem.isLineSupported(info)) {
             throw new LineUnavailableException("No microphone input is available on this system.");
+        }
+        for (Mixer.Info mixerInfo : AudioSystem.getMixerInfo()) {
+            if (AudioSystem.getMixer(mixerInfo).isLineSupported(info)) {
+                LOGGER.info("Input mixer available: " + mixerInfo.getName() + " (" + mixerInfo.getDescription() + ")");
+            }
         }
         return (TargetDataLine) AudioSystem.getLine(info);
     }

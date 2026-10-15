@@ -10,7 +10,8 @@ target/
 SE310_Assignment1_2026.pdf
 
 # Vosk speech model - large binary, download separately (see README)
-models/
+models/*
+!models/README.md
 
 # Local Claude Code session/config directory - machine-local, not project config
 .claude/
