@@ -23,6 +23,41 @@ action items for the next meeting.
 
 <!-- Add one entry per meeting below this line, most recent first. -->
 
+### 12-10-2026 (No meeting)
+**Attendees:** N/A<br>
+**Topics discussed:** No meeting was held during Week 11.<br>
+**Decisions made:** N/A<br>
+**Issues/PRs referenced:** N/A<br>
+**Action items:** N/A<br>
+
+### 05-10-2026 (No meeting)
+**Attendees:** N/A<br>
+**Topics discussed:** No meeting was held during Week 10.<br>
+**Decisions made:** N/A<br>
+**Issues/PRs referenced:** N/A<br>
+**Action items:** N/A<br>
+
+### 28-09-2026 (In-person)
+**Attendees:** Jason, Jago, Johan, Adrian, Aditeya, Suah, Louis<br>
+**Topics discussed:** Branch and PR naming conventions, review requirements, the A2 repository workflow, and issue claiming.<br>
+**Decisions made:** Branch names do not require issue numbers and use the `bug/`, `feat/`, or `refactor/` prefixes. PR names do not need to match issue names and use the `feature:`, `bug:`, or `refactor:` prefixes. One primary reviewer is required. Continue opening PRs against the Group 1 repository. A contributor may claim another issue once their current work has a PR. Do not work on the debugger and runtime compiler. Preserve the extended description when squashing and rebasing.<br>
+**Issues/PRs referenced:** Issue #89<br>
+**Action items:** Apply the agreed naming, review, and workflow decisions to the remaining A2 work.<br>
+
+### 21-09-2026 (In-person)
+**Attendees:** Jason, Jago, Johan, Adrian, Aditeya, Suah, Louis<br>
+**Topics discussed:** Bugs found during the handover, focused refactoring, documentation changes, possible features, issue splitting, and task allocation.<br>
+**Decisions made:** Investigate voice recording, missing comments, Snyk checks on forks, and duplicate logout and return behaviour. Refactoring work should cover centralised error handling, JSON prompt storage, and centralised scene management. Non-code work should cover the Wiki structure and GitHub issue templates. The UI work should be split into smaller tasks.<br>
+**Issues/PRs referenced:** Issue #40<br>
+**Action items:** Jago to refine the layout and styling. Adrian to add difficulty selection. Johan to set up the database. Aditeya to add topic selection. Louis to implement the scoring rubric. Suah to add validation constraints. Jason to investigate the identified bugs and create issues.<br>
+
+### 14-09-2026 (In-person)
+**Attendees:** Jason, Jago, Johan, Adrian, Aditeya, Suah, Louis<br>
+**Topics discussed:** Project handover and becoming familiar with the new codebase.<br>
+**Decisions made:** No decisions recorded.<br>
+**Issues/PRs referenced:** None.<br>
+**Action items:** Understand how the project works and identify possible new issues.<br>
+
 ### 24-08-2026 (In-person)
 **Attendees:**Scott, Neia<br>
 **Topics discussed:** <br>
