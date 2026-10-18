@@ -1,18 +1,19 @@
-This refactoring improved two cross-cutting areas of the application: scene navigation and error handling. It replaces
-scattered responsibilities with shared conventions, making it easier to extend behavior consistently and reducing the
-amount of controller-specific code needed for common tasks.
-For navigation, `SceneManager` is the central place for scene transitions, active-scene tracking, cached scenes, and
+This refactoring improved two cross-cutting areas of the application: scene navigation and error handling. It replaced
+scattered responsibilities with shared conventions, making the code easier to extend and reducing the amount of
+controller-specific logic needed for common tasks.
+
+For navigation, `SceneManager` became the central place for scene transitions, active-scene tracking, cached scenes, and
 push/pop history. `switchScene` handles regular navigation, `pushScene` saves the current scene before opening a
-temporary screen, and `popScene` returns to the previous one. `SceneAware` lifecycle callbacks provide consistent places
-to react when a scene is shown, hidden, or disposed. For example, `PracticeController` stops an active recording when
-the user leaves:
+temporary screen, and `popScene` returns to the previous one. `SceneAware` lifecycle callbacks give each screen a clear and
+consistent place to react when it is shown, hidden, or disposed. For example, `PracticeController` stops an active
+recording when the user leaves:
 
     @Override
     public void onSceneHidden() {
         cancelRecordingIfActive();
     }
 
-The existing practice controller also navigates to history and then configures its controller through the manager:
+The same controller also navigates to history and configures the screen through the manager:
 
     @FXML
     public void onHistory() {
@@ -22,21 +23,22 @@ The existing practice controller also navigates to history and then configures i
         }
     }
 
-Keeping scene lookup, activation, and lifecycle behavior in `SceneManager` makes changes such as adding a screen or
-adjusting navigation policy easier to apply consistently. The compatibility alias `switchToScene` also lets existing
-callers keep working while the newer navigation API is adopted. The manager rejects attempts to unload the active scene
-and removes inactive scenes from its cache and navigation history when unloading them, helping prevent stale state.
-Error handling is centralized in `AppErrorHandler`, which is installed when the application starts. It logs errors with
-context and either displays a standard JavaFX alert or supplies a user-facing message to a caller. Typed exceptions,
-such as `ValidationException`, distinguish expected validation failures from other errors. `Authenticator.signUp` uses
-that exception for invalid account details:
+By keeping scene lookup, activation, and lifecycle behavior in a single place, changes such as adding a screen or updating
+navigation rules become much easier to apply consistently. The compatibility alias `switchToScene` lets existing callers
+continue working while the newer navigation API is adopted, and the manager rejects attempts to unload the active scene
+while cleaning up stale scenes and navigation history when needed.
+
+Error handling was centralized in `AppErrorHandler`, which is installed when the application starts. It logs errors with
+context and either shows a standard JavaFX alert or supplies a user-facing message to the caller. Typed exceptions, such as
+`ValidationException`, distinguish expected validation failures from other errors. `Authenticator.signUp` uses that
+pattern for invalid account details:
 
     if (username == null || password == null) {
         throw new ValidationException("Username and password cannot be null");
     }
 
-Asynchronous failures use the same shared handler while allowing the screen to provide task-specific feedback. In
-`PracticeController`, a failed question-generation task is reported as follows:
+Asynchronous failures follow the same shared flow while still allowing the screen to provide task-specific feedback. In
+`PracticeController`, a failed question-generation task is handled like this:
 
     task.setOnFailed(event -> {
         AppErrorHandler.report(task.getException(), "Generating interview question",
@@ -44,8 +46,14 @@ Asynchronous failures use the same shared handler while allowing the screen to p
         buttonGenerateQuestion.setDisable(false);
     });
 
-This means a service can raise a meaningful typed exception and a controller can report it with useful context, rather
-than implementing separate logging and notification behavior. Changes to error presentation can also be made centrally.
-Overall, the refactoring makes navigation, cleanup, and user-facing error reporting more predictable and reduces
-duplicated logic. Existing tests cover transition history, lifecycle callbacks, scene unloading, and error-message
-handling, helping maintain these conventions as new features are added.
+This keeps the service responsible for raising a meaningful typed exception while the controller focuses on presenting the
+result in context, instead of duplicating logging and notification behavior. The same approach also makes error presentation
+consistent across the application.
+
+A similar refactoring was applied to prompt management. Prompt definitions had previously been spread across raw txt files
+and hard-coded Java strings, which made them difficult to validate, update, and track consistently. Moving them into JSON
+files gave each prompt a clear structure, standard metadata, and a more reliable loading path at runtime.
+
+This separation keeps application logic and prompt content distinct. The interview-generation code can focus on
+orchestration while the JSON files define the wording and configuration. That reduces duplication, prevents mismatched
+prompt content, and makes future updates safer and easier to review.
