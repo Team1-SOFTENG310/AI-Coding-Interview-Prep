@@ -2,19 +2,19 @@
 
 Contributions made by Group 2 during Assignment 2. For Group 1's work in Assignment 1, see [Contributions - Assignment 1](Contributions-A1).
 
-Add each item with the PR and issue it relates to, e.g. `Short description (PR #70, Issue #68)`.
+Add each item with the PR and issue it relates to, e.g. `Short description (PR #70)`.
 
 ### Jason Huang (@Shio-y)
 * **Code Contributions:**
-    * Interview history summary persistence and dashboard screen (PR #99, Issue #38)
-    * Logout and retrun bug(PR #85, Issue #76)
+    * Interview history summary persistence and dashboard screen (PR [#99](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/99)).
+    * Logout and retrun bug(PR [#85](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/85)).
 * **Other Contributions:**
     * Added some of the new issues we decided on to issues tab.
 
 ### Louis Cao (@LouisCao1029)
 * **Code Contributions:**
-    * Adding scoring rubric for response (PR #84, Issue#37) 
-    * refactoring .txt and hardcoded prompts into JSON (PR #96, Issue #78)
+    * Adding scoring rubric for response (PR [#84](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/84)).
+    * refactoring .txt and hardcoded prompts into JSON (PR [#96](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/96)).
 
 ### Suah Kim (@mirosgithub)
 * **Code Contributions:**
