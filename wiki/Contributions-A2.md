@@ -15,8 +15,6 @@ Add each item with the PR and issue it relates to, e.g. `Short description (PR #
 * **Code Contributions:**
     * Adding scoring rubric for response (PR #84, Issue#37) 
     * refactoring .txt and hardcoded prompts into JSON (PR #96, Issue #78)
-* **Other Contributions:**
-    * Reviewed teammates' pull requests and provided feedback 
 
 ### Suah Kim (@mirosgithub)
 * **Code Contributions:**
@@ -24,8 +22,6 @@ Add each item with the PR and issue it relates to, e.g. `Short description (PR #
     * Investigated and fixed voice transcription related bugs (PR [#98](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/98)).
 * **Other Contributions:**
     * Created copies of upstream issues in team fork (Issues #1 to #9).
-    * Reviewed, identified bugs and approved after fixes (PR [#91](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/91)).
-    * Reviewed and approved (PR [#95](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/95)).
 
 ### Jago Sutherland (@Jago-Sutherland)
 * **Code Contributions:**
