@@ -30,7 +30,7 @@ Add each item with the PR and issue it relates to, e.g. `Short description (PR #
 * **Other Contributions:**
     * Added missing contributions to Contributions-A2.md.
 
-### Johan Edgar (@JohanEdgar)
+### Johan Eger (@JohanEger)
 * **Code Contributions:**
     * Added persistent MySQL database running in Docker (PR [#74](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/74)).
     * Added testcontainers so Database Tests run against a throwaway MySQL container (PR [#83](https://github.com/Team1-SOFTENG310/AI-Coding-Interview-Prep/pull/83)).
