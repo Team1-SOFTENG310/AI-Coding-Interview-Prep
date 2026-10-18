@@ -8,3 +8,4 @@
 - [Quality Tools](Quality-Tools)
 - [Meeting Minutes](Meeting-Minutes)
 - [Generative AI Use](Generative-AI-Use)
+- [Refactoring](Refactoring)
